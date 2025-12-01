@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useImperativeHandle, forwardRe
 import { WORD_LIST } from "./wordlist";
 
 const WORD_LENGTH = 5;
-const MAX_GUESSES = 6;
+const MAX_GUESSES = 8;
 
 function getRandomWord() {
   return WORD_LIST[Math.floor(Math.random() * WORD_LIST.length)].toLowerCase();
