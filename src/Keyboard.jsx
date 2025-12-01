@@ -19,26 +19,6 @@ function Keyboard({ onKeyPress, keyboard, gameState }) {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [onKeyPress]);
 
-  const renderEnterIcon = () => (
-    <svg
-      width="28"
-      height="28"
-      viewBox="0 0 48 48"
-      style={{ verticalAlign: "middle", display: "block", margin: "0 auto" }}
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <path
-        d="M44 36V16C44 11.5817 40.4183 8 36 8H12M12 8L20 16M12 8L20 0"
-        stroke="#fff"
-        strokeWidth="6"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <polygon points="0,24 16,16 16,32" fill="#fff" />
-    </svg>
-  );
-
   return (
     <div className="wordle-keyboard">
       {QWERTY.map((row, i) => (
@@ -51,7 +31,7 @@ function Keyboard({ onKeyPress, keyboard, gameState }) {
               disabled={gameState !== "playing" && key !== "Enter" && key !== "Backspace"}
               aria-label={key}
             >
-              {key === "Backspace" ? "⌫" : key === "Enter" ? renderEnterIcon() : key}
+              {key === "Backspace" ? "⌫" : key === "Enter" ? "⤶" : key}
             </button>
           ))}
         </div>
