@@ -95,8 +95,20 @@
   background: #232336;
   border-radius: 18px;
   box-shadow: 0 4px 24px 0 rgba(99, 102, 241, 0.13);
-  max-width: 400px;
+  max-width: 1000px;
   text-align: center;
+}
+.wordle-boards-wrapper {
+  display: flex;
+  gap: 2rem;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+}
+.wordle-board-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 .wordle-board {
   display: flex;
