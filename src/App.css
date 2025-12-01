@@ -173,25 +173,6 @@
   transition: background 0.2s, color 0.2s, border 0.2s;
   text-transform: uppercase;
 }
-.wordle-key.correct {
-  background: #22c55e;
-  color: #fff;
-  border-color: #22c55e;
-}
-.wordle-key.present {
-  background: #eab308;
-  color: #fff;
-  border-color: #eab308;
-}
-.wordle-key.absent {
-  background: #52525b;
-  color: #fff;
-  border-color: #52525b;
-}
-.wordle-key:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
 .wordle-result {
   margin-top: 1.2rem;
   font-size: 1.2rem;

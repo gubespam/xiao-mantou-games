@@ -3,7 +3,7 @@ import WordleBoard from "./WordleBoard";
 import Keyboard from "./Keyboard";
 
 function Wordle() {
-  const [keyboard, setKeyboard] = useState({}); // {A: 'absent'|'present'|'correct'}
+  const [keyboardStates, setKeyboardStates] = useState([{}, {}]); // Keyboard state for each board
   const [boardStates, setBoardStates] = useState([{}, {}]); // State for each board
   const boardRefs = useRef([React.createRef(), React.createRef()]);
 
@@ -14,25 +14,29 @@ function Wordle() {
       return updated;
     });
 
-    // Update keyboard based on both boards' guesses and statuses
-    const kb = { ...keyboard };
-    const state = { guesses, statuses };
-    state.guesses.forEach((guess, i) => {
-      state.statuses[i].forEach((status, j) => {
-        const letter = guess[j].toUpperCase();
-        if (!kb[letter] || kb[letter] === "absent") {
-          kb[letter] = status;
-        }
-        if (kb[letter] === "present" && status === "correct") {
-          kb[letter] = "correct";
-        }
-        if (kb[letter] === "absent" && (status === "present" || status === "correct")) {
-          kb[letter] = status;
-        }
+    // Update keyboard state for the specific board
+    setKeyboardStates((prev) => {
+      const updated = [...prev];
+      const kb = { ...updated[boardIndex] };
+      const state = { guesses, statuses };
+      state.guesses.forEach((guess, i) => {
+        state.statuses[i].forEach((status, j) => {
+          const letter = guess[j].toUpperCase();
+          if (!kb[letter] || kb[letter] === "absent") {
+            kb[letter] = status;
+          }
+          if (kb[letter] === "present" && status === "correct") {
+            kb[letter] = "correct";
+          }
+          if (kb[letter] === "absent" && (status === "present" || status === "correct")) {
+            kb[letter] = status;
+          }
+        });
       });
+      updated[boardIndex] = kb;
+      return updated;
     });
-    setKeyboard(kb);
-  }, [keyboard]);
+  }, []);
 
   const handleKey = useCallback((key) => {
     // Dispatch key to both boards
@@ -60,7 +64,8 @@ function Wordle() {
       </div>
       <Keyboard 
         onKeyPress={handleKey} 
-        keyboard={keyboard} 
+        keyboardLeft={keyboardStates[0]}
+        keyboardRight={keyboardStates[1]}
         gameState={isBothGameOver ? "finished" : "playing"} 
       />
     </div>

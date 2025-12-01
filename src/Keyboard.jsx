@@ -6,7 +6,7 @@ const QWERTY = [
   ["Enter", "Z", "X", "C", "V", "B", "N", "M", "Backspace"]
 ];
 
-function Keyboard({ onKeyPress, keyboard, gameState }) {
+function Keyboard({ onKeyPress, keyboardLeft, keyboardRight, gameState }) {
   // Handle physical keyboard input
   useEffect(() => {
     const onKeyDown = (e) => {
@@ -19,6 +19,29 @@ function Keyboard({ onKeyPress, keyboard, gameState }) {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [onKeyPress]);
 
+  const getKeyStyle = (key) => {
+    const leftStatus = keyboardLeft?.[key] || "";
+    const rightStatus = keyboardRight?.[key] || "";
+
+    let leftBg = "#18181b";
+    let rightBg = "#18181b";
+
+    // Map status to background color
+    const statusToColor = {
+      correct: "#22c55e",
+      present: "#eab308",
+      absent: "#52525b",
+    };
+
+    if (leftStatus) leftBg = statusToColor[leftStatus] || "#18181b";
+    if (rightStatus) rightBg = statusToColor[rightStatus] || "#18181b";
+
+    // Create a split background
+    return {
+      background: `linear-gradient(to right, ${leftBg} 0%, ${leftBg} 50%, ${rightBg} 50%, ${rightBg} 100%)`,
+    };
+  };
+
   return (
     <div className="wordle-keyboard">
       {QWERTY.map((row, i) => (
@@ -26,9 +49,9 @@ function Keyboard({ onKeyPress, keyboard, gameState }) {
           {row.map((key) => (
             <button
               key={key}
-              className={`wordle-key ${keyboard[key] || ""}`}
+              className="wordle-key"
+              style={getKeyStyle(key)}
               onClick={() => onKeyPress(key)}
-              disabled={gameState !== "playing" && key !== "Enter" && key !== "Backspace"}
               aria-label={key}
             >
               {key === "Backspace" ? "⌫" : key === "Enter" ? "⤶" : key}
