@@ -80,32 +80,28 @@ function TicTacTumble() {
   };
 
   const handleGameEnd = (boardIndex, endData) => {
-    const newStates = gameStates.slice();
-    
-    if (endData.type === 'win') {
+    // Only update game state if the smaller game ended (win or tie)
+    if (endData.type === 'win' || endData.type === 'tie') {
+      const newStates = gameStates.slice();
       newStates[boardIndex] = endData;
-    } else if (endData.type === 'tie') {
-      newStates[boardIndex] = endData;
-    } else {
-      // Regular move was made, just switch player
-      setIsXNext(!isXNext);
-      return;
-    }
+      setGameStates(newStates);
 
-    // Game ended (win or tie)
-    setGameStates(newStates);
+      // Check for winner immediately
+      const winner = calculateWinner(newStates);
+      if (winner) {
+        setGameWinner(winner);
+      } else if (allGamesDone(newStates)) {
+        // Calculate scores if all games are done
+        const finalScores = calculateScores(newStates);
+        setScores(finalScores);
+        setGameWinner({ type: 'scored', scores: finalScores });
+      }
+    }
+  };
+
+  const handleMove = (boardIndex, index, player) => {
+    // Switch player turn on every move
     setIsXNext(!isXNext);
-
-    // Check for winner immediately
-    const winner = calculateWinner(newStates);
-    if (winner) {
-      setGameWinner(winner);
-    } else if (allGamesDone(newStates)) {
-      // Calculate scores if all games are done
-      const finalScores = calculateScores(newStates);
-      setScores(finalScores);
-      setGameWinner({ type: 'scored', scores: finalScores });
-    }
   };
 
   const isGameCellPlayable = (index) => {
@@ -124,6 +120,7 @@ function TicTacTumble() {
         <div className="game-cell">
           <T3Board
             currentPlayer={isXNext ? 'X' : 'O'}
+            onMove={() => handleMove(index)}
             onGameEnd={(endData) => handleGameEnd(index, endData)}
             disabled={isBoardDisabled(index)}
           />

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './T3Board.css';
 
-function T3Board({ onGameEnd = null, disabled = false, currentPlayer = 'X' }) {
+function T3Board({ onGameEnd = null, onMove = null, disabled = false, currentPlayer = 'X' }) {
   const [board, setBoard] = useState(Array(9).fill(null));
   const [winner, setWinner] = useState(null);
 
@@ -50,8 +50,8 @@ function T3Board({ onGameEnd = null, disabled = false, currentPlayer = 'X' }) {
     newBoard[index] = currentPlayer;
     setBoard(newBoard);
 
-    if (onGameEnd) {
-      onGameEnd({ index, player: currentPlayer });
+    if (onMove) {
+      onMove(index, currentPlayer);
     }
   };
 
