@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import './T3Board.css';
 
-function T3Board({ onGameEnd = null, disabled = false, onMove = null }) {
+function T3Board({ onGameEnd = null, disabled = false, currentPlayer = 'X' }) {
   const [board, setBoard] = useState(Array(9).fill(null));
-  const [isXNext, setIsXNext] = useState(true);
   const [winner, setWinner] = useState(null);
 
   const calculateWinner = (squares) => {
@@ -48,12 +47,11 @@ function T3Board({ onGameEnd = null, disabled = false, onMove = null }) {
     if (disabled || board[index] !== null || winner) return;
 
     const newBoard = board.slice();
-    newBoard[index] = isXNext ? 'X' : 'O';
+    newBoard[index] = currentPlayer;
     setBoard(newBoard);
-    setIsXNext(!isXNext);
 
-    if (onMove) {
-      onMove(index, isXNext ? 'X' : 'O');
+    if (onGameEnd) {
+      onGameEnd({ index, player: currentPlayer });
     }
   };
 

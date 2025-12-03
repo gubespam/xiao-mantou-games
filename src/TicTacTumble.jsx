@@ -81,10 +81,19 @@ function TicTacTumble() {
 
   const handleGameEnd = (boardIndex, endData) => {
     const newStates = gameStates.slice();
-    newStates[boardIndex] = endData;
-    setGameStates(newStates);
+    
+    if (endData.type === 'win') {
+      newStates[boardIndex] = endData;
+    } else if (endData.type === 'tie') {
+      newStates[boardIndex] = endData;
+    } else {
+      // Regular move was made, just switch player
+      setIsXNext(!isXNext);
+      return;
+    }
 
-    // Switch to next player
+    // Game ended (win or tie)
+    setGameStates(newStates);
     setIsXNext(!isXNext);
 
     // Check for winner immediately
@@ -114,6 +123,7 @@ function TicTacTumble() {
       return (
         <div className="game-cell">
           <T3Board
+            currentPlayer={isXNext ? 'X' : 'O'}
             onGameEnd={(endData) => handleGameEnd(index, endData)}
             disabled={isBoardDisabled(index)}
           />
