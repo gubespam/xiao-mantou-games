@@ -19,7 +19,7 @@
   grid-template-columns: repeat(3, 1fr);
   grid-template-rows: repeat(3, 1fr);
   gap: 6px;
-  background-color: #404040;
+  background-color: #dbd4d4;
   padding: 6px;
   border-radius: 8px;
   margin: 2rem auto;
@@ -71,7 +71,7 @@
 
 .large-mark {
   font-size: 5rem;
-  font-weight: bold;
+  font-weight: 500;
   color: #ffffff;
   line-height: 1;
 }
