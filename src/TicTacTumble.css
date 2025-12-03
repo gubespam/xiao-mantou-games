@@ -1,0 +1,114 @@
+.tic-tac-tumble-container {
+  max-width: fit-content;
+}
+
+.turn-indicator {
+  font-size: 1.5rem;
+  color: #a1a1aa;
+  margin-bottom: 1.5rem;
+}
+
+.current-player {
+  color: #ffffff;
+  font-weight: bold;
+  font-size: 1.8rem;
+}
+
+.larger-board {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  gap: 6px;
+  background-color: #404040;
+  padding: 6px;
+  border-radius: 8px;
+  margin: 2rem auto;
+}
+
+.board-square {
+  background-color: #1a1a1a;
+  border: 3px solid #404040;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 1;
+}
+
+.board-square.winning-square .large-mark,
+.board-square.winning-square .cat-emoji {
+  color: #ff0000;
+}
+
+.game-cell {
+  width: 100%;
+  height: 100%;
+}
+
+.game-cell-result {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+}
+
+.winning-cell {
+  background-color: #2a2a2a;
+}
+
+.winning-cell.player-X {
+  background-color: #1a3a5a;
+}
+
+.winning-cell.player-O {
+  background-color: #5a1a1a;
+}
+
+.tie-cell {
+  background-color: #3a3a3a;
+}
+
+.large-mark {
+  font-size: 5rem;
+  font-weight: bold;
+  color: #ffffff;
+  line-height: 1;
+}
+
+.cat-emoji {
+  font-size: 4rem;
+  line-height: 1;
+}
+
+.game-over-message {
+  font-size: 1.8rem;
+  font-weight: bold;
+  margin-top: 2rem;
+  padding: 1.5rem;
+  background: rgba(99, 102, 241, 0.1);
+  border-radius: 12px;
+  border: 2px solid #6366f1;
+}
+
+.winner-message {
+  color: #fbbf24;
+  background: rgba(251, 191, 36, 0.1);
+  border-color: #fbbf24;
+}
+
+.scored-message {
+  color: #a5b4fc;
+  background: rgba(165, 180, 252, 0.1);
+  border-color: #a5b4fc;
+}
+
+.scored-message p {
+  margin: 0.5rem 0;
+  color: #a5b4fc;
+}
+
+.score-winner {
+  margin-top: 1rem;
+  font-size: 1.4rem;
+}

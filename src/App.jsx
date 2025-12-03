@@ -4,6 +4,7 @@ import { Link, Routes, Route } from 'react-router-dom';
 import Duordle from './Duordle.jsx';
 import DuordlePlus from './DuordlePlus.jsx';
 import CheckersChess from './CheckersChess.jsx';
+import TicTacTumble from './TicTacTumble.jsx';
 import mantouLogo from './images/mantou.png';
 
 
@@ -29,6 +30,7 @@ function App() {
         />
         <Route path="/xiao-mantou-games/duordle" element={<Duordle />} />
         <Route path="/xiao-mantou-games/duordle-plus" element={<DuordlePlus />} />
+        <Route path="/xiao-mantou-games/tic-tac-tumble" element={<TicTacTumble />} />
         <Route path="/xiao-mantou-games/checkers-chess" element={<CheckersChess />} />
       </Routes>
     </div>
