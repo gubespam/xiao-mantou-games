@@ -9,7 +9,7 @@ function getRandomWord() {
 }
 
 // Given a guess and teh correct answer, return array of statuses for each letter in the guess
-function getLetterStatuses(guess, answer) {
+function getLetterStatuses(guess, answer, rules) {
   // Returns array of 'absent', 'present', 'present-near', 'present-far', 'correct' for each letter
   const result = Array(WORD_LENGTH).fill("absent");
   const answerArr = answer.split("");
@@ -29,10 +29,14 @@ function getLetterStatuses(guess, answer) {
     if (result[i] === "correct") continue;
     const idx = answerArr.indexOf(guessArr[i]);
     if (idx !== -1) {
-      if (Math.abs(idx - i) === 1) {
-        result[i] = "present-near";
-      } else if (Math.abs(idx - i) > 1) {
-        result[i] = "present-far";
+      if (rules === "plus") {
+        if (Math.abs(idx - i) === 1) {
+          result[i] = "present-near";
+        } else if (Math.abs(idx - i) > 1) {
+          result[i] = "present-far";
+        } else {
+          result[i] = "present";
+        }
       } else {
         result[i] = "present";
       }
@@ -42,7 +46,7 @@ function getLetterStatuses(guess, answer) {
   return result;
 }
 
-const WordleBoard = forwardRef(({ onStatusChange }, ref) => {
+const WordleBoard = forwardRef(({ onStatusChange, rules }, ref) => {
   const [answer, setAnswer] = useState("");
   const [guesses, setGuesses] = useState([]); // Array of strings
   const [statuses, setStatuses] = useState([]); // Array of arrays
@@ -72,7 +76,7 @@ const WordleBoard = forwardRef(({ onStatusChange }, ref) => {
         //   alert("Not in word list");
         //   return;
         // }
-        const status = getLetterStatuses(current, answer);
+        const status = getLetterStatuses(current, answer, rules);
         setGuesses((g) => [...g, current]);
         setStatuses((s) => [...s, status]);
         setCurrent("");
@@ -85,7 +89,7 @@ const WordleBoard = forwardRef(({ onStatusChange }, ref) => {
         setCurrent((c) => c + key.toLowerCase());
       }
     },
-    [current, answer, guesses, gameState]
+    [current, answer, guesses, gameState, rules]
   );
 
   // Expose handleKey method to parent

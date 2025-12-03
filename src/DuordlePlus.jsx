@@ -7,7 +7,7 @@ const Duordle = () => {
   return (
     <div className="game-page">
       <h1>Duordle Plus</h1>
-      <Wordle />
+      <Wordle rules="plus"/>
     </div>
   );
 };

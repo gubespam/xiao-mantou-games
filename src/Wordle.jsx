@@ -2,7 +2,7 @@ import React, { useState, useCallback, useRef } from "react";
 import WordleBoard from "./WordleBoard";
 import Keyboard from "./Keyboard";
 
-function Wordle() {
+function Wordle({ rules = "plus" }) {
   const [keyboardStates, setKeyboardStates] = useState([{}, {}]); // Keyboard state for each board
   const [boardStates, setBoardStates] = useState([{}, {}]); // State for each board
   const boardRefs = useRef([React.createRef(), React.createRef()]);
@@ -60,10 +60,12 @@ function Wordle() {
       <div className="wordle-boards-wrapper">
         <WordleBoard 
           ref={boardRefs.current[0]}
+          rules={rules}
           onStatusChange={(status) => handleBoardStatusChange(0, status)}
         />
         <WordleBoard 
           ref={boardRefs.current[1]}
+          rules={rules}
           onStatusChange={(status) => handleBoardStatusChange(1, status)}
         />
       </div>
