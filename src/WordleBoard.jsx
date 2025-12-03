@@ -8,8 +8,9 @@ function getRandomWord() {
   return WORD_LIST[Math.floor(Math.random() * WORD_LIST.length)].toLowerCase();
 }
 
+// Given a guess and teh correct answer, return array of statuses for each letter in the guess
 function getLetterStatuses(guess, answer) {
-  // Returns array of 'absent', 'present', 'correct' for each letter
+  // Returns array of 'absent', 'present', 'present-near', 'present-far', 'correct' for each letter
   const result = Array(WORD_LENGTH).fill("absent");
   const answerArr = answer.split("");
   const guessArr = guess.split("");
@@ -28,7 +29,13 @@ function getLetterStatuses(guess, answer) {
     if (result[i] === "correct") continue;
     const idx = answerArr.indexOf(guessArr[i]);
     if (idx !== -1) {
-      result[i] = "present";
+      if (Math.abs(idx - i) === 1) {
+        result[i] = "present-near";
+      } else if (Math.abs(idx - i) > 1) {
+        result[i] = "present-far";
+      } else {
+        result[i] = "present";
+      }
       answerArr[idx] = null;
     }
   }
@@ -61,10 +68,10 @@ const WordleBoard = forwardRef(({ onStatusChange }, ref) => {
         setCurrent((c) => c.slice(0, -1));
       } else if (key === "Enter") {
         if (current.length !== WORD_LENGTH) return;
-        if (!WORD_LIST.includes(current)) {
-          alert("Not in word list");
-          return;
-        }
+        // if (!WORD_LIST.includes(current)) {
+        //   alert("Not in word list");
+        //   return;
+        // }
         const status = getLetterStatuses(current, answer);
         setGuesses((g) => [...g, current]);
         setStatuses((s) => [...s, status]);
@@ -106,6 +113,7 @@ const WordleBoard = forwardRef(({ onStatusChange }, ref) => {
 
   return (
     <div className="wordle-board-container">
+      <div>{answer}</div>
       <div className="wordle-board">
         {guesses.map((g, i) => renderRow(g, statuses[i]))}
         {gameState === "playing" && renderRow(current)}

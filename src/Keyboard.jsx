@@ -30,6 +30,8 @@ function Keyboard({ onKeyPress, keyboardLeft, keyboardRight, gameState }) {
     const statusToColor = {
       correct: "#22c55e",
       present: "#eab308",
+      'present-near': "#e3ea08",
+      'present-far': "#f2442d",
       absent: "#52525b",
     };
 

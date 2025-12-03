@@ -147,6 +147,16 @@
   color: #fff;
   border-color: #eab308;
 }
+.wordle-cell.present-near {
+  background: #e3ea08;
+  color: #fff;
+  border-color: #e3ea08;
+}
+.wordle-cell.present-far {
+  background: #f2442d;
+  color: #fff;
+  border-color: #f2442d;
+}
 .wordle-cell.absent {
   background: #52525b;
   color: #fff;

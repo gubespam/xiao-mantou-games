@@ -15,20 +15,25 @@ function Wordle() {
     });
 
     // Update keyboard state for the specific board
+    // absent
+    // present - anywhere in the word
+    // present-near - one space away
+    // present-far - more than one space away
+    // correct
     setKeyboardStates((prev) => {
       const updated = [...prev];
-      const kb = { ...updated[boardIndex] };
+      const kb = { ...updated[boardIndex] }; // keyboard state for this board
       const state = { guesses, statuses };
-      state.guesses.forEach((guess, i) => {
-        state.statuses[i].forEach((status, j) => {
+      state.guesses.forEach((guess, i) => { // guesses on the board
+        state.statuses[i].forEach((status, j) => { // status of each letter in the guess
           const letter = guess[j].toUpperCase();
           if (!kb[letter] || kb[letter] === "absent") {
             kb[letter] = status;
           }
-          if (kb[letter] === "present" && status === "correct") {
+          if (kb[letter].startsWith("present") && status === "correct") {
             kb[letter] = "correct";
           }
-          if (kb[letter] === "absent" && (status === "present" || status === "correct")) {
+          if (kb[letter] === "absent" && (status.startsWith("present") || status === "correct")) {
             kb[letter] = status;
           }
         });

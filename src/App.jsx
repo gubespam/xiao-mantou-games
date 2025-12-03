@@ -2,6 +2,7 @@
 import './App.css';
 import { Link, Routes, Route } from 'react-router-dom';
 import Duordle from './Duordle.jsx';
+import DuordlePlus from './DuordlePlus.jsx';
 import CheckersChess from './CheckersChess.jsx';
 import mantouLogo from './images/mantou.png';
 
@@ -18,15 +19,17 @@ function App() {
               <h1>Xiao Mantou Games</h1>
               <p className="subtitle">Little games by our favorite mantou</p>
               <nav className="vertical-menu">
-                <Link className="menu-item" to="/duordle">Duordle</Link>
-                <Link className="menu-item" to="/checkers-chess">Checkers-Chess</Link>
-                <Link className="menu-item" to="/tic-tac-tumble">Hierarchy Tic-tac-tumble</Link>
+                <Link className="menu-item" to="/xiao-mantou-games/duordle">Duordle</Link>
+                <Link className="menu-item" to="/xiao-mantou-games/duordle-plus">Duordle Plus</Link>
+                <Link className="menu-item" to="/xiao-mantou-games/checkers-chess">Checkers-Chess</Link>
+                <Link className="menu-item" to="/xiao-mantou-games/tic-tac-tumble">Hierarchy Tic-tac-tumble</Link>
               </nav>
             </div>
           }
         />
-        <Route path="/duordle" element={<Duordle />} />
-        <Route path="/checkers-chess" element={<CheckersChess />} />
+        <Route path="/xiao-mantou-games/duordle" element={<Duordle />} />
+        <Route path="/xiao-mantou-games/duordle-plus" element={<DuordlePlus />} />
+        <Route path="/xiao-mantou-games/checkers-chess" element={<CheckersChess />} />
       </Routes>
     </div>
   );
