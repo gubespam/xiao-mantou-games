@@ -72,10 +72,10 @@ const WordleBoard = forwardRef(({ onStatusChange, rules }, ref) => {
         setCurrent((c) => c.slice(0, -1));
       } else if (key === "Enter") {
         if (current.length !== WORD_LENGTH) return;
-        // if (!WORD_LIST.includes(current)) {
-        //   alert("Not in word list");
-        //   return;
-        // }
+        if (!WORD_LIST.includes(current)) {
+          alert("Not in word list");
+          return;
+        }
         const status = getLetterStatuses(current, answer, rules);
         setGuesses((g) => [...g, current]);
         setStatuses((s) => [...s, status]);
@@ -117,7 +117,7 @@ const WordleBoard = forwardRef(({ onStatusChange, rules }, ref) => {
 
   return (
     <div className="wordle-board-container">
-      <div>{answer}</div>
+      {/* <div>{answer}</div> */}
       <div className="wordle-board">
         {guesses.map((g, i) => renderRow(g, statuses[i]))}
         {gameState === "playing" && renderRow(current)}
