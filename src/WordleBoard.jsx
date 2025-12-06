@@ -46,6 +46,10 @@ function getLetterStatuses(guess, answer, rules) {
   return result;
 }
 
+function seq(n) {
+  return Array.from({ length: n }, (_, i) => i);
+}
+
 const WordleBoard = forwardRef(({ onStatusChange, rules }, ref) => {
   const [answer, setAnswer] = useState("");
   const [guesses, setGuesses] = useState([]); // Array of strings
@@ -99,7 +103,7 @@ const WordleBoard = forwardRef(({ onStatusChange, rules }, ref) => {
 
   const renderCell = (letter, status, idx) => (
     <div
-      key={idx}
+      key={`${letter}-${idx}`}
       className={`wordle-cell ${status || ""}`}
       style={{ textTransform: "uppercase" }}
     >
@@ -107,8 +111,8 @@ const WordleBoard = forwardRef(({ onStatusChange, rules }, ref) => {
     </div>
   );
 
-  const renderRow = (guess = "", status = []) => (
-    <div className="wordle-row">
+  const renderRow = (guess = "", status = [], idx) => (
+    <div className="wordle-row" key={`row-${idx}`}>
       {Array.from({ length: WORD_LENGTH }).map((_, i) =>
         renderCell(guess[i] || "", status[i] || "", i)
       )}
@@ -119,9 +123,17 @@ const WordleBoard = forwardRef(({ onStatusChange, rules }, ref) => {
     <div className="wordle-board-container">
       {/* <div>{answer}</div> */}
       <div className="wordle-board">
-        {guesses.map((g, i) => renderRow(g, statuses[i]))}
-        {gameState === "playing" && renderRow(current)}
-        {Array.from({ length: MAX_GUESSES - guesses.length - (gameState === "playing" ? 1 : 0) }).map((_, i) => renderRow("", []))}
+        {
+          seq(MAX_GUESSES).map((i) => {
+            if (i < guesses.length) {
+              return renderRow(guesses[i], statuses[i], i);
+            } else if (i === guesses.length && gameState === "playing") {
+              return renderRow(current, [], i);
+            } else {
+              return renderRow("", [], i);
+            }
+          })
+        }
       </div>
       {gameState === "won" && <div className="wordle-result win">You won! 🎉</div>}
       {gameState === "lost" && <div className="wordle-result lose">The word was: <b>{answer}</b></div>}
