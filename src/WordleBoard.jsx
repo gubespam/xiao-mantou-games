@@ -4,6 +4,9 @@ import { WORD_LIST } from "./wordlist";
 const WORD_LENGTH = 5;
 const MAX_GUESSES = 8;
 
+ // Set to true to show answers and allow non-words for debugging
+const DEBUG = true && window.location.hostname === "localhost";
+
 function getRandomWord() {
   return WORD_LIST[Math.floor(Math.random() * WORD_LIST.length)].toLowerCase();
 }
@@ -76,7 +79,7 @@ const WordleBoard = forwardRef(({ onStatusChange, rules }, ref) => {
         setCurrent((c) => c.slice(0, -1));
       } else if (key === "Enter") {
         if (current.length !== WORD_LENGTH) return;
-        if (!WORD_LIST.includes(current)) {
+        if (!DEBUG && !WORD_LIST.includes(current)) {
           alert("Not in word list");
           return;
         }
@@ -121,7 +124,7 @@ const WordleBoard = forwardRef(({ onStatusChange, rules }, ref) => {
 
   return (
     <div className="wordle-board-container">
-      {/* <div>{answer}</div> */}
+      {DEBUG && <div className="wordle-debug">Answer: {answer}</div>}
       <div className="wordle-board">
         {
           seq(MAX_GUESSES).map((i) => {
