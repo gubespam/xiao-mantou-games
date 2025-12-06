@@ -427,7 +427,7 @@ export const WORD_LIST = [
 "schwa","scion","scoff","scold","scone","scoop","scoot","scope","scops","score",
 "scorn","scour","scout","scowl","scows","scram","scrap","screw","scrim","scrip",
 "scrod","scrub","scrum","scuba","scudi","scudo","scuds","scuff","scull","scums",
-"scurf","scuse","scuzz","sdfdsfwhich","seals","seams","seamy","sears","seats","sebum",
+"scurf","scuse","scuzz","seals","seams","seamy","sears","seats","sebum",
 "secco","sects","sedan","seder","sedge","sedgy","sedum","seeds","seedy","seeks",
 "seems","seeps","seers","seest","seeth","segue","seine","seize","selah","selfs",
 "sells","semen","semis","sends","sense","sepal","sepia","sepoy","septa","serfs",
