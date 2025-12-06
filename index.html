@@ -13,7 +13,6 @@
           l.replace(
             l.protocol + '//' + l.hostname + 
             (l.port ? ':' + l.port : '') +
-            '/xiao-mantou-games' +
             (l.search ? '/' + l.search.slice(3).replace(/~and~/g, '&') : '') +
             (l.hash ? '#' + l.hash.slice(1).replace(/~and~/g, '&') : '')
           );
