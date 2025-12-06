@@ -2,7 +2,7 @@ import React, { useState, useCallback, useRef } from "react";
 import WordleBoard from "./WordleBoard";
 import Keyboard from "./Keyboard";
 
-function Wordle({ rules = "plus" }) {
+function Wordle({ rules }) {
   const [keyboardStates, setKeyboardStates] = useState([{}, {}]); // Keyboard state for each board
   const [boardStates, setBoardStates] = useState([{}, {}]); // State for each board
   const boardRefs = useRef([React.createRef(), React.createRef()]);
