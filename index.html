@@ -6,16 +6,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Xiao Mantou Games</title>
     <script type="text/javascript">
-      // Handle redirect from 404.html
+      // Handle redirect from 404.html without causing a full page reload.
+      // The 404 page passes the original path in `?p=...` (and optional `&q=...`),
+      // we reconstruct the original URL and update the history so the SPA router
+      // handles the route instead of performing another network navigation.
       (function(){
-        if (window.location.search[1] === 'p') {
-          var l = window.location;
-          l.replace(
-            l.protocol + '//' + l.hostname + 
-            (l.port ? ':' + l.port : '') +
-            (l.search ? '/' + l.search.slice(3).replace(/~and~/g, '&') : '') +
-            (l.hash ? '#' + l.hash.slice(1).replace(/~and~/g, '&') : '')
-          );
+        try {
+          var params = new URLSearchParams(window.location.search);
+          if (params.has('p')) {
+            var p = params.get('p') || '';
+            var q = params.get('q') || '';
+            p = p.replace(/~and~/g, '&');
+            q = q.replace(/~and~/g, '&');
+            var reconstructedPath = p ? '/' + p : '/';
+            if (q) reconstructedPath += '?' + q;
+            if (window.location.hash) reconstructedPath += window.location.hash;
+            var base = '/xiao-mantou-games';
+            if (!reconstructedPath.startsWith(base)) reconstructedPath = base + reconstructedPath;
+            // Replace the URL in history without reloading so React Router can render
+            // the correct route inside the SPA.
+            window.history.replaceState({}, '', reconstructedPath);
+          }
+        } catch (e) {
+          console.error('Error handling 404 redirect:', e);
         }
       }());
     </script>
