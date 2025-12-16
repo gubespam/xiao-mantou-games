@@ -5,7 +5,7 @@ const WORD_LENGTH = 5;
 const MAX_GUESSES = 8;
 
  // Set to true to show answers and allow non-words for debugging
-const DEBUG = true && window.location.hostname === "localhost";
+const DEBUG = false && window.location.hostname === "localhost";
 
 function getRandomWord() {
   return WORD_LIST[Math.floor(Math.random() * WORD_LIST.length)].toLowerCase();
@@ -56,7 +56,7 @@ function seq(n) {
 const WordleBoard = forwardRef(({ onStatusChange, rules, storageKey, boardIndex }, ref) => {
   const [answer, setAnswer] = useState("");
   const [guesses, setGuesses] = useState([]); // Array of strings
-  const [statuses, setStatuses] = useState([]); // Array of arrays
+  // statuses are derived from guesses + answer to avoid staleness
   const [current, setCurrent] = useState("");
   const [gameState, setGameState] = useState("playing"); // 'playing', 'won', 'lost'
 
@@ -93,8 +93,6 @@ const WordleBoard = forwardRef(({ onStatusChange, rules, storageKey, boardIndex 
       setAnswer(board.answer);
       const restoredGuesses = board.guesses || [];
       setGuesses(restoredGuesses);
-      const restoredStatuses = restoredGuesses.map((g) => getLetterStatuses(g, board.answer, rules));
-      setStatuses(restoredStatuses);
       setCurrent(board.current || "");
       if (restoredGuesses.length > 0 && restoredGuesses[restoredGuesses.length - 1] === board.answer) {
         setGameState("won");
@@ -116,13 +114,16 @@ const WordleBoard = forwardRef(({ onStatusChange, rules, storageKey, boardIndex 
     // eslint-disable-next-line
   }, []);
 
-  // Notify parent of status changes
+  // Derived statuses from current guesses and answer so they always reflect current answer
+  const statuses = guesses.map((g) => getLetterStatuses(g, answer, rules));
+
+  // Notify parent of status changes whenever guesses or answer change
   useEffect(() => {
     if (onStatusChange) {
       onStatusChange({ guesses, statuses });
     }
     // eslint-disable-next-line
-  }, [guesses, statuses]);
+  }, [guesses, answer, rules]); // re-run when answer changes so parent gets up-to-date statuses
 
   // Persist answer / guesses / current whenever any of them change
   useEffect(() => {
@@ -136,25 +137,31 @@ const WordleBoard = forwardRef(({ onStatusChange, rules, storageKey, boardIndex 
   const handleKey = useCallback(
     (key) => {
       if (gameState !== "playing") return;
-      if (key === "Backspace") {
+      const k = typeof key === "string" ? key : "";
+      const kl = k.toLowerCase();
+      if (kl === "backspace" || kl === "delete") {
         setCurrent((c) => c.slice(0, -1));
-      } else if (key === "Enter") {
+        return;
+      }
+      if (kl === "enter") {
         if (current.length !== WORD_LENGTH) return;
         if (!DEBUG && !WORD_LIST.includes(current)) {
           alert("Not in word list");
           return;
         }
-        const status = getLetterStatuses(current, answer, rules);
-        setGuesses((g) => [...g, current]);
-        setStatuses((s) => [...s, status]);
+        // compute new guesses length from current state to avoid stale closure
+        const newGuesses = [...guesses, current];
+        setGuesses(newGuesses);
         setCurrent("");
         if (current === answer) {
           setGameState("won");
-        } else if (guesses.length + 1 >= MAX_GUESSES) {
+        } else if (newGuesses.length >= MAX_GUESSES) {
           setGameState("lost");
         }
-      } else if (/^[A-Z]$/.test(key) && current.length < WORD_LENGTH) {
-        setCurrent((c) => c + key.toLowerCase());
+        return;
+      }
+      if (/^[a-z]$/.test(kl) && current.length < WORD_LENGTH) {
+        setCurrent((c) => c + kl); // store lowercase for consistency
       }
     },
     [current, answer, guesses, gameState, rules]
@@ -163,7 +170,21 @@ const WordleBoard = forwardRef(({ onStatusChange, rules, storageKey, boardIndex 
   // Expose handleKey method to parent
   useImperativeHandle(ref, () => ({
     handleKey,
-  }), [handleKey]);
+    // reset the board to a fresh random word and clear guesses/current
+    reset: () => {
+      const w = getRandomWord();
+      setAnswer(w);
+      setGuesses([]);
+      setCurrent("");
+      setGameState("playing");
+      if (storageKey !== undefined) {
+        const newRoot = readRoot();
+        newRoot.boards = newRoot.boards || [];
+        newRoot.boards[boardIndex] = { answer: w, guesses: [], current: "" };
+        writeRoot(newRoot);
+      }
+    }
+  }), [handleKey, storageKey, boardIndex]);
 
   const renderCell = (letter, status, idx) => (
     <div

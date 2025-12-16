@@ -52,11 +52,35 @@ function Wordle({ rules, storageKey }) {
     });
   }, []);
 
+  const handleReset = useCallback(() => {
+    // Clear storage for this game key
+    if (storageKey) {
+      try {
+        window.localStorage.removeItem(storageKey);
+      } catch (e) {
+        console.error("Failed to clear storage", e);
+      }
+    }
+    // Clear keyboard and board state
+    setKeyboardStates([{}, {}]);
+    setBoardStates([{}, {}]);
+
+    // Ask each board to reset itself (this also writes the new answer into storage)
+    boardRefs.current.forEach((r) => {
+      if (r && r.current && typeof r.current.reset === "function") {
+        r.current.reset();
+      }
+    });
+  }, [storageKey]);
+
   const gameStates = boardStates.map((state) => state.guesses && state.guesses.length > 0 ? "done" : "playing");
   const isBothGameOver = gameStates.every((state) => state === "done");
 
   return (
     <div className="wordle-container">
+      <div className="wordle-controls">
+        <button onClick={handleReset}>New Game</button>
+      </div>
       <div className="wordle-boards-wrapper">
         <WordleBoard 
           ref={boardRefs.current[0]}
