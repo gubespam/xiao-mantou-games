@@ -53,15 +53,67 @@ function seq(n) {
   return Array.from({ length: n }, (_, i) => i);
 }
 
-const WordleBoard = forwardRef(({ onStatusChange, rules }, ref) => {
+const WordleBoard = forwardRef(({ onStatusChange, rules, storageKey, boardIndex }, ref) => {
   const [answer, setAnswer] = useState("");
   const [guesses, setGuesses] = useState([]); // Array of strings
   const [statuses, setStatuses] = useState([]); // Array of arrays
   const [current, setCurrent] = useState("");
   const [gameState, setGameState] = useState("playing"); // 'playing', 'won', 'lost'
 
+  // Helpers to read/write root object for this storageKey
+  const readRoot = () => {
+    if (!storageKey) return {};
+    try {
+      return JSON.parse(window.localStorage.getItem(storageKey)) || {};
+    } catch (e) {
+      console.error("Failed to parse storage for", storageKey, e);
+      return {};
+    }
+  };
+  const writeRoot = (root) => {
+    if (!storageKey) return;
+    try {
+      window.localStorage.setItem(storageKey, JSON.stringify(root));
+    } catch (e) {
+      console.error("Failed to write storage for", storageKey, e);
+    }
+  };
+
+  // Initialize answer / guesses / current from storage (if present), otherwise pick new random answer
   useEffect(() => {
-    setAnswer(getRandomWord());
+    if (!storageKey || boardIndex === undefined) {
+      setAnswer(getRandomWord());
+      console.log("New word")
+      return;
+    }
+    const root = readRoot();
+    const board = (root.boards && root.boards[boardIndex]) || null;
+    if (board && board.answer) {
+      console.log("Board found")
+      setAnswer(board.answer);
+      const restoredGuesses = board.guesses || [];
+      setGuesses(restoredGuesses);
+      const restoredStatuses = restoredGuesses.map((g) => getLetterStatuses(g, board.answer, rules));
+      setStatuses(restoredStatuses);
+      setCurrent(board.current || "");
+      if (restoredGuesses.length > 0 && restoredGuesses[restoredGuesses.length - 1] === board.answer) {
+        setGameState("won");
+      } else if (restoredGuesses.length >= MAX_GUESSES) {
+        setGameState("lost");
+      } else {
+        setGameState("playing");
+      }
+      return;
+    }
+      console.log("New word2")
+    const w = getRandomWord();
+    setAnswer(w);
+    // persist initial answer immediately so a reload won't change it
+    const newRoot = readRoot();
+    newRoot.boards = newRoot.boards || [];
+    newRoot.boards[boardIndex] = { answer: w, guesses: [], current: "" };
+    writeRoot(newRoot);
+    // eslint-disable-next-line
   }, []);
 
   // Notify parent of status changes
@@ -71,6 +123,15 @@ const WordleBoard = forwardRef(({ onStatusChange, rules }, ref) => {
     }
     // eslint-disable-next-line
   }, [guesses, statuses]);
+
+  // Persist answer / guesses / current whenever any of them change
+  useEffect(() => {
+    if (!storageKey || boardIndex === undefined) return;
+    const root = readRoot();
+    root.boards = root.boards || [];
+    root.boards[boardIndex] = { answer, guesses, current };
+    writeRoot(root);
+  }, [answer, guesses, current, storageKey, boardIndex]);
 
   const handleKey = useCallback(
     (key) => {
