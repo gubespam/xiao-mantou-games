@@ -112,3 +112,16 @@
   margin-top: 1rem;
   font-size: 1.4rem;
 }
+
+.general-button {
+  background-color: #4f46e5;
+  color: #ffffff;
+  border: none;
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.general-button:hover {
+  background-color: #4338ca;
+}

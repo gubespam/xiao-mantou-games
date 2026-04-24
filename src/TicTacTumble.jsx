@@ -8,6 +8,9 @@ function TicTacTumble() {
   const [gameWinner, setGameWinner] = useState(null);
   const [scores, setScores] = useState({ X: 0, O: 0 });
 
+  const [boardSquares, setBoardSquares] = useState(Array(9).fill().map(() => Array(9).fill(null)));
+  const [moveHistory, setMoveHistory] = useState([]);
+
   const calculateWinner = (states) => {
     const lines = [
       [0, 1, 2],
@@ -99,9 +102,29 @@ function TicTacTumble() {
     }
   };
 
-  const handleMove = (boardIndex, index, player) => {
-    // Switch player turn on every move
+  const handleMove = (boardIndex, cellIndex, player) => {
+    const newBoardSquares = boardSquares.map(board => board.slice());
+    newBoardSquares[boardIndex][cellIndex] = player;
+    setBoardSquares(newBoardSquares);
+    setMoveHistory([...moveHistory, { boardIndex, cellIndex, player }]);
     setIsXNext(!isXNext);
+  };
+
+  const handleUndo = () => {
+    if (moveHistory.length === 0) return;
+    const lastMove = moveHistory[moveHistory.length - 1];
+    const newBoardSquares = boardSquares.map(board => board.slice());
+    newBoardSquares[lastMove.boardIndex][lastMove.cellIndex] = null;
+    setBoardSquares(newBoardSquares);
+    setMoveHistory(moveHistory.slice(0, -1));
+    setIsXNext(lastMove.player === 'X');
+    if (gameStates[lastMove.boardIndex]) {
+      const newGameStates = gameStates.slice();
+      newGameStates[lastMove.boardIndex] = null;
+      setGameStates(newGameStates);
+      const overallWinner = calculateWinner(newGameStates);
+      setGameWinner(overallWinner);
+    }
   };
 
   const isGameCellPlayable = (index) => {
@@ -119,8 +142,9 @@ function TicTacTumble() {
       return (
         <div className="game-cell">
           <T3Board
+            squares={boardSquares[index]}
             currentPlayer={isXNext ? 'X' : 'O'}
-            onMove={() => handleMove(index)}
+            onSquareClick={(cellIndex) => handleMove(index, cellIndex, isXNext ? 'X' : 'O')}
             onGameEnd={(endData) => handleGameEnd(index, endData)}
             disabled={isBoardDisabled(index)}
           />
@@ -153,6 +177,12 @@ function TicTacTumble() {
   return (
     <div className="game-page tic-tac-tumble-container">
       <h1>Tic-Tac-Tumble</h1>
+
+      {moveHistory.length > 0 && !gameWinner && (
+        <div style={{ textAlign: 'center', marginBottom: '10px' }}>
+          <button className="general-button" onClick={handleUndo}>Undo</button>
+        </div>
+      )}
 
       {!gameWinner && (
         <div className="turn-indicator">

@@ -1,10 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './T3Board.css';
 
-function T3Board({ onGameEnd = null, onMove = null, disabled = false, currentPlayer = 'X' }) {
-  const [board, setBoard] = useState(Array(9).fill(null));
-  const [winner, setWinner] = useState(null);
-
+function T3Board({ squares, onSquareClick, onGameEnd = null, disabled = false, currentPlayer = 'X' }) {
   const calculateWinner = (squares) => {
     const lines = [
       [0, 1, 2],
@@ -30,38 +27,32 @@ function T3Board({ onGameEnd = null, onMove = null, disabled = false, currentPla
   };
 
   useEffect(() => {
-    const result = calculateWinner(board);
+    const result = calculateWinner(squares);
     if (result) {
-      setWinner(result);
       if (onGameEnd) {
-        onGameEnd({ type: 'win', player: result.player, board: board.slice() });
+        onGameEnd({ type: 'win', player: result.player, board: squares.slice() });
       }
-    } else if (isBoardFull(board)) {
+    } else if (isBoardFull(squares)) {
       if (onGameEnd) {
-        onGameEnd({ type: 'tie', board: board.slice() });
+        onGameEnd({ type: 'tie', board: squares.slice() });
       }
     }
-  }, [board]);
+  }, [squares]);
 
   const handleClick = (index) => {
-    if (disabled || board[index] !== null || winner) return;
+    if (disabled || squares[index] || calculateWinner(squares)) return;
 
-    const newBoard = board.slice();
-    newBoard[index] = currentPlayer;
-    setBoard(newBoard);
-
-    if (onMove) {
-      onMove(index, currentPlayer);
-    }
+    onSquareClick(index);
   };
 
   const isWinningSquare = (index) => {
+    const winner = calculateWinner(squares);
     return winner && winner.line.includes(index);
   };
 
   return (
     <div className="t3-board">
-      {board.map((value, index) => (
+      {squares.map((value, index) => (
         <div
           key={index}
           className={`t3-square ${isWinningSquare(index) ? 'winning' : ''} ${
