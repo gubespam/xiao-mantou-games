@@ -127,6 +127,15 @@ function TicTacTumble() {
     }
   };
 
+  const handleNewGame = () => {
+    setGameStates(Array(9).fill(null));
+    setIsXNext(true);
+    setGameWinner(null);
+    setScores({ X: 0, O: 0 });
+    setBoardSquares(Array(9).fill().map(() => Array(9).fill(null)));
+    setMoveHistory([]);
+  };
+
   const isGameCellPlayable = (index) => {
     return gameStates[index] === null;
   };
@@ -178,11 +187,14 @@ function TicTacTumble() {
     <div className="game-page tic-tac-tumble-container">
       <h1>Tic-Tac-Tumble</h1>
 
-      {moveHistory.length > 0 && !gameWinner && (
-        <div style={{ textAlign: 'center', marginBottom: '10px' }}>
-          <button className="general-button" onClick={handleUndo}>Undo</button>
+      {moveHistory.length > 0 || gameWinner ? (
+        <div style={{ display: 'flex', justifyContent: 'center', gap: '2em', marginBottom: '10px' }}>
+          {moveHistory.length > 0 && !gameWinner && (
+            <button className="general-button" onClick={handleUndo}>Undo</button>
+          )}
+          <button className="general-button" onClick={handleNewGame}>New Game</button>
         </div>
-      )}
+      ) : null}
 
       {!gameWinner && (
         <div className="turn-indicator">
