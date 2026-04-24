@@ -1,0 +1,59 @@
+.trash-cans-game {
+  text-align: center;
+  padding: 20px;
+}
+
+.game-area {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 20px;
+}
+
+.trash-items {
+  flex: 1;
+  padding: 10px;
+}
+
+.trash-item {
+  background-color: #f0f0f0;
+  border: 1px solid #ccc;
+  padding: 10px;
+  margin: 5px;
+  cursor: grab;
+  border-radius: 5px;
+  color: black;
+}
+
+.trash-item:active {
+  cursor: grabbing;
+}
+
+.cans {
+  flex: 2;
+  display: flex;
+  justify-content: space-around;
+}
+
+.can {
+  width: 150px;
+  height: 200px;
+  border: 2px dashed #ccc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  margin: 10px;
+  color: black;
+}
+
+.recycle-can {
+  background-color: #e8f5e8;
+}
+
+.compost-can {
+  background-color: #f5f5dc;
+}
+
+.trash-can {
+  background-color: #ffe4e1;
+}

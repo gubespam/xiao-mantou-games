@@ -5,6 +5,7 @@ import Duordle from './Duordle.jsx';
 import DuordlePlus from './DuordlePlus.jsx';
 import CheckersChess from './CheckersChess.jsx';
 import TicTacTumble from './TicTacTumble.jsx';
+import TrashCans from './TrashCans.jsx';
 import mantouLogo from './images/mantou.png';
 
 
@@ -24,6 +25,7 @@ function App() {
                 <Link className="menu-item" to="/xiao-mantou-games/duordle-plus">Duordle Plus</Link>
                 <Link className="menu-item" to="/xiao-mantou-games/checkers-chess">Checkers-Chess</Link>
                 <Link className="menu-item" to="/xiao-mantou-games/tic-tac-tumble">Hierarchy Tic-tac-tumble</Link>
+                <Link className="menu-item" to="/xiao-mantou-games/trash-cans">Trash Cans</Link>
               </nav>
             </div>
           }
@@ -32,6 +34,7 @@ function App() {
         <Route path="/xiao-mantou-games/duordle-plus" element={<DuordlePlus />} />
         <Route path="/xiao-mantou-games/tic-tac-tumble" element={<TicTacTumble />} />
         <Route path="/xiao-mantou-games/checkers-chess" element={<CheckersChess />} />
+        <Route path="/xiao-mantou-games/trash-cans" element={<TrashCans />} />
       </Routes>
     </div>
   );
