@@ -1,0 +1,19 @@
+.spaceship-game-root { display:flex; flex-direction:column; align-items:center; }
+.topbar { width:100%; display:flex; justify-content:space-between; align-items:center; padding:8px 16px; box-sizing:border-box; }
+.timer { font-family:monospace; }
+.game-area { padding:12px; }
+.spaceship-board { position:relative; background:linear-gradient(#001, #033); border-radius:8px; overflow:hidden; }
+.grid { position:absolute; left:0; top:0; right:0; bottom:0; display:flex; flex-direction:column; }
+.grid-row { display:flex; }
+.grid-cell { border:1px solid rgba(255,255,255,0.04); box-sizing:border-box; }
+.entity { position:absolute; width:90px; height:90px; display:flex; align-items:center; justify-content:center; transition:transform 180ms linear; }
+.ship-sprite { width:36px; height:36px; background:linear-gradient(#fff,#ccc); clip-path:polygon(50% 0, 100% 100%, 50% 80%, 0 100%); }
+.dir-up .ship-sprite { transform:rotate(0deg); }
+.dir-down .ship-sprite { transform:rotate(180deg); }
+.dir-left .ship-sprite { transform:rotate(270deg); }
+.dir-right .ship-sprite { transform:rotate(90deg); }
+.asteroid { color:#daa520; font-size:28px; }
+.heart { color:#ff3366; font-size:28px; }
+.cloud { color:#ddd; font-size:36px; animation:cloudScale 1s ease-in-out; }
+
+@keyframes cloudScale { 0%{transform:scale(0.4)}50%{transform:scale(1.2)}100%{transform:scale(0.4)} }
