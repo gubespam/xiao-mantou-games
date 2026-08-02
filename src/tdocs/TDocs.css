@@ -49,3 +49,191 @@
 .tdocs-tab-screen p {
   color: #f4f7f4;
 }
+
+.tdocs-files-screen {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.tdocs-files-topbar {
+  display: flex;
+  align-items: stretch;
+  min-height: 3rem;
+  border: 1px solid #314731;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #101710;
+}
+
+.tdocs-files-back-button {
+  width: 3rem;
+  border: none;
+  background: #243323;
+  color: #f4f7f4;
+  font-size: 1.25rem;
+  cursor: pointer;
+}
+
+.tdocs-files-back-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.tdocs-files-path-label {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  padding: 0 1rem;
+  background: #182218;
+  font-weight: 700;
+}
+
+.tdocs-files-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-height: 18rem;
+}
+
+.tdocs-files-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.7rem 0.9rem;
+  border: 1px solid #2d3d2d;
+  border-radius: 8px;
+  background: #132013;
+}
+
+.tdocs-files-item-left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.tdocs-files-item-icon {
+  font-size: 1.15rem;
+}
+
+.tdocs-files-item-name {
+  color: #f4f7f4;
+  font-size: 0.98rem;
+}
+
+.tdocs-files-link {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  text-align: left;
+}
+
+.tdocs-files-add-row {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.tdocs-files-add-button {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 999px;
+  border: 1px solid #2f8f3f;
+  background: #1b341b;
+  color: #f4f7f4;
+  font-size: 1.4rem;
+  cursor: pointer;
+}
+
+.tdocs-files-menu {
+  position: absolute;
+  left: 0;
+  bottom: 3rem;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #314731;
+  border-radius: 8px;
+  background: #162116;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.35);
+  overflow: hidden;
+}
+
+.tdocs-files-menu button {
+  border: none;
+  background: transparent;
+  color: #f4f7f4;
+  padding: 0.7rem 1rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+.tdocs-files-menu button:hover {
+  background: #213521;
+}
+
+.tdocs-files-prompt-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tdocs-files-prompt-card {
+  width: min(25rem, calc(100vw - 2rem));
+  background: #111811;
+  border: 1px solid #324432;
+  border-radius: 12px;
+  padding: 1rem;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.45);
+}
+
+.tdocs-files-prompt-title {
+  font-size: 1rem;
+  font-weight: 800;
+  margin-bottom: 0.9rem;
+}
+
+.tdocs-files-prompt-label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.tdocs-files-prompt-label span {
+  color: #dce9dc;
+}
+
+.tdocs-files-prompt-label input {
+  width: 100%;
+  padding: 0.6rem 0.7rem;
+  border-radius: 8px;
+  border: 1px solid #3a563a;
+  background: #0d120d;
+  color: #f4f7f4;
+}
+
+.tdocs-files-prompt-actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+  margin-top: 1rem;
+}
+
+.tdocs-files-prompt-actions button {
+  border: 1px solid #325632;
+  background: #1d2a1d;
+  color: #f4f7f4;
+  border-radius: 8px;
+  padding: 0.45rem 0.85rem;
+  cursor: pointer;
+}
+
+.tdocs-files-prompt-error {
+  margin-top: 0.6rem;
+  color: #ff9696;
+  font-size: 0.9rem;
+}
