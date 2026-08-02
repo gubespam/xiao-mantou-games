@@ -1,12 +1,16 @@
 
 import './App.css';
 import { Link, Routes, Route } from 'react-router-dom';
+
 import Duordle from './Duordle.jsx';
 import DuordlePlus from './DuordlePlus.jsx';
 import CheckersChess from './CheckersChess.jsx';
 import TicTacTumble from './TicTacTumble.jsx';
 import TrashCans from './TrashCans.jsx';
 import SpaceshipGame from './SpaceshipGame/SpaceshipGame.jsx';
+import TDocs from './TDocs.jsx';
+
+
 import mantouLogo from './images/mantou.png';
 
 
@@ -28,6 +32,7 @@ function App() {
                 <Link className="menu-item" to="/xiao-mantou-games/tic-tac-tumble">Hierarchy Tic-tac-tumble</Link>
                 <Link className="menu-item" to="/xiao-mantou-games/trash-cans">Trash Cans</Link>
                 {/* <Link className="menu-item" to="/xiao-mantou-games/spaceship-game">Spaceship</Link> */}
+                <Link className="menu-item" to="/xiao-mantou-games/TDocs">TDocs</Link>
               </nav>
             </div>
           }
@@ -38,6 +43,7 @@ function App() {
         <Route path="/xiao-mantou-games/tic-tac-tumble" element={<TicTacTumble />} />
         <Route path="/xiao-mantou-games/checkers-chess" element={<CheckersChess />} />
         <Route path="/xiao-mantou-games/trash-cans" element={<TrashCans />} />
+        <Route path="/xiao-mantou-games/TDocs" element={<TDocs />} />
       </Routes>
     </div>
   );
