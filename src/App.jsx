@@ -8,7 +8,7 @@ import CheckersChess from './CheckersChess.jsx';
 import TicTacTumble from './TicTacTumble.jsx';
 import TrashCans from './TrashCans.jsx';
 import SpaceshipGame from './SpaceshipGame/SpaceshipGame.jsx';
-import TDocs from './TDocs.jsx';
+import TDocs from './tdocs/TDocs.jsx';
 
 
 import mantouLogo from './images/mantou.png';

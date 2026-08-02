@@ -1,0 +1,51 @@
+.tdocs-base {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: #111811;
+  color: #f4f7f4;
+}
+
+.tdocs-tabs-bar {
+  display: flex;
+  gap: 0.5rem;
+  padding: 1rem;
+  background: #182218;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  border-bottom: 1px solid #2b3c2b;
+}
+
+.tdocs-tab {
+  border: 1px solid #325632;
+  background: #1d2a1d;
+  color: #dce9dc;
+  padding: 0.75rem 1.25rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.tdocs-tab.is-active {
+  background: #2f8f3f;
+  color: #ffffff;
+}
+
+.tdocs-main-content {
+  flex: 1;
+  padding: 1.5rem;
+}
+
+.tdocs-tab-screen {
+  background: #171f17;
+  border: 1px solid #2c3a2c;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+}
+
+.tdocs-tab-screen h2,
+.tdocs-tab-screen p {
+  color: #f4f7f4;
+}
