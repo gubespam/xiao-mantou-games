@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import './FileEditText.css';
 
 // Takes file content and splits it into indented lines
 function parseText(text) {
@@ -68,22 +69,16 @@ function FileEditText({ fileContent = "food\n\tfruit\n\t\tapple\n\t\tbanana\n\tv
 
     const [nodes, setNodes] = React.useState(nestedItems);
 
-    const handleChange = (e) => {
-        const newText = e.target.value;
-        setText(newText);
-        onChange(newText);
-    };
-
     function listItem({ node, index }) {
         if(node?.children?.length > 0){
            return (<li key={index}>
-                {node.text}
+                {TextLine({ index, text: node.text, indentLevel: node.indentLevel, onChangeText: (newText) => {} })}
                 {listContainer({ nodes: node.children, index })}
             </li>)
         } else {   
             console.log("node", node);
             return (<li key={index}>
-                {node.text}
+                {TextLine({ index, text: node.text, indentLevel: node.indentLevel, onChangeText: (newText) => {} })}
             </li>)
         }
     }
