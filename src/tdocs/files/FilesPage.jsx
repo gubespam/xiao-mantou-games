@@ -20,16 +20,16 @@ function createFileNode(name, content = '') {
 
 function buildInitialTree() {
   return createDirectoryNode('root', [
-    createDirectoryNode('Documents', [
-      createFileNode('meetup-notes.txt', 'Team sync notes'),
-      createDirectoryNode('Projects', [
-        createFileNode('launch-plan.md', '# Launch plan'),
-      ]),
-    ]),
-    createDirectoryNode('Images', [
-      createFileNode('screenshot.png', 'image-bytes'),
-    ]),
-    createFileNode('welcome.txt', 'Welcome to the Files tab.'),
+  //   createDirectoryNode('Documents', [
+  //     createFileNode('meetup-notes.txt', 'Team sync notes'),
+  //     createDirectoryNode('Projects', [
+  //       createFileNode('launch-plan.md', '# Launch plan'),
+  //     ]),
+  //   ]),
+  //   createDirectoryNode('Images', [
+  //     createFileNode('screenshot.png', 'image-bytes'),
+  //   ]),
+  //   createFileNode('welcome.txt', 'Welcome to the Files tab.'),
   ]);
 }
 
@@ -149,7 +149,7 @@ function FilesPage() {
       return;
     }
 
-    const nameExists = currentDirectory?.children.some(
+    const nameExists = currentDirectory?.children?.some(
       (child) => child.name.toLowerCase() === trimmedName.toLowerCase(),
     );
 
@@ -166,9 +166,9 @@ function FilesPage() {
     }
 
     if (promptKind === 'file') {
-      updatedCurrentDirectory.children.push(createFileNode(trimmedName, ''));
+      updatedCurrentDirectory.children?.push(createFileNode(trimmedName, ''));
     } else {
-      updatedCurrentDirectory.children.push(createDirectoryNode(trimmedName));
+      updatedCurrentDirectory.children?.push(createDirectoryNode(trimmedName));
     }
 
     setDirectoryTree(nextTree);

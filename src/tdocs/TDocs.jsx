@@ -4,17 +4,19 @@ import TabsBar from './TabsBar.jsx';
 import TrashesPage from './trashes/TrashesPage.jsx';
 import FilesPage from './files/FilesPage.jsx';
 import SmartFoldersPage from './smartfolders/SmartFoldersPage.jsx';
+import FileEditText from './files/FileEditText.jsx';
 
 const tabs = [
   { id: 'trashes', label: 'Trashes', component: TrashesPage },
   { id: 'files', label: 'Files', component: FilesPage },
+  { id: 'edit', label: 'Edit File', component: FileEditText },
   { id: 'smartfolders', label: 'Smart Folders', component: SmartFoldersPage },
 ];
 
 function TDocs() {
   const [activeTab, setActiveTab] = useState('trashes');
 
-  const ActiveScreen = tabs.find((tab) => tab.id === activeTab)?.component ?? TrashesPage;
+  const ActiveScreen = tabs.find((tab) => tab.id === activeTab)?.component ?? FileEditText;
 
   return (
     <div className="tdocs-base">
