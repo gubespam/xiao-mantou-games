@@ -4,5 +4,5 @@ Implement opening and editing files.
 
 
 # File Editor
-- Make the text area auto-expand vertically
+- Tab and shift-tab should implement changing indent level
 - Make the text area width equal remaining horizontal space in the editor component

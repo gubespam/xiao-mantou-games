@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import './FileEditText.css';
 
 // Takes file content and splits it into indented lines
@@ -12,13 +12,22 @@ function parseText(text) {
 
 // Takes a list of line elements and compiles to the text stored in the file
 function compileText(lines) {
-    // TODO for each line, return line.indentLevel tabs followed by line.text
-    //      join whole list by newlines
     return lines.map(line => '\t'.repeat(line.indentLevel) + line.text).join('\n');
 }
 
+function flattenTree(nodes, flat = []) {
+    nodes.forEach(node => {
+        flat.push({ text: node.text, indentLevel: node.indentLevel });
+        if (node.children?.length > 0) {
+            flattenTree(node.children, flat);
+        }
+    });
+
+    return flat;
+}
+
 // take flat list of items with indentation levels and convert to a nested structure of parent/child
-function nestify(lines){
+function nestify(lines) {
     // each input item has:
     // - text
     // - indentLevel
@@ -39,69 +48,110 @@ function nestify(lines){
     return root.children;
 }
 
-function TextLine({ index, text, indentLevel, onChangeText, onIndent, onOutdent }) {
-
-    // catch tab character and indent/outdent the line instead of inserting a tab character
+function TextLine({ text, indentLevel, onChangeText, onIndent, onOutdent }) {
     const handleKeyDown = (e) => {
         if (e.key === 'Tab') {
             e.preventDefault();
             if (e.shiftKey) {
-                onOutdent(index);
+                onOutdent();
             } else {
-                onIndent(index);
+                onIndent();
             }
         }
-    }
+    };
+
     const handleChange = (e) => {
-        const newText = e.target.value;
-        onChangeText(newText);
+        onChangeText(e.target.value);
     };
 
     return (
-        <textarea value={text} onChange={handleChange} onKeyDown={handleKeyDown} />
+        <textarea
+            className="file-edit-text-area"
+            value={text}
+            onChange={handleChange}
+            onKeyDown={handleKeyDown}
+            data-indent={indentLevel}
+        />
     );
 }
 
-function FileEditText({ fileContent = "food\n\tfruit\n\t\tapple\n\t\tbanana\n\tveggie", onChange = () => {} }) {
-    // raw text file content -> split into lines with indentation levels -> nested structure of items
-    const nestedItems = nestify(parseText(fileContent));
-    console.log("nestedItems", nestedItems);
-
-    const [nodes, setNodes] = React.useState(nestedItems);
-
-    function listItem({ node, index }) {
-        if(node?.children?.length > 0){
-           return (<li key={index}>
-                {TextLine({ index, text: node.text, indentLevel: node.indentLevel, onChangeText: (newText) => {} })}
-                {listContainer({ nodes: node.children, index })}
-            </li>)
-        } else {   
-            console.log("node", node);
-            return (<li key={index}>
-                {TextLine({ index, text: node.text, indentLevel: node.indentLevel, onChangeText: (newText) => {} })}
-            </li>)
+function updateNodeAtPath(nodes, path, updater) {
+    return nodes.map((node, index) => {
+        if (index !== path[0]) {
+            return node;
         }
+
+        if (path.length === 1) {
+            return updater({ ...node });
+        }
+
+        return {
+            ...node,
+            children: updateNodeAtPath(node.children ?? [], path.slice(1), updater),
+        };
+    });
+}
+
+function FileEditText({ fileContent = "food\n\tfruit\n\t\tapple\n\t\tbanana\n\tveggie", onChange = () => {} }) {
+    const [nodes, setNodes] = React.useState(() => nestify(parseText(fileContent)));
+
+    const emitNodeChange = (nextNodes) => {
+        const compiledText = compileText(flattenTree(nextNodes));
+        onChange(compiledText);
+    };
+
+    const handleChangeText = (path, newText) => {
+        const nextNodes = updateNodeAtPath(nodes, path, node => ({ ...node, text: newText }));
+        setNodes(nextNodes);
+        emitNodeChange(nextNodes);
+    };
+
+    const handleIndent = (path) => {
+        const nextNodes = updateNodeAtPath(nodes, path, node => ({
+            ...node,
+            indentLevel: Math.max(0, node.indentLevel + 1),
+        }));
+        setNodes(nextNodes);
+        emitNodeChange(nextNodes);
+    };
+
+    const handleOutdent = (path) => {
+        const nextNodes = updateNodeAtPath(nodes, path, node => ({
+            ...node,
+            indentLevel: Math.max(0, node.indentLevel - 1),
+        }));
+        setNodes(nextNodes);
+        emitNodeChange(nextNodes);
+    };
+
+    function listItem({ node, path }) {
+        const currentPath = [...path, node.index];
+
+        return (
+            <li key={currentPath.join('-')}>
+                <TextLine
+                    text={node.text}
+                    indentLevel={node.indentLevel}
+                    onChangeText={(newText) => handleChangeText(currentPath, newText)}
+                    onIndent={() => handleIndent(currentPath)}
+                    onOutdent={() => handleOutdent(currentPath)}
+                />
+                {node.children?.length > 0 && listContainer({ nodes: node.children, path: currentPath })}
+            </li>
+        );
     }
 
-    function listContainer({ nodes, index }) {
+    function listContainer({ nodes, path = [] }) {
         return (
-            <ul key={index}>
-                {nodes.map((node, index) => listItem({ node, index }))}
+            <ul>
+                {nodes.map((node, index) => listItem({ node: { ...node, index }, path }))}
             </ul>
         );
     }
 
     return (
         <div className="file-edit-text">
-            {listContainer({ nodes, index: 0 })}
-            {/* {lines.map((line, index) => (
-                <TextLine key={index} index={index} text={line} onChangeText={(newText) => {
-                    const newLines = [...lines];
-                    newLines[index] = { ...line, text: newText };
-                    setLines(newLines);
-                    onChange(newLines);
-                }}  />
-            ))} */}
+            {listContainer({ nodes, path: [] })}
         </div>
     );
 }

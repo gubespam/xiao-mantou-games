@@ -1,20 +1,37 @@
+.file-edit-text {
+  width: 100%;
+}
+
+.file-edit-text ul {
+  margin: 0;
+  padding-left: 1.25rem;
+  list-style: disc outside;
+}
+
+.file-edit-text li {
+  display: list-item;
+}
+
 .file-edit-text textarea {
   width: 100%;
-  height: 100%;
-  padding: 0.5rem;
+  min-height: 1.4rem;
+  padding: 0;
+  margin: 0;
   border: none;
   background: #111811;
   color: #f4f7f4;
   font-size: 1rem;
+  line-height: 1.4;
   resize: none;
+  vertical-align: top;
 }
 
 .file-edit-text textarea:focus {
-    outline: none;
-    box-shadow: none;
-    border-color: transparent;
+  outline: none;
+  box-shadow: none;
+  border-color: transparent;
 }
 
-ul {
-  list-style-position: outside; /* Keeps bullets hanging in the margin, next to line 1 */
+.file-edit-text textarea[data-indent='0'] {
+  padding-left: 0;
 }
