@@ -104,12 +104,14 @@
   border: 1px solid #2d3d2d;
   border-radius: 8px;
   background: #132013;
+  position: relative;
 }
 
 .tdocs-files-item-left {
   display: flex;
   align-items: center;
   gap: 0.75rem;
+  flex: 1;
 }
 
 .tdocs-files-item-icon {
@@ -127,6 +129,34 @@
   padding: 0;
   cursor: pointer;
   text-align: left;
+}
+
+.tdocs-files-item-actions {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.tdocs-files-item-action-button {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 999px;
+  border: 1px solid #314731;
+  background: #1a2a1a;
+  color: #f4f7f4;
+  cursor: pointer;
+  opacity: 0.7;
+}
+
+.tdocs-files-item:hover .tdocs-files-item-action-button,
+.tdocs-files-item:focus-within .tdocs-files-item-action-button {
+  opacity: 1;
+}
+
+.tdocs-files-item-actions .tdocs-files-menu {
+  right: 0;
+  left: auto;
+  bottom: 2.4rem;
 }
 
 .tdocs-files-add-row {
@@ -236,4 +266,29 @@
   margin-top: 0.6rem;
   color: #ff9696;
   font-size: 0.9rem;
+}
+
+.tdocs-files-status {
+  color: #bfe8c6;
+  font-size: 0.95rem;
+  padding: 0.4rem 0.2rem;
+}
+
+.tdocs-files-editor-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  border: 1px solid #314731;
+  border-radius: 10px;
+  padding: 0.9rem;
+  background: #101710;
+}
+
+.tdocs-files-editor-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  color: #dce9dc;
+  font-size: 0.95rem;
 }

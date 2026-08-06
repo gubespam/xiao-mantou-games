@@ -102,8 +102,11 @@ function FilesPage() {
   const [directoryTree, setDirectoryTree] = useState(() => loadTreeFromStorage());
   const [currentPath, setCurrentPath] = useState([]);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [activeMenuItemKey, setActiveMenuItemKey] = useState(null);
   const [promptKind, setPromptKind] = useState(null);
+  const [promptTarget, setPromptTarget] = useState(null);
   const [newName, setNewName] = useState('');
+  const [statusMessage, setStatusMessage] = useState('');
   const nameInputRef = useRef(null);
 
   useEffect(() => {
@@ -116,28 +119,89 @@ function FilesPage() {
     }
   }, [promptKind]);
 
+  useEffect(() => {
+    setStatusMessage('');
+  }, [currentPath]);
+
   const currentDirectory = useMemo(
     () => findDirectoryByPath(directoryTree, currentPath),
     [directoryTree, currentPath],
   );
 
-  const directoryItems = currentDirectory?.children ?? [];
+  const directoryItems = useMemo(() => {
+    const items = currentDirectory?.children ?? [];
+    return [...items].sort((left, right) => left.name.localeCompare(right.name));
+  }, [currentDirectory]);
+
   const displayPath = getDisplayPath(currentPath);
 
   function handleOpenDirectory(nextDirectoryName) {
     setCurrentPath((previousPath) => [...previousPath, nextDirectoryName]);
     setMenuOpen(false);
+    setActiveMenuItemKey(null);
   }
 
   function handleGoBack() {
     setCurrentPath((previousPath) => previousPath.slice(0, -1));
     setMenuOpen(false);
+    setActiveMenuItemKey(null);
   }
 
   function handleAddItem(kind) {
     setPromptKind(kind);
+    setPromptTarget(null);
     setNewName('');
     setMenuOpen(false);
+    setActiveMenuItemKey(null);
+  }
+
+  function toggleItemMenu(itemKey) {
+    setActiveMenuItemKey((currentKey) => (currentKey === itemKey ? null : itemKey));
+    setMenuOpen(false);
+  }
+
+  function handleRenameItem(index, item) {
+    setPromptKind('rename');
+    setPromptTarget({ index, item });
+    setNewName(item.name);
+    setActiveMenuItemKey(null);
+    setMenuOpen(false);
+  }
+
+  function handleDeleteItem(index) {
+    const nextTree = JSON.parse(JSON.stringify(directoryTree));
+    const updatedCurrentDirectory = findDirectoryByPath(nextTree, currentPath);
+
+    if (!updatedCurrentDirectory?.children) {
+      return;
+    }
+
+    const targetItem = updatedCurrentDirectory.children[index];
+    updatedCurrentDirectory.children.splice(index, 1);
+
+    setDirectoryTree(nextTree);
+    setActiveMenuItemKey(null);
+    setStatusMessage(`${targetItem.name} deleted.`);
+  }
+
+  function handleMoveItem() {
+    setStatusMessage('Move is not implemented yet.');
+    setActiveMenuItemKey(null);
+  }
+
+  function handleDownloadItem(item) {
+    if (item.type !== 'file') {
+      return;
+    }
+
+    const blob = new Blob([item.content ?? ''], { type: 'text/plain;charset=utf-8' });
+    const objectUrl = window.URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = objectUrl;
+    anchor.download = item.name;
+    anchor.click();
+    window.URL.revokeObjectURL(objectUrl);
+    setActiveMenuItemKey(null);
   }
 
   function validateNewName(trimmedName) {
@@ -145,9 +209,17 @@ function FilesPage() {
       return 'Please enter a name.';
     }
 
-    const nameExists = currentDirectory?.children?.some(
-      (child) => child.name.toLowerCase() === trimmedName.toLowerCase(),
-    );
+    if (promptKind === 'rename' && promptTarget) {
+      const currentItem = currentDirectory?.children?.[promptTarget.index];
+      if (currentItem && currentItem.name === trimmedName) {
+        return 'Please choose a different name.';
+      }
+    }
+
+    const nameExists = currentDirectory?.children?.some((child, index) => {
+      const isSameTarget = promptKind === 'rename' && promptTarget && index === promptTarget.index;
+      return !isSameTarget && child.name.toLowerCase() === trimmedName.toLowerCase();
+    });
 
     if (nameExists) {
       return 'That name already exists in this directory.';
@@ -164,7 +236,12 @@ function FilesPage() {
       return;
     }
 
-    if (promptKind === 'file') {
+    if (promptKind === 'rename' && promptTarget) {
+      const currentItem = updatedCurrentDirectory.children?.[promptTarget.index];
+      if (currentItem) {
+        currentItem.name = trimmedName;
+      }
+    } else if (promptKind === 'file') {
       updatedCurrentDirectory.children?.push(createFileNode(trimmedName, ''));
     } else {
       updatedCurrentDirectory.children?.push(createDirectoryNode(trimmedName));
@@ -172,11 +249,13 @@ function FilesPage() {
 
     setDirectoryTree(nextTree);
     setPromptKind(null);
+    setPromptTarget(null);
     setNewName('');
   }
 
   function handleCancelNewItem() {
     setPromptKind(null);
+    setPromptTarget(null);
     setNewName('');
   }
 
@@ -196,26 +275,61 @@ function FilesPage() {
       </div>
 
       <div className="tdocs-files-list">
-        {directoryItems.map((item) => (
-          <div className="tdocs-files-item" key={`${item.type}-${item.name}`}>
-            <div className="tdocs-files-item-left">
-              <span className="tdocs-files-item-icon" aria-hidden="true">
-                {item.type === 'dir' ? '📁' : '📄'}
-              </span>
-              {item.type === 'dir' ? (
+        {directoryItems.map((item, index) => {
+          const itemKey = `${item.type}-${item.name}-${index}`;
+          const isMenuOpen = activeMenuItemKey === itemKey;
+
+          return (
+            <div className="tdocs-files-item" key={itemKey}>
+              <div className="tdocs-files-item-left">
+                <span className="tdocs-files-item-icon" aria-hidden="true">
+                  {item.type === 'dir' ? '📁' : '📄'}
+                </span>
+                {item.type === 'dir' ? (
+                  <button
+                    type="button"
+                    className="tdocs-files-item-name tdocs-files-link"
+                    onClick={() => handleOpenDirectory(item.name)}
+                  >
+                    {item.name}
+                  </button>
+                ) : (
+                  <span className="tdocs-files-item-name">{item.name}</span>
+                )}
+              </div>
+
+              <div className="tdocs-files-item-actions">
                 <button
                   type="button"
-                  className="tdocs-files-item-name tdocs-files-link"
-                  onClick={() => handleOpenDirectory(item.name)}
+                  className="tdocs-files-item-action-button"
+                  onClick={() => toggleItemMenu(itemKey)}
+                  aria-label={`More actions for ${item.name}`}
                 >
-                  {item.name}
+                  ⋯
                 </button>
-              ) : (
-                <span className="tdocs-files-item-name">{item.name}</span>
-              )}
+
+                {isMenuOpen ? (
+                  <div className="tdocs-files-menu">
+                    <button type="button" onClick={() => handleRenameItem(index, item)}>
+                      Rename
+                    </button>
+                    <button type="button" onClick={() => handleDeleteItem(index)}>
+                      Delete
+                    </button>
+                    <button type="button" onClick={() => handleMoveItem()}>
+                      Move to...
+                    </button>
+                    {item.type === 'file' ? (
+                      <button type="button" onClick={() => handleDownloadItem(item)}>
+                        Download
+                      </button>
+                    ) : null}
+                  </div>
+                ) : null}
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
 
         <div className="tdocs-files-add-row">
           <button
@@ -240,9 +354,11 @@ function FilesPage() {
         </div>
       </div>
 
+      {statusMessage ? <div className="tdocs-files-status">{statusMessage}</div> : null}
+
       {promptKind ? (
         <FileNameWindow
-          title={`New ${promptKind === 'file' ? 'file' : 'folder'}`}
+          title={promptKind === 'rename' ? 'Rename item' : `New ${promptKind === 'file' ? 'file' : 'folder'}`}
           isFolder={promptKind === 'folder'}
           value={newName}
           onChange={setNewName}
