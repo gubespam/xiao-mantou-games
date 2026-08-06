@@ -1,22 +1,16 @@
-Automatically sort the directory contents by name.
-
-Implement opening and editing files.
 
 
 # Files Tab
 - When you hover over a file or directory, a three dot (...) button appears on the right side of the file item.
 - Clicking the dots icon shows a menu with these options
     - Rename
-        - Shows a popup window (FileNameWindow) to let the user give the new name
-        - Validate that new name differs from old one
-        - Validate that new name does not match any existing file or folder in the parent folder
+    - Delete
     - Delete to...
-        - no implemented yet
+        - no implemented yet (allows user to pick a specific trash can to move it to)
     - Move to...
         - no implemented yet
     - Download (only shown for files not directories)
-        - no implemented yet
-
+- There's a bug: when user deletes a folder and there is a file below the folder in the list, the file gets deleted instead of the file.
 
 
 # File Editor
