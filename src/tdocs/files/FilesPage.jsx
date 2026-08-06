@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import FileNameWindow from './FileNameWindow';
 
 const STORAGE_KEY = 'xmg-tdocs-files';
 
@@ -103,7 +104,6 @@ function FilesPage() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [promptKind, setPromptKind] = useState(null);
   const [newName, setNewName] = useState('');
-  const [promptError, setPromptError] = useState('');
   const nameInputRef = useRef(null);
 
   useEffect(() => {
@@ -137,16 +137,12 @@ function FilesPage() {
   function handleAddItem(kind) {
     setPromptKind(kind);
     setNewName('');
-    setPromptError('');
     setMenuOpen(false);
   }
 
-  function handleConfirmNewItem() {
-    const trimmedName = newName.trim();
-
+  function validateNewName(trimmedName) {
     if (!trimmedName) {
-      setPromptError('Please enter a name.');
-      return;
+      return 'Please enter a name.';
     }
 
     const nameExists = currentDirectory?.children?.some(
@@ -154,10 +150,13 @@ function FilesPage() {
     );
 
     if (nameExists) {
-      setPromptError('That name already exists in this directory.');
-      return;
+      return 'That name already exists in this directory.';
     }
 
+    return '';
+  }
+
+  function handleConfirmNewItem(trimmedName) {
     const nextTree = JSON.parse(JSON.stringify(directoryTree));
     const updatedCurrentDirectory = findDirectoryByPath(nextTree, currentPath);
 
@@ -174,13 +173,11 @@ function FilesPage() {
     setDirectoryTree(nextTree);
     setPromptKind(null);
     setNewName('');
-    setPromptError('');
   }
 
   function handleCancelNewItem() {
     setPromptKind(null);
     setNewName('');
-    setPromptError('');
   }
 
   return (
@@ -244,46 +241,16 @@ function FilesPage() {
       </div>
 
       {promptKind ? (
-        <div className="tdocs-files-prompt-overlay">
-          <div className="tdocs-files-prompt-card">
-            <div className="tdocs-files-prompt-title">
-              New {promptKind === 'file' ? 'file' : 'folder'}
-            </div>
-            <label className="tdocs-files-prompt-label">
-              <span>{promptKind === 'file' ? 'File name' : 'Folder name'}</span>
-              <input
-                ref={nameInputRef}
-                type="text"
-                value={newName}
-                onChange={(event) => {
-                  setNewName(event.target.value);
-                  setPromptError('');
-                }}
-                onKeyDown={(event) => {
-                  if (event.key === 'Escape') {
-                    event.preventDefault();
-                    handleCancelNewItem();
-                  }
-
-                  if (event.key === 'Enter') {
-                    event.preventDefault();
-                    handleConfirmNewItem();
-                  }
-                }}
-                placeholder={promptKind === 'file' ? 'example.txt' : 'New folder'}
-              />
-            </label>
-            {promptError ? <div className="tdocs-files-prompt-error">{promptError}</div> : null}
-            <div className="tdocs-files-prompt-actions">
-              <button type="button" onClick={handleConfirmNewItem}>
-                OK
-              </button>
-              <button type="button" onClick={handleCancelNewItem}>
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
+        <FileNameWindow
+          title={`New ${promptKind === 'file' ? 'file' : 'folder'}`}
+          isFolder={promptKind === 'folder'}
+          value={newName}
+          onChange={setNewName}
+          onConfirm={handleConfirmNewItem}
+          onCancel={handleCancelNewItem}
+          validateName={validateNewName}
+          inputRef={nameInputRef}
+        />
       ) : null}
     </section>
   );

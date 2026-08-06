@@ -75,6 +75,61 @@ function TextLine({ text, indentLevel, onChangeText, onIndent, onOutdent }) {
     );
 }
 
+function getNodeAtPath(nodes, path) {
+    return path.reduce((currentNodes, index) => currentNodes[index], nodes);
+}
+
+function removeNodeAtPath(nodes, path) {
+    if (path.length === 1) {
+        const [index] = path;
+        const [removedNode] = nodes.slice(index, index + 1);
+        return {
+            nodes: nodes.filter((_, nodeIndex) => nodeIndex !== index),
+            node: removedNode,
+        };
+    }
+
+    const [index, ...rest] = path;
+    const nextChildResult = removeNodeAtPath(nodes[index].children ?? [], rest);
+
+    return {
+        nodes: nodes.map((node, nodeIndex) => {
+            if (nodeIndex !== index) {
+                return node;
+            }
+
+            return {
+                ...node,
+                children: nextChildResult.nodes,
+            };
+        }),
+        node: nextChildResult.node,
+    };
+}
+
+function insertNodeAtPath(nodes, path, insertionIndex, nodeToInsert) {
+    if (path.length === 0) {
+        return [
+            ...nodes.slice(0, insertionIndex),
+            nodeToInsert,
+            ...nodes.slice(insertionIndex),
+        ];
+    }
+
+    const [index, ...rest] = path;
+
+    return nodes.map((node, nodeIndex) => {
+        if (nodeIndex !== index) {
+            return node;
+        }
+
+        return {
+            ...node,
+            children: insertNodeAtPath(node.children ?? [], rest, insertionIndex, nodeToInsert),
+        };
+    });
+}
+
 function updateNodeAtPath(nodes, path, updater) {
     return nodes.map((node, index) => {
         if (index !== path[0]) {
@@ -107,19 +162,51 @@ function FileEditText({ fileContent = "food\n\tfruit\n\t\tapple\n\t\tbanana\n\tv
     };
 
     const handleIndent = (path) => {
-        const nextNodes = updateNodeAtPath(nodes, path, node => ({
-            ...node,
-            indentLevel: Math.max(0, node.indentLevel + 1),
-        }));
+        const currentPath = [...path];
+        const currentIndex = currentPath[currentPath.length - 1];
+        const parentPath = currentPath.slice(0, -1);
+
+        if (currentIndex <= 0) {
+            return;
+        }
+
+        const priorSiblingPath = [...parentPath, currentIndex - 1];
+        const priorSibling = getNodeAtPath(nodes, priorSiblingPath);
+        const { nodes: nextNodesWithoutCurrent, node: currentNode } = removeNodeAtPath(nodes, currentPath);
+        const nextNodes = insertNodeAtPath(
+            nextNodesWithoutCurrent,
+            priorSiblingPath,
+            priorSibling.children?.length ?? 0,
+            {
+                ...currentNode,
+                indentLevel: priorSibling.indentLevel + 1,
+            },
+        );
+
         setNodes(nextNodes);
         emitNodeChange(nextNodes);
     };
 
     const handleOutdent = (path) => {
-        const nextNodes = updateNodeAtPath(nodes, path, node => ({
-            ...node,
-            indentLevel: Math.max(0, node.indentLevel - 1),
-        }));
+        const currentPath = [...path];
+        const parentPath = currentPath.slice(0, -1);
+
+        if (parentPath.length === 0) {
+            return;
+        }
+
+        const parentIndex = parentPath[parentPath.length - 1];
+        const { nodes: nextNodesWithoutCurrent, node: currentNode } = removeNodeAtPath(nodes, currentPath);
+        const nextNodes = insertNodeAtPath(
+            nextNodesWithoutCurrent,
+            parentPath.slice(0, -1),
+            parentIndex + 1,
+            {
+                ...currentNode,
+                indentLevel: Math.max(0, currentNode.indentLevel - 1),
+            },
+        );
+
         setNodes(nextNodes);
         emitNodeChange(nextNodes);
     };
