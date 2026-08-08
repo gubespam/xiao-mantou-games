@@ -1,105 +1,19 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import FileNameWindow from './FileNameWindow';
+import {
+  addItem,
+  deleteItem,
+  findDirectoryByPath,
+  getDirectoryItems,
+  getDisplayPath,
+  navigateToDirectory,
+  goToParentDirectory,
+  renameItem,
+  saveTreeToStorage,
+} from './fileSystemService';
 
-const STORAGE_KEY = 'xmg-tdocs-files';
-
-function createDirectoryNode(name, children = []) {
-  return {
-    type: 'dir',
-    name,
-    children,
-  };
-}
-
-function createFileNode(name, content = '') {
-  return {
-    type: 'file',
-    name,
-    content,
-  };
-}
-
-function buildInitialTree() {
-  return createDirectoryNode('root', [
-  //   createDirectoryNode('Documents', [
-  //     createFileNode('meetup-notes.txt', 'Team sync notes'),
-  //     createDirectoryNode('Projects', [
-  //       createFileNode('launch-plan.md', '# Launch plan'),
-  //     ]),
-  //   ]),
-  //   createDirectoryNode('Images', [
-  //     createFileNode('screenshot.png', 'image-bytes'),
-  //   ]),
-  //   createFileNode('welcome.txt', 'Welcome to the Files tab.'),
-  ]);
-}
-
-function loadTreeFromStorage() {
-  if (typeof window === 'undefined') {
-    return buildInitialTree();
-  }
-
-  const rawTree = window.localStorage.getItem(STORAGE_KEY);
-
-  if (!rawTree) {
-    const initialTree = buildInitialTree();
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(initialTree));
-    return initialTree;
-  }
-
-  try {
-    const parsedTree = JSON.parse(rawTree);
-
-    if (parsedTree && parsedTree.type === 'dir' && Array.isArray(parsedTree.children)) {
-      return parsedTree;
-    }
-  } catch {
-    // Fall through to the default tree if parsing fails.
-  }
-
-  const fallbackTree = buildInitialTree();
-  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(fallbackTree));
-  return fallbackTree;
-}
-
-function saveTreeToStorage(tree) {
-  if (typeof window !== 'undefined') {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(tree));
-  }
-}
-
-function findDirectoryByPath(root, pathSegments) {
-  let currentNode = root;
-
-  for (const segment of pathSegments) {
-    if (!currentNode || currentNode.type !== 'dir') {
-      return null;
-    }
-
-    const nextNode = currentNode.children.find(
-      (child) => child.type === 'dir' && child.name === segment,
-    );
-
-    if (!nextNode) {
-      return null;
-    }
-
-    currentNode = nextNode;
-  }
-
-  return currentNode;
-}
-
-function getDisplayPath(pathSegments) {
-  if (pathSegments.length === 0) {
-    return '/';
-  }
-
-  return `/${pathSegments.join('/')}`;
-}
-
-function FilesPage() {
-  const [directoryTree, setDirectoryTree] = useState(() => loadTreeFromStorage());
+function FilesPage({ tree, onTreeChange }) {
+  const [directoryTree, setDirectoryTree] = useState(tree);
   const [currentPath, setCurrentPath] = useState([]);
   const [menuOpen, setMenuOpen] = useState(false);
   const [activeMenuItemKey, setActiveMenuItemKey] = useState(null);
@@ -110,8 +24,13 @@ function FilesPage() {
   const nameInputRef = useRef(null);
 
   useEffect(() => {
-    saveTreeToStorage(directoryTree);
-  }, [directoryTree]);
+    setDirectoryTree(tree);
+  }, [tree]);
+
+  useEffect(() => {
+    saveTreeToStorage(directoryTree, window.localStorage);
+    onTreeChange?.(directoryTree);
+  }, [directoryTree, onTreeChange]);
 
   useEffect(() => {
     if (promptKind) {
@@ -129,20 +48,20 @@ function FilesPage() {
   );
 
   const directoryItems = useMemo(() => {
-    const items = currentDirectory?.children ?? [];
+    const items = getDirectoryItems(directoryTree, currentPath);
     return [...items].sort((left, right) => left.name.localeCompare(right.name));
-  }, [currentDirectory]);
+  }, [directoryTree, currentPath]);
 
   const displayPath = getDisplayPath(currentPath);
 
   function handleOpenDirectory(nextDirectoryName) {
-    setCurrentPath((previousPath) => [...previousPath, nextDirectoryName]);
+    setCurrentPath((previousPath) => navigateToDirectory(previousPath, nextDirectoryName));
     setMenuOpen(false);
     setActiveMenuItemKey(null);
   }
 
   function handleGoBack() {
-    setCurrentPath((previousPath) => previousPath.slice(0, -1));
+    setCurrentPath((previousPath) => goToParentDirectory(previousPath));
     setMenuOpen(false);
     setActiveMenuItemKey(null);
   }
@@ -169,15 +88,12 @@ function FilesPage() {
   }
 
   function handleDeleteItem(index) {
-    const nextTree = JSON.parse(JSON.stringify(directoryTree));
-    const updatedCurrentDirectory = findDirectoryByPath(nextTree, currentPath);
+    const targetItem = getDirectoryItems(directoryTree, currentPath)[index];
+    const nextTree = deleteItem(directoryTree, currentPath, index);
 
-    if (!updatedCurrentDirectory?.children) {
+    if (nextTree === directoryTree) {
       return;
     }
-
-    const targetItem = updatedCurrentDirectory.children[index];
-    updatedCurrentDirectory.children.splice(index, 1);
 
     setDirectoryTree(nextTree);
     setActiveMenuItemKey(null);
@@ -229,22 +145,16 @@ function FilesPage() {
   }
 
   function handleConfirmNewItem(trimmedName) {
-    const nextTree = JSON.parse(JSON.stringify(directoryTree));
-    const updatedCurrentDirectory = findDirectoryByPath(nextTree, currentPath);
-
-    if (!updatedCurrentDirectory) {
-      return;
-    }
+    let nextTree = directoryTree;
 
     if (promptKind === 'rename' && promptTarget) {
-      const currentItem = updatedCurrentDirectory.children?.[promptTarget.index];
-      if (currentItem) {
-        currentItem.name = trimmedName;
-      }
-    } else if (promptKind === 'file') {
-      updatedCurrentDirectory.children?.push(createFileNode(trimmedName, ''));
-    } else {
-      updatedCurrentDirectory.children?.push(createDirectoryNode(trimmedName));
+      nextTree = renameItem(directoryTree, currentPath, promptTarget.index, trimmedName);
+    } else if (promptKind === 'file' || promptKind === 'folder') {
+      nextTree = addItem(directoryTree, currentPath, promptKind, trimmedName);
+    }
+
+    if (nextTree === directoryTree) {
+      return;
     }
 
     setDirectoryTree(nextTree);
