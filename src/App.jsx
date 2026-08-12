@@ -9,6 +9,7 @@ import TicTacTumble from './TicTacTumble.jsx';
 import TrashCans from './TrashCans.jsx';
 import SpaceshipGame from './SpaceshipGame/SpaceshipGame.jsx';
 import TDocs from './tdocs/TDocs.jsx';
+import NotFound from './NotFound.jsx';
 
 
 import mantouLogo from './images/mantou.png';
@@ -44,6 +45,7 @@ function App() {
         <Route path="/xiao-mantou-games/checkers-chess" element={<CheckersChess />} />
         <Route path="/xiao-mantou-games/trash-cans" element={<TrashCans />} />
         <Route path="/xiao-mantou-games/TDocs" element={<TDocs />} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </div>
   );
