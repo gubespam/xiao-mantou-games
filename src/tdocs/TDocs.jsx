@@ -77,7 +77,7 @@ function TDocs() {
 
   const tabs = [
     { id: 'trashes', label: 'Trashes', component: () => <TrashesPage trashCans={trashCans} onTrashCansChange={setTrashCans} /> },
-    { id: 'files', label: 'Files', component: () => <FilesPage tree={directoryTree} onTreeChange={setDirectoryTree} /> },
+    { id: 'files', label: 'Files', component: () => <FilesPage tree={directoryTree} onTreeChange={setDirectoryTree} trashCans={trashCans} onTrashCansChange={setTrashCans} /> },
     { id: 'edit', label: 'Edit File', component: () => <FileEditText /> },
     { id: 'smartfolders', label: 'Smart Folders', component: () => <SmartFoldersPage /> },
   ];

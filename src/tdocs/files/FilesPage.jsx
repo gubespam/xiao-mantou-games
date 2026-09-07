@@ -12,13 +12,15 @@ import {
   saveTreeToStorage,
 } from './fileSystemService';
 
-function FilesPage({ tree, onTreeChange }) {
+function FilesPage({ tree, onTreeChange, trashCans = [], onTrashCansChange = () => {} }) {
   const [directoryTree, setDirectoryTree] = useState(tree);
   const [currentPath, setCurrentPath] = useState([]);
   const [menuOpen, setMenuOpen] = useState(false);
   const [activeMenuItemKey, setActiveMenuItemKey] = useState(null);
   const [deleteMenuItemKey, setDeleteMenuItemKey] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
+  const [trashTarget, setTrashTarget] = useState(null);
+  const [selectedTrashCanId, setSelectedTrashCanId] = useState('');
   const [promptKind, setPromptKind] = useState(null);
   const [promptTarget, setPromptTarget] = useState(null);
   const [newName, setNewName] = useState('');
@@ -106,6 +108,55 @@ function FilesPage({ tree, onTreeChange }) {
     handleDeleteItem(deleteTarget.index);
     setDeleteTarget(null);
     setDeleteMenuItemKey(null);
+  }
+
+  function handleOpenTrashPrompt(index, item) {
+    setTrashTarget({ index, item });
+    setSelectedTrashCanId(trashCans[0]?.id ?? '');
+    setDeleteMenuItemKey(null);
+    setActiveMenuItemKey(null);
+  }
+
+  function handleMoveToTrash() {
+    if (!trashTarget || !selectedTrashCanId) {
+      return;
+    }
+
+    const currentItems = getDirectoryItems(directoryTree, currentPath);
+    const itemIndex = currentItems.findIndex((item) => item === trashTarget.item);
+
+    if (itemIndex < 0) {
+      setTrashTarget(null);
+      setSelectedTrashCanId('');
+      return;
+    }
+
+    const nextTree = deleteItem(directoryTree, currentPath, itemIndex);
+
+    if (nextTree === directoryTree) {
+      return;
+    }
+
+    const trashItem = {
+      id: `${selectedTrashCanId}-${Date.now()}`,
+      originalFolderPath: displayPath,
+      originalFilename: trashTarget.item.name,
+      deletedAt: new Date().toISOString(),
+      item: trashTarget.item,
+    };
+
+    onTrashCansChange((currentTrashCans) =>
+      (currentTrashCans ?? []).map((trashCan) =>
+        trashCan.id === selectedTrashCanId
+          ? { ...trashCan, items: [...(trashCan.items ?? []), trashItem] }
+          : trashCan,
+      ),
+    );
+    onTreeChange?.(nextTree);
+    setDirectoryTree(nextTree);
+    setTrashTarget(null);
+    setSelectedTrashCanId('');
+    setStatusMessage(`${trashTarget.item.name} moved to trash.`);
   }
 
   function handleDeleteItem(index) {
@@ -275,10 +326,7 @@ function FilesPage({ tree, onTreeChange }) {
                         </button>
                         <button
                           type="button"
-                          onClick={() => {
-                            setDeleteMenuItemKey(null);
-                            setActiveMenuItemKey(null);
-                          }}
+                          onClick={() => handleOpenTrashPrompt(index, item)}
                         >
                           To Trash...
                         </button>
@@ -350,6 +398,53 @@ function FilesPage({ tree, onTreeChange }) {
               <button type="button" onClick={() => setDeleteTarget(null)}>
                 Cancel
               </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {trashTarget ? (
+        <div className="tdocs-files-prompt-overlay">
+          <div className="tdocs-files-prompt-card" role="dialog" aria-modal="true" aria-labelledby="trash-prompt-title">
+            <div id="trash-prompt-title" className="tdocs-files-prompt-title">
+              Move &quot;{trashTarget.item.name}&quot; to trash
+            </div>
+            {trashCans.length > 0 ? (
+              <label className="tdocs-files-prompt-label">
+                <span>Trash can</span>
+                <select value={selectedTrashCanId} onChange={(event) => setSelectedTrashCanId(event.target.value)}>
+                  {trashCans.map((trashCan) => (
+                    <option key={trashCan.id} value={trashCan.id}>
+                      {trashCan.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            ) : (
+              <div className="tdocs-files-prompt-error">There are no trash cans. You must create one before you can move items to it.</div>
+            )}
+            <div className="tdocs-files-prompt-actions">
+              <button
+                type="button"
+                onClick={trashCans.length > 0 ? handleMoveToTrash : () => {
+                  setTrashTarget(null);
+                  setSelectedTrashCanId('');
+                }}
+                disabled={trashCans.length > 0 && !selectedTrashCanId}
+              >
+                OK
+              </button>
+              {trashCans.length > 0 ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setTrashTarget(null);
+                    setSelectedTrashCanId('');
+                  }}
+                >
+                  Cancel
+                </button>
+              ) : null}
             </div>
           </div>
         </div>

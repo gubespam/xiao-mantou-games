@@ -133,7 +133,7 @@ export function deleteItem(tree, pathSegments, index) {
   const nextTree = cloneTree(tree);
   const currentDirectory = findDirectoryByPath(nextTree, pathSegments);
 
-  if (!currentDirectory?.children) {
+  if (!currentDirectory?.children || index < 0 || index >= currentDirectory.children.length) {
     return tree;
   }
 
