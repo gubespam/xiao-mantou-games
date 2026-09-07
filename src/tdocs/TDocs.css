@@ -292,3 +292,160 @@
   color: #dce9dc;
   font-size: 0.95rem;
 }
+
+.tdocs-trash-screen {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.tdocs-trash-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.tdocs-trash-header h2 {
+  margin: 0;
+}
+
+.tdocs-trash-list,
+.tdocs-trash-item-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.tdocs-trash-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.7rem 0.9rem;
+  border: 1px solid #2d3d2d;
+  border-radius: 8px;
+  background: #132013;
+  position: relative;
+  cursor: pointer;
+}
+
+.tdocs-trash-item-main {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.tdocs-trash-item-icon,
+.tdocs-trash-item-row-icon {
+  font-size: 1.1rem;
+}
+
+.tdocs-trash-item-name,
+.tdocs-trash-item-row-name {
+  color: #f4f7f4;
+  font-size: 0.98rem;
+}
+
+.tdocs-trash-item-name {
+  background: none;
+  border: none;
+  padding: 0;
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+}
+
+.tdocs-trash-item-actions {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.tdocs-trash-item-menu-button {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 999px;
+  border: 1px solid #314731;
+  background: #1a2a1a;
+  color: #f4f7f4;
+  cursor: pointer;
+  opacity: 0.2;
+  transition: opacity 0.15s ease;
+}
+
+.tdocs-trash-item:hover .tdocs-trash-item-menu-button,
+.tdocs-trash-item:focus-within .tdocs-trash-item-menu-button {
+  opacity: 1;
+}
+
+.tdocs-trash-menu {
+  right: 0;
+  left: auto;
+  bottom: 2.4rem;
+}
+
+.tdocs-trash-detail-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.tdocs-trash-detail-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.tdocs-trash-item-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.7rem 0.9rem;
+  border: 1px solid #2d3d2d;
+  border-radius: 8px;
+  background: #132013;
+}
+
+.tdocs-trash-empty-state {
+  color: #dce9dc;
+  padding: 0.75rem 0.25rem;
+}
+
+.tdocs-trash-settings-card {
+  width: min(28rem, calc(100vw - 2rem));
+}
+
+.tdocs-trash-settings-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.tdocs-trash-settings-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  border: 1px solid #2d3d2d;
+  border-radius: 8px;
+  padding: 0.75rem 0.9rem;
+  margin: 0;
+}
+
+.tdocs-trash-settings-group legend {
+  padding: 0 0.35rem;
+  color: #dce9dc;
+  font-weight: 700;
+}
+
+.tdocs-trash-settings-group label {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  color: #f4f7f4;
+}
+
+.tdocs-trash-settings-group input {
+  accent-color: #2f8f3f;
+}
