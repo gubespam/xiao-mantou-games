@@ -181,13 +181,14 @@
   position: absolute;
   left: 0;
   bottom: 3rem;
+  z-index: 1000;
   display: flex;
   flex-direction: column;
   border: 1px solid #314731;
   border-radius: 8px;
   background: #162116;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.35);
-  overflow: hidden;
+  overflow: visible;
 }
 
 .tdocs-files-menu button {
@@ -201,6 +202,38 @@
 
 .tdocs-files-menu button:hover {
   background: #213521;
+}
+
+.tdocs-files-submenu-container {
+  position: relative;
+}
+
+.tdocs-files-delete-option {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.tdocs-files-submenu {
+  left: 100%;
+  bottom: auto;
+  top: 0;
+  z-index: 1001;
+}
+
+.tdocs-files-item-actions .tdocs-files-submenu {
+  right: auto;
+  left: 100%;
+  bottom: auto;
+}
+
+.tdocs-files-submenu[hidden] {
+  display: none;
+}
+
+.tdocs-files-danger-button,
+.tdocs-files-danger-button:hover {
+  background: #a83232;
+  color: #ffffff;
 }
 
 .tdocs-files-prompt-overlay {

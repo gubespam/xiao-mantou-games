@@ -17,6 +17,8 @@ function FilesPage({ tree, onTreeChange }) {
   const [currentPath, setCurrentPath] = useState([]);
   const [menuOpen, setMenuOpen] = useState(false);
   const [activeMenuItemKey, setActiveMenuItemKey] = useState(null);
+  const [deleteMenuItemKey, setDeleteMenuItemKey] = useState(null);
+  const [deleteTarget, setDeleteTarget] = useState(null);
   const [promptKind, setPromptKind] = useState(null);
   const [promptTarget, setPromptTarget] = useState(null);
   const [newName, setNewName] = useState('');
@@ -58,12 +60,14 @@ function FilesPage({ tree, onTreeChange }) {
     setCurrentPath((previousPath) => navigateToDirectory(previousPath, nextDirectoryName));
     setMenuOpen(false);
     setActiveMenuItemKey(null);
+    setDeleteMenuItemKey(null);
   }
 
   function handleGoBack() {
     setCurrentPath((previousPath) => goToParentDirectory(previousPath));
     setMenuOpen(false);
     setActiveMenuItemKey(null);
+    setDeleteMenuItemKey(null);
   }
 
   function handleAddItem(kind) {
@@ -72,10 +76,12 @@ function FilesPage({ tree, onTreeChange }) {
     setNewName('');
     setMenuOpen(false);
     setActiveMenuItemKey(null);
+    setDeleteMenuItemKey(null);
   }
 
   function toggleItemMenu(itemKey) {
     setActiveMenuItemKey((currentKey) => (currentKey === itemKey ? null : itemKey));
+    setDeleteMenuItemKey(null);
     setMenuOpen(false);
   }
 
@@ -84,7 +90,22 @@ function FilesPage({ tree, onTreeChange }) {
     setPromptTarget({ index, item });
     setNewName(item.name);
     setActiveMenuItemKey(null);
+    setDeleteMenuItemKey(null);
     setMenuOpen(false);
+  }
+
+  function handleOpenDeleteMenu(itemKey) {
+    setDeleteMenuItemKey(itemKey);
+  }
+
+  function handleDeleteForevermore() {
+    if (!deleteTarget) {
+      return;
+    }
+
+    handleDeleteItem(deleteTarget.index);
+    setDeleteTarget(null);
+    setDeleteMenuItemKey(null);
   }
 
   function handleDeleteItem(index) {
@@ -97,12 +118,14 @@ function FilesPage({ tree, onTreeChange }) {
 
     setDirectoryTree(nextTree);
     setActiveMenuItemKey(null);
+    setDeleteMenuItemKey(null);
     setStatusMessage(`${targetItem.name} deleted.`);
   }
 
   function handleMoveItem() {
     setStatusMessage('Move is not implemented yet.');
     setActiveMenuItemKey(null);
+    setDeleteMenuItemKey(null);
   }
 
   function handleDownloadItem(item) {
@@ -118,6 +141,7 @@ function FilesPage({ tree, onTreeChange }) {
     anchor.click();
     window.URL.revokeObjectURL(objectUrl);
     setActiveMenuItemKey(null);
+    setDeleteMenuItemKey(null);
   }
 
   function validateNewName(trimmedName) {
@@ -223,9 +247,43 @@ function FilesPage({ tree, onTreeChange }) {
                     <button type="button" onClick={() => handleRenameItem(index, item)}>
                       Rename
                     </button>
-                    <button type="button" onClick={() => handleDeleteItem(index)}>
-                      Delete
-                    </button>
+                    <div className="tdocs-files-submenu-container">
+                      <button
+                        type="button"
+                        className="tdocs-files-delete-option"
+                        aria-haspopup="menu"
+                        aria-expanded={deleteMenuItemKey === itemKey}
+                        onMouseOver={() => handleOpenDeleteMenu(itemKey)}
+                        onClick={() => handleOpenDeleteMenu(itemKey)}
+                      >
+                        Delete
+                      </button>
+                      <div
+                        className="tdocs-files-submenu tdocs-files-menu"
+                        role="menu"
+                        hidden={deleteMenuItemKey !== itemKey}
+                        onMouseEnter={() => handleOpenDeleteMenu(itemKey)}
+                      >
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setDeleteTarget({ index, item });
+                            setActiveMenuItemKey(null);
+                          }}
+                        >
+                          Delete Forevermore
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setDeleteMenuItemKey(null);
+                            setActiveMenuItemKey(null);
+                          }}
+                        >
+                          To Trash...
+                        </button>
+                      </div>
+                    </div>
                     <button type="button" onClick={() => handleMoveItem()}>
                       Move to...
                     </button>
@@ -277,6 +335,24 @@ function FilesPage({ tree, onTreeChange }) {
           validateName={validateNewName}
           inputRef={nameInputRef}
         />
+      ) : null}
+
+      {deleteTarget ? (
+        <div className="tdocs-files-prompt-overlay">
+          <div className="tdocs-files-prompt-card" role="alertdialog" aria-modal="true">
+            <div className="tdocs-files-prompt-title">
+              Are you sure you want to delete &quot;{deleteTarget.item.name}&quot; forevermore?
+            </div>
+            <div className="tdocs-files-prompt-actions">
+              <button type="button" className="tdocs-files-danger-button" onClick={handleDeleteForevermore}>
+                Delete
+              </button>
+              <button type="button" onClick={() => setDeleteTarget(null)}>
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
       ) : null}
     </section>
   );
