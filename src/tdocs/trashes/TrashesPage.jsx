@@ -7,6 +7,8 @@ function TrashesPage({ trashCans = [], onTrashCansChange = () => {} }) {
   const [menuOpenId, setMenuOpenId] = useState(null);
   const [renameTargetId, setRenameTargetId] = useState(null);
   const [renameValue, setRenameValue] = useState('');
+  const [isAddingTrashCan, setIsAddingTrashCan] = useState(false);
+  const [newTrashCanName, setNewTrashCanName] = useState('');
   const [settingsTargetId, setSettingsTargetId] = useState(null);
   const nameInputRef = useRef(null);
 
@@ -29,6 +31,11 @@ function TrashesPage({ trashCans = [], onTrashCansChange = () => {} }) {
     setMenuOpenId(null);
   }
 
+  function handleAddTrashCanRequest() {
+    setIsAddingTrashCan(true);
+    setNewTrashCanName('');
+  }
+
   function validateTrashCanName(trimmedName) {
     if (!trimmedName) {
       return 'Please enter a name.';
@@ -36,7 +43,7 @@ function TrashesPage({ trashCans = [], onTrashCansChange = () => {} }) {
 
     const duplicateName = trashCans.some(
       (trashCan) =>
-        trashCan.id !== renameTargetId &&
+        (!renameTargetId || trashCan.id !== renameTargetId) &&
         trashCan.name.trim().toLowerCase() === trimmedName.toLowerCase(),
     );
 
@@ -45,6 +52,21 @@ function TrashesPage({ trashCans = [], onTrashCansChange = () => {} }) {
     }
 
     return '';
+  }
+
+  function handleAddTrashCanConfirm(trimmedName) {
+    const newTrashCanId = `trash-can-${Date.now()}`;
+    const newTrashCan = {
+      id: newTrashCanId,
+      name: trimmedName,
+      settings: { action: 'nothing', deleteAfterDays: 30 },
+      items: [],
+    };
+
+    onTrashCansChange((currentTrashCans) => [...(currentTrashCans ?? []), newTrashCan]);
+    setIsAddingTrashCan(false);
+    setNewTrashCanName('');
+    setSettingsTargetId(newTrashCanId);
   }
 
   function handleRenameConfirm(trimmedName) {
@@ -156,6 +178,17 @@ function TrashesPage({ trashCans = [], onTrashCansChange = () => {} }) {
               </div>
             ))
           )}
+
+          <div className="tdocs-files-add-row">
+            <button
+              type="button"
+              className="tdocs-files-add-button"
+              onClick={handleAddTrashCanRequest}
+              aria-label="Create a new trash can"
+            >
+              +
+            </button>
+          </div>
         </div>
       </section>
     );
@@ -212,6 +245,23 @@ function TrashesPage({ trashCans = [], onTrashCansChange = () => {} }) {
           onCancel={() => {
             setRenameTargetId(null);
             setRenameValue('');
+            setSelectedTrashCanId(null);
+          }}
+          validateName={validateTrashCanName}
+          inputRef={nameInputRef}
+        />
+      ) : null}
+
+      {isAddingTrashCan ? (
+        <FileNameWindow
+          title="New trash can"
+          isFolder={false}
+          value={newTrashCanName}
+          onChange={setNewTrashCanName}
+          onConfirm={handleAddTrashCanConfirm}
+          onCancel={() => {
+            setIsAddingTrashCan(false);
+            setNewTrashCanName('');
           }}
           validateName={validateTrashCanName}
           inputRef={nameInputRef}
@@ -222,7 +272,10 @@ function TrashesPage({ trashCans = [], onTrashCansChange = () => {} }) {
         <TrashCanSettingsWindow
           trashCan={trashCans.find((trashCan) => trashCan.id === settingsTargetId)}
           onSave={handleSaveSettings}
-          onCancel={() => setSettingsTargetId(null)}
+          onCancel={() => {
+            setSettingsTargetId(null);
+            setSelectedTrashCanId(null);
+          }}
         />
       ) : null}
     </>
