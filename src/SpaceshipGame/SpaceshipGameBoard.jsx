@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { spawnAsteroid, stepEntities, checkCollisions } from './spaceshipGameLogic.js';
-import asteroidImg from '../Prompts/asteroid.png';
+import asteroidImg from './Prompts/asteroid.png';
 
 const GRID = 5;
 const CELL = 90; // px
