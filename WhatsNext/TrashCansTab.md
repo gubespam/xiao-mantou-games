@@ -42,6 +42,3 @@
 - Clicking on a trash can switches to a view that shows the list of deleted items in that trash can
     - Each item shows
         - Filename
-    - When user hovers over item, a popup hint shows
-        - Original path
-        - Deletion date/time
