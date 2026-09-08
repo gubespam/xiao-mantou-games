@@ -1,13 +1,16 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import FileNameWindow from './FileNameWindow';
+import MoveToWindow from './MoveToWindow';
 import {
   addItem,
   deleteItem,
+  explodeFolder,
   findDirectoryByPath,
   getDirectoryItems,
   getDisplayPath,
   navigateToDirectory,
   goToParentDirectory,
+  moveItem,
   renameItem,
   saveTreeToStorage,
 } from './fileSystemService';
@@ -19,7 +22,9 @@ function FilesPage({ tree, onTreeChange, trashCans = [], onTrashCansChange = () 
   const [activeMenuItemKey, setActiveMenuItemKey] = useState(null);
   const [deleteMenuItemKey, setDeleteMenuItemKey] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
+  const [explodeTarget, setExplodeTarget] = useState(null);
   const [trashTarget, setTrashTarget] = useState(null);
+  const [moveTarget, setMoveTarget] = useState(null);
   const [selectedTrashCanId, setSelectedTrashCanId] = useState('');
   const [promptKind, setPromptKind] = useState(null);
   const [promptTarget, setPromptTarget] = useState(null);
@@ -139,6 +144,7 @@ function FilesPage({ tree, onTreeChange, trashCans = [], onTrashCansChange = () 
 
     const trashItem = {
       id: `${selectedTrashCanId}-${Date.now()}`,
+      originalPath: currentPath,
       originalFolderPath: displayPath,
       originalFilename: trashTarget.item.name,
       deletedAt: new Date().toISOString(),
@@ -173,10 +179,46 @@ function FilesPage({ tree, onTreeChange, trashCans = [], onTrashCansChange = () 
     setStatusMessage(`${targetItem.name} deleted.`);
   }
 
-  function handleMoveItem() {
-    setStatusMessage('Move is not implemented yet.');
+  function handleExplodeFolder() {
+    if (!explodeTarget) {
+      return;
+    }
+
+    const nextTree = explodeFolder(directoryTree, currentPath, explodeTarget.index);
+
+    if (nextTree === directoryTree) {
+      return;
+    }
+
+    setDirectoryTree(nextTree);
+    setExplodeTarget(null);
+    setActiveMenuItemKey(null);
+    setStatusMessage(`${explodeTarget.item.name} exploded.`);
+  }
+
+  function handleMoveItem(index, item) {
+    const sourceIndex = currentDirectory?.children?.findIndex((child) => child === item) ?? -1;
+    setMoveTarget({ index: sourceIndex, item, sourcePath: currentPath });
     setActiveMenuItemKey(null);
     setDeleteMenuItemKey(null);
+  }
+
+  function handleConfirmMove(targetPath) {
+    if (!moveTarget) {
+      return;
+    }
+
+    const nextTree = moveItem(directoryTree, moveTarget.sourcePath, moveTarget.index, targetPath);
+
+    if (nextTree === directoryTree) {
+      setStatusMessage(`${moveTarget.item.name} is already in that directory.`);
+      setMoveTarget(null);
+      return;
+    }
+
+    setDirectoryTree(nextTree);
+    setMoveTarget(null);
+    setStatusMessage(`${moveTarget.item.name} moved to ${getDisplayPath(targetPath)}.`);
   }
 
   function handleDownloadItem(item) {
@@ -298,41 +340,52 @@ function FilesPage({ tree, onTreeChange, trashCans = [], onTrashCansChange = () 
                     <button type="button" onClick={() => handleRenameItem(index, item)}>
                       Rename
                     </button>
-                    <div className="tdocs-files-submenu-container">
-                      <button
-                        type="button"
-                        className="tdocs-files-delete-option"
-                        aria-haspopup="menu"
-                        aria-expanded={deleteMenuItemKey === itemKey}
-                        onMouseOver={() => handleOpenDeleteMenu(itemKey)}
-                        onClick={() => handleOpenDeleteMenu(itemKey)}
-                      >
-                        Delete
-                      </button>
-                      <div
-                        className="tdocs-files-submenu tdocs-files-menu"
-                        role="menu"
-                        hidden={deleteMenuItemKey !== itemKey}
-                        onMouseEnter={() => handleOpenDeleteMenu(itemKey)}
-                      >
+                    {item.type === 'file' ? (
+                      <div className="tdocs-files-submenu-container">
                         <button
                           type="button"
-                          onClick={() => {
-                            setDeleteTarget({ index, item });
-                            setActiveMenuItemKey(null);
-                          }}
+                          className="tdocs-files-delete-option"
+                          aria-haspopup="menu"
+                          aria-expanded={deleteMenuItemKey === itemKey}
+                          onMouseOver={() => handleOpenDeleteMenu(itemKey)}
+                          onClick={() => handleOpenDeleteMenu(itemKey)}
                         >
-                          Delete Forevermore
+                          Delete
                         </button>
-                        <button
-                          type="button"
-                          onClick={() => handleOpenTrashPrompt(index, item)}
+                        <div
+                          className="tdocs-files-submenu tdocs-files-menu"
+                          role="menu"
+                          hidden={deleteMenuItemKey !== itemKey}
+                          onMouseEnter={() => handleOpenDeleteMenu(itemKey)}
                         >
-                          To Trash...
-                        </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setDeleteTarget({ index, item });
+                              setActiveMenuItemKey(null);
+                            }}
+                          >
+                            Delete Forevermore
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleOpenTrashPrompt(index, item)}
+                          >
+                            To Trash...
+                          </button>
+                        </div>
                       </div>
-                    </div>
-                    <button type="button" onClick={() => handleMoveItem()}>
+                    ) : null}
+                    {item.type === 'dir' ? (
+                      <button type="button" onClick={() => {
+                        const sourceIndex = currentDirectory?.children?.findIndex((child) => child === item) ?? -1;
+                        setExplodeTarget({ index: sourceIndex, item });
+                        setActiveMenuItemKey(null);
+                      }}>
+                        Explode
+                      </button>
+                    ) : null}
+                    <button type="button" onClick={() => handleMoveItem(index, item)}>
                       Move to...
                     </button>
                     {item.type === 'file' ? (
@@ -403,6 +456,27 @@ function FilesPage({ tree, onTreeChange, trashCans = [], onTrashCansChange = () 
         </div>
       ) : null}
 
+      {explodeTarget ? (
+        <div className="tdocs-files-prompt-overlay">
+          <div className="tdocs-files-prompt-card" role="alertdialog" aria-modal="true">
+            <div className="tdocs-files-prompt-title">
+              Explode &quot;{explodeTarget.item.name}&quot;?
+            </div>
+            <div>
+              All items inside this folder will move here, and the folder will be permanently deleted.
+            </div>
+            <div className="tdocs-files-prompt-actions">
+              <button type="button" className="tdocs-files-danger-button" onClick={handleExplodeFolder}>
+                Explode
+              </button>
+              <button type="button" onClick={() => setExplodeTarget(null)}>
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
       {trashTarget ? (
         <div className="tdocs-files-prompt-overlay">
           <div className="tdocs-files-prompt-card" role="dialog" aria-modal="true" aria-labelledby="trash-prompt-title">
@@ -448,6 +522,16 @@ function FilesPage({ tree, onTreeChange, trashCans = [], onTrashCansChange = () 
             </div>
           </div>
         </div>
+      ) : null}
+
+      {moveTarget ? (
+        <MoveToWindow
+          tree={directoryTree}
+          sourcePath={moveTarget.sourcePath}
+          sourceItem={moveTarget.item}
+          onConfirm={handleConfirmMove}
+          onCancel={() => setMoveTarget(null)}
+        />
       ) : null}
     </section>
   );

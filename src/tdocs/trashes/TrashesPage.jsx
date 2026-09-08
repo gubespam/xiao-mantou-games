@@ -1,10 +1,14 @@
 import React, { useMemo, useRef, useState } from 'react';
 import FileNameWindow from '../files/FileNameWindow.jsx';
+import { restoreItem } from '../files/fileSystemService.js';
 import TrashCanSettingsWindow from './TrashCanSettingsWindow.jsx';
 
-function TrashesPage({ trashCans = [], onTrashCansChange = () => {} }) {
+function TrashesPage({ tree, onTreeChange = () => {}, trashCans = [], onTrashCansChange = () => {} }) {
   const [selectedTrashCanId, setSelectedTrashCanId] = useState(null);
   const [menuOpenId, setMenuOpenId] = useState(null);
+  const [itemMenuOpenId, setItemMenuOpenId] = useState(null);
+  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [trashCanAction, setTrashCanAction] = useState(null);
   const [renameTargetId, setRenameTargetId] = useState(null);
   const [renameValue, setRenameValue] = useState('');
   const [isAddingTrashCan, setIsAddingTrashCan] = useState(false);
@@ -15,6 +19,10 @@ function TrashesPage({ trashCans = [], onTrashCansChange = () => {} }) {
   const selectedTrashCan = useMemo(
     () => trashCans.find((trashCan) => trashCan.id === selectedTrashCanId) ?? null,
     [selectedTrashCanId, trashCans],
+  );
+  const trashCanActionTarget = useMemo(
+    () => trashCans.find((trashCan) => trashCan.id === trashCanAction?.trashCanId) ?? null,
+    [trashCanAction, trashCans],
   );
 
   function updateTrashCan(trashCanId, updater) {
@@ -82,6 +90,7 @@ function TrashesPage({ trashCans = [], onTrashCansChange = () => {} }) {
   function handleDeleteEmptyTrashCan(trashCanId) {
     onTrashCansChange((currentTrashCans) => (currentTrashCans ?? []).filter((trashCan) => trashCan.id !== trashCanId));
     setMenuOpenId(null);
+    setTrashCanAction(null);
 
     if (selectedTrashCanId === trashCanId) {
       setSelectedTrashCanId(null);
@@ -91,6 +100,55 @@ function TrashesPage({ trashCans = [], onTrashCansChange = () => {} }) {
   function handleEmptyTrashCan(trashCanId) {
     updateTrashCan(trashCanId, (trashCan) => ({ ...trashCan, items: [] }));
     setMenuOpenId(null);
+    setTrashCanAction(null);
+  }
+
+  function handleTrashCanActionConfirm() {
+    if (!trashCanAction) {
+      return;
+    }
+
+    if (trashCanAction.type === 'delete') {
+      handleDeleteEmptyTrashCan(trashCanAction.trashCanId);
+      return;
+    }
+
+    handleEmptyTrashCan(trashCanAction.trashCanId);
+  }
+
+  function handleDeleteForevermore() {
+    if (!deleteTarget) {
+      return;
+    }
+
+    updateTrashCan(deleteTarget.trashCanId, (trashCan) => ({
+      ...trashCan,
+      items: (trashCan.items ?? []).filter((item) => item.id !== deleteTarget.item.id),
+    }));
+    setDeleteTarget(null);
+    setItemMenuOpenId(null);
+  }
+
+  function handleRestoreItem(trashCanId, item) {
+    if (!item.item) {
+      return;
+    }
+
+    const originalPath = item.originalPath
+      ?? item.originalFolderPath?.split('/').filter(Boolean)
+      ?? [];
+    const nextTree = restoreItem(tree, item.item, originalPath);
+
+    if (nextTree === tree) {
+      return;
+    }
+
+    onTreeChange(nextTree);
+    updateTrashCan(trashCanId, (trashCan) => ({
+      ...trashCan,
+      items: (trashCan.items ?? []).filter((trashItem) => trashItem.id !== item.id),
+    }));
+    setItemMenuOpenId(null);
   }
 
   function handleSaveSettings(nextSettings) {
@@ -157,12 +215,12 @@ function TrashesPage({ trashCans = [], onTrashCansChange = () => {} }) {
                   {menuOpenId === trashCan.id ? (
                     <div className="tdocs-files-menu tdocs-trash-menu">
                       {trashCan.items.length === 0 ? (
-                        <button type="button" onClick={() => handleDeleteEmptyTrashCan(trashCan.id)}>
+                        <button type="button" onClick={() => setTrashCanAction({ type: 'delete', trashCanId: trashCan.id })}>
                           Delete
                         </button>
                       ) : null}
                       {trashCan.items.length > 0 ? (
-                        <button type="button" onClick={() => handleEmptyTrashCan(trashCan.id)}>
+                        <button type="button" onClick={() => setTrashCanAction({ type: 'empty', trashCanId: trashCan.id })}>
                           Empty
                         </button>
                       ) : null}
@@ -219,10 +277,35 @@ function TrashesPage({ trashCans = [], onTrashCansChange = () => {} }) {
           <div className="tdocs-trash-item-list">
             {selectedTrashCan.items.map((item) => (
               <div className="tdocs-trash-item-row" key={item.id}>
-                <span className="tdocs-trash-item-row-icon" aria-hidden="true">
-                  📄
-                </span>
-                <span className="tdocs-trash-item-row-name">{item.originalFilename}</span>
+                <div className="tdocs-trash-item-row-main">
+                  <span className="tdocs-trash-item-row-icon" aria-hidden="true">
+                    📄
+                  </span>
+                  <span className="tdocs-trash-item-row-name">{item.originalFilename}</span>
+                </div>
+                <div className="tdocs-trash-item-actions">
+                  <button
+                    type="button"
+                    className="tdocs-trash-item-menu-button"
+                    aria-label={`More actions for ${item.originalFilename}`}
+                    onClick={() => setItemMenuOpenId((currentId) => (currentId === item.id ? null : item.id))}
+                  >
+                    ⋯
+                  </button>
+                  {itemMenuOpenId === item.id ? (
+                    <div className="tdocs-files-menu tdocs-trash-menu">
+                      <button type="button" onClick={() => setDeleteTarget({ trashCanId: selectedTrashCan.id, item })}>
+                        Delete forevermore
+                      </button>
+                      <button type="button" onClick={() => handleRestoreItem(selectedTrashCan.id, item)}>
+                        Restore
+                      </button>
+                      <button type="button" disabled>
+                        Reset clock
+                      </button>
+                    </div>
+                  ) : null}
+                </div>
               </div>
             ))}
           </div>
@@ -277,6 +360,40 @@ function TrashesPage({ trashCans = [], onTrashCansChange = () => {} }) {
             setSelectedTrashCanId(null);
           }}
         />
+      ) : null}
+
+      {trashCanAction ? (
+        <div className="tdocs-files-prompt-overlay">
+          <div className="tdocs-files-prompt-card" role="alertdialog" aria-modal="true">
+            <div className="tdocs-files-prompt-title">
+              {trashCanAction.type === 'delete'
+                ? `Are you sure you want to delete "${trashCanActionTarget?.name ?? 'this trash can'}"?`
+                : `Are you sure you want to empty "${trashCanActionTarget?.name ?? 'this trash can'}"?`}
+            </div>
+            <div className="tdocs-files-prompt-actions">
+              <button type="button" className="tdocs-files-danger-button" onClick={handleTrashCanActionConfirm}>
+                {trashCanAction.type === 'delete' ? 'Delete' : 'Empty'}
+              </button>
+              <button type="button" onClick={() => setTrashCanAction(null)}>Cancel</button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {deleteTarget ? (
+        <div className="tdocs-files-prompt-overlay">
+          <div className="tdocs-files-prompt-card" role="alertdialog" aria-modal="true">
+            <div className="tdocs-files-prompt-title">
+              Are you sure you want to delete &quot;{deleteTarget.item.originalFilename}&quot; forevermore?
+            </div>
+            <div className="tdocs-files-prompt-actions">
+              <button type="button" className="tdocs-files-danger-button" onClick={handleDeleteForevermore}>
+                Delete
+              </button>
+              <button type="button" onClick={() => setDeleteTarget(null)}>Cancel</button>
+            </div>
+          </div>
+        </div>
       ) : null}
     </>
   );

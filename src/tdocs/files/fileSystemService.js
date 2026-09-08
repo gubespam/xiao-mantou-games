@@ -140,3 +140,73 @@ export function deleteItem(tree, pathSegments, index) {
   const [removedItem] = currentDirectory.children.splice(index, 1);
   return removedItem ? nextTree : tree;
 }
+
+export function explodeFolder(tree, pathSegments, index) {
+  const nextTree = cloneTree(tree);
+  const currentDirectory = findDirectoryByPath(nextTree, pathSegments);
+
+  if (!currentDirectory?.children || index < 0 || index >= currentDirectory.children.length) {
+    return tree;
+  }
+
+  const folder = currentDirectory.children[index];
+
+  if (folder.type !== 'dir') {
+    return tree;
+  }
+
+  currentDirectory.children.splice(index, 1, ...(folder.children ?? []));
+  return nextTree;
+}
+
+export function moveItem(tree, sourcePath, index, targetPath) {
+  if (sourcePath.length === targetPath.length && sourcePath.every((segment, pathIndex) => segment === targetPath[pathIndex])) {
+    return tree;
+  }
+
+  const nextTree = cloneTree(tree);
+  const sourceDirectory = findDirectoryByPath(nextTree, sourcePath);
+  const targetDirectory = findDirectoryByPath(nextTree, targetPath);
+
+  if (!sourceDirectory?.children || !targetDirectory || index < 0 || index >= sourceDirectory.children.length) {
+    return tree;
+  }
+
+  const item = sourceDirectory.children[index];
+  const itemPath = [...sourcePath, item.name];
+  const targetIsInsideItem = item.type === 'dir'
+    && targetPath.length >= itemPath.length
+    && itemPath.every((segment, pathIndex) => targetPath[pathIndex] === segment);
+
+  if (targetIsInsideItem) {
+    return tree;
+  }
+
+  const [removedItem] = sourceDirectory.children.splice(index, 1);
+  targetDirectory.children = targetDirectory.children ?? [];
+  targetDirectory.children.push(removedItem);
+  return nextTree;
+}
+
+export function restoreItem(tree, item, originalPath = []) {
+  if (!item || !Array.isArray(originalPath)) {
+    return tree;
+  }
+
+  const nextTree = cloneTree(tree);
+  let targetPath = originalPath.slice();
+  let targetDirectory = findDirectoryByPath(nextTree, targetPath);
+
+  while (!targetDirectory && targetPath.length > 0) {
+    targetPath = targetPath.slice(0, -1);
+    targetDirectory = findDirectoryByPath(nextTree, targetPath);
+  }
+
+  if (!targetDirectory) {
+    return tree;
+  }
+
+  targetDirectory.children = targetDirectory.children ?? [];
+  targetDirectory.children.push(cloneTree(item));
+  return nextTree;
+}
