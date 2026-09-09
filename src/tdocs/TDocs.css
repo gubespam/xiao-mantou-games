@@ -405,6 +405,95 @@
   padding: 0.4rem 0.2rem;
 }
 
+.tdocs-smart-folders-screen {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.tdocs-smart-folders-header,
+.tdocs-smart-folder-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.tdocs-smart-folders-header h2,
+.tdocs-smart-folders-header p {
+  margin: 0;
+}
+
+.tdocs-smart-folders-header p,
+.tdocs-smart-folder-open small,
+.tdocs-smart-folder-item-path,
+.tdocs-smart-folder-criteria {
+  color: #91a391;
+}
+
+.tdocs-smart-folders-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.tdocs-smart-folder-row {
+  padding: 0.75rem 0.9rem;
+  border: 1px solid #2d3d2d;
+  border-radius: 8px;
+  background: #132013;
+}
+
+.tdocs-smart-folder-open {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex: 1;
+  border: 0;
+  background: transparent;
+  color: #f4f7f4;
+  text-align: left;
+  cursor: pointer;
+}
+
+.tdocs-smart-folder-open span:last-child {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.tdocs-smart-folder-open small,
+.tdocs-smart-folder-item-path {
+  display: block;
+  font-size: 0.82rem;
+}
+
+.tdocs-smart-folder-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.tdocs-smart-folder-form .tdocs-files-prompt-actions {
+  margin-top: 0.2rem;
+}
+
+.tdocs-smart-folder-criteria {
+  font-size: 0.9rem;
+}
+
+.tdocs-smart-folder-detail .tdocs-files-item-name {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.tdocs-smart-folders-empty {
+  padding: 1.5rem 0.25rem;
+  color: #91a391;
+  text-align: center;
+}
+
 .tdocs-files-editor-panel {
   display: flex;
   flex-direction: column;
