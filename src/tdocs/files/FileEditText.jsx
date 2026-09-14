@@ -3,27 +3,15 @@ import './FileEditText.css';
 
 // Takes file content and splits it into indented lines
 function parseText(text) {
-    return text.split('\n').map(line => {
-        const indentLevel = line.match(/^\t*/)[0].length;
-        const text = line.trim();
-        return { indentLevel, text };
+    return text.split('\n').map((line, index) => {
+        const indentLevel = index === 0 ? 0 : line.match(/^\t*/)[0].length;
+        return { indentLevel, text: line.slice(indentLevel) };
     });
 }
 
 // Takes a list of line elements and compiles to the text stored in the file
 function compileText(lines) {
     return lines.map(line => '\t'.repeat(line.indentLevel) + line.text).join('\n');
-}
-
-function flattenTree(nodes, flat = []) {
-    nodes.forEach(node => {
-        flat.push({ text: node.text, indentLevel: node.indentLevel });
-        if (node.children?.length > 0) {
-            flattenTree(node.children, flat);
-        }
-    });
-
-    return flat;
 }
 
 // take flat list of items with indentation levels and convert to a nested structure of parent/child
@@ -34,8 +22,8 @@ function nestify(lines) {
     const root = { text: null, indentLevel: -1, children: [] };
     const stack = [root];
 
-    for (const line of lines) {
-        const item = { ...line, children: [] };
+    lines.forEach((line, lineIndex) => {
+        const item = { ...line, lineIndex, children: [] };
 
         while (stack.length > 0 && stack[stack.length - 1].indentLevel >= item.indentLevel) {
             stack.pop();
@@ -43,21 +31,14 @@ function nestify(lines) {
 
         stack[stack.length - 1].children.push(item);
         stack.push(item);
-    }
+    });
 
     return root.children;
 }
 
-function TextLine({ text, indentLevel, onChangeText, onIndent, onOutdent }) {
+function TextLine({ text, indentLevel, onChangeText, onKeyDown, textAreaRef }) {
     const handleKeyDown = (e) => {
-        if (e.key === 'Tab') {
-            e.preventDefault();
-            if (e.shiftKey) {
-                onOutdent();
-            } else {
-                onIndent();
-            }
-        }
+        onKeyDown(e);
     };
 
     const handleChange = (e) => {
@@ -70,160 +51,112 @@ function TextLine({ text, indentLevel, onChangeText, onIndent, onOutdent }) {
             value={text}
             onChange={handleChange}
             onKeyDown={handleKeyDown}
+            ref={textAreaRef}
             data-indent={indentLevel}
         />
     );
 }
 
-function getNodeAtPath(nodes, path) {
-    return path.reduce((currentNodes, index) => currentNodes[index], nodes);
-}
-
-function removeNodeAtPath(nodes, path) {
-    if (path.length === 1) {
-        const [index] = path;
-        const [removedNode] = nodes.slice(index, index + 1);
-        return {
-            nodes: nodes.filter((_, nodeIndex) => nodeIndex !== index),
-            node: removedNode,
-        };
-    }
-
-    const [index, ...rest] = path;
-    const nextChildResult = removeNodeAtPath(nodes[index].children ?? [], rest);
-
-    return {
-        nodes: nodes.map((node, nodeIndex) => {
-            if (nodeIndex !== index) {
-                return node;
-            }
-
-            return {
-                ...node,
-                children: nextChildResult.nodes,
-            };
-        }),
-        node: nextChildResult.node,
-    };
-}
-
-function insertNodeAtPath(nodes, path, insertionIndex, nodeToInsert) {
-    if (path.length === 0) {
-        return [
-            ...nodes.slice(0, insertionIndex),
-            nodeToInsert,
-            ...nodes.slice(insertionIndex),
-        ];
-    }
-
-    const [index, ...rest] = path;
-
-    return nodes.map((node, nodeIndex) => {
-        if (nodeIndex !== index) {
-            return node;
-        }
-
-        return {
-            ...node,
-            children: insertNodeAtPath(node.children ?? [], rest, insertionIndex, nodeToInsert),
-        };
-    });
-}
-
-function updateNodeAtPath(nodes, path, updater) {
-    return nodes.map((node, index) => {
-        if (index !== path[0]) {
-            return node;
-        }
-
-        if (path.length === 1) {
-            return updater({ ...node });
-        }
-
-        return {
-            ...node,
-            children: updateNodeAtPath(node.children ?? [], path.slice(1), updater),
-        };
-    });
-}
-
 function FileEditText({ fileContent = "food\n\tfruit\n\t\tapple\n\t\tbanana\n\tveggie", onChange = () => {} }) {
-    const [nodes, setNodes] = React.useState(() => nestify(parseText(fileContent)));
+    const [lines, setLines] = React.useState(() => parseText(fileContent));
+    const textAreaRefs = React.useRef([]);
 
-    const emitNodeChange = (nextNodes) => {
-        const compiledText = compileText(flattenTree(nextNodes));
+    const emitLinesChange = (nextLines) => {
+        const compiledText = compileText(nextLines);
         onChange(compiledText);
     };
 
-    const handleChangeText = (path, newText) => {
-        const nextNodes = updateNodeAtPath(nodes, path, node => ({ ...node, text: newText }));
-        setNodes(nextNodes);
-        emitNodeChange(nextNodes);
+    const applyLineChange = (nextLines, focusIndex, cursorPosition) => {
+        setLines(nextLines);
+        emitLinesChange(nextLines);
+        requestAnimationFrame(() => {
+            const textArea = textAreaRefs.current[focusIndex];
+            textArea?.focus();
+            textArea?.setSelectionRange(cursorPosition, cursorPosition);
+        });
     };
 
-    const handleIndent = (path) => {
-        const currentPath = [...path];
-        const currentIndex = currentPath[currentPath.length - 1];
-        const parentPath = currentPath.slice(0, -1);
+    const handleChangeText = (lineIndex, newText) => {
+        const nextLines = lines.map((line, index) => index === lineIndex ? { ...line, text: newText } : line);
+        setLines(nextLines);
+        emitLinesChange(nextLines);
+    };
 
-        if (currentIndex <= 0) {
+    const handleKeyDown = (lineIndex, e) => {
+        const currentLine = lines[lineIndex];
+        const cursorStart = e.target.selectionStart;
+        const cursorEnd = e.target.selectionEnd;
+
+        if (e.key === 'Tab') {
+            e.preventDefault();
+            if (lineIndex === 0) {
+                return;
+            }
+
+            const nextIndentLevel = e.shiftKey
+                ? Math.max(0, currentLine.indentLevel - 1)
+                : Math.min(currentLine.indentLevel + 1, lines[lineIndex - 1].indentLevel + 1);
+            if (nextIndentLevel === currentLine.indentLevel) {
+                return;
+            }
+
+            const nextLines = lines.map((line, index) => index === lineIndex
+                ? { ...line, indentLevel: nextIndentLevel }
+                : line);
+            setLines(nextLines);
+            emitLinesChange(nextLines);
             return;
         }
 
-        const priorSiblingPath = [...parentPath, currentIndex - 1];
-        const priorSibling = getNodeAtPath(nodes, priorSiblingPath);
-        const { nodes: nextNodesWithoutCurrent, node: currentNode } = removeNodeAtPath(nodes, currentPath);
-        const nextNodes = insertNodeAtPath(
-            nextNodesWithoutCurrent,
-            priorSiblingPath,
-            priorSibling.children?.length ?? 0,
-            {
-                ...currentNode,
-                indentLevel: priorSibling.indentLevel + 1,
-            },
-        );
-
-        setNodes(nextNodes);
-        emitNodeChange(nextNodes);
-    };
-
-    const handleOutdent = (path) => {
-        const currentPath = [...path];
-        const parentPath = currentPath.slice(0, -1);
-
-        if (parentPath.length === 0) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            const beforeText = currentLine.text.slice(0, cursorStart);
+            const afterText = currentLine.text.slice(cursorEnd);
+            const nextLines = [
+                ...lines.slice(0, lineIndex),
+                { ...currentLine, text: beforeText },
+                { indentLevel: currentLine.indentLevel, text: afterText },
+                ...lines.slice(lineIndex + 1),
+            ];
+            applyLineChange(nextLines, lineIndex + 1, 0);
             return;
         }
 
-        const parentIndex = parentPath[parentPath.length - 1];
-        const { nodes: nextNodesWithoutCurrent, node: currentNode } = removeNodeAtPath(nodes, currentPath);
-        const nextNodes = insertNodeAtPath(
-            nextNodesWithoutCurrent,
-            parentPath.slice(0, -1),
-            parentIndex + 1,
-            {
-                ...currentNode,
-                indentLevel: Math.max(0, currentNode.indentLevel - 1),
-            },
-        );
+        if (e.key === 'Backspace' && cursorStart === 0 && cursorEnd === 0 && lineIndex > 0) {
+            e.preventDefault();
+            const previousLine = lines[lineIndex - 1];
+            const nextLines = [
+                ...lines.slice(0, lineIndex - 1),
+                { ...previousLine, text: previousLine.text + currentLine.text },
+                ...lines.slice(lineIndex + 1),
+            ];
+            applyLineChange(nextLines, lineIndex - 1, previousLine.text.length);
+            return;
+        }
 
-        setNodes(nextNodes);
-        emitNodeChange(nextNodes);
+        if (e.key === 'Delete' && cursorStart === currentLine.text.length && cursorEnd === cursorStart && lineIndex < lines.length - 1) {
+            e.preventDefault();
+            const nextLine = lines[lineIndex + 1];
+            const nextLines = [
+                ...lines.slice(0, lineIndex),
+                { ...currentLine, text: currentLine.text + nextLine.text },
+                ...lines.slice(lineIndex + 2),
+            ];
+            applyLineChange(nextLines, lineIndex, currentLine.text.length);
+        }
     };
 
     function listItem({ node, path }) {
-        const currentPath = [...path, node.index];
-
         return (
-            <li key={currentPath.join('-')}>
+            <li key={node.lineIndex}>
                 <TextLine
                     text={node.text}
                     indentLevel={node.indentLevel}
-                    onChangeText={(newText) => handleChangeText(currentPath, newText)}
-                    onIndent={() => handleIndent(currentPath)}
-                    onOutdent={() => handleOutdent(currentPath)}
+                    onChangeText={(newText) => handleChangeText(node.lineIndex, newText)}
+                    onKeyDown={(event) => handleKeyDown(node.lineIndex, event)}
+                    textAreaRef={(element) => { textAreaRefs.current[node.lineIndex] = element; }}
                 />
-                {node.children?.length > 0 && listContainer({ nodes: node.children, path: currentPath })}
+                {node.children?.length > 0 && listContainer({ nodes: node.children, path })}
             </li>
         );
     }
@@ -238,7 +171,7 @@ function FileEditText({ fileContent = "food\n\tfruit\n\t\tapple\n\t\tbanana\n\tv
 
     return (
         <div className="file-edit-text">
-            {listContainer({ nodes, path: [] })}
+            {listContainer({ nodes: nestify(lines), path: [] })}
         </div>
     );
 }
