@@ -92,9 +92,9 @@ function FilesPage({ tree, onTreeChange, onOpenFile = () => {}, trashCans = [], 
     setMenuOpen(false);
   }
 
-  function handleRenameItem(index, item) {
+  function handleRenameItem(item) {
     setPromptKind('rename');
-    setPromptTarget({ index, item });
+    setPromptTarget({ item });
     setNewName(item.name);
     setActiveMenuItemKey(null);
     setDeleteMenuItemKey(null);
@@ -243,14 +243,14 @@ function FilesPage({ tree, onTreeChange, onOpenFile = () => {}, trashCans = [], 
     }
 
     if (promptKind === 'rename' && promptTarget) {
-      const currentItem = currentDirectory?.children?.[promptTarget.index];
+      const currentItem = currentDirectory?.children?.find((child) => child === promptTarget.item);
       if (currentItem && currentItem.name === trimmedName) {
         return 'Please choose a different name.';
       }
     }
 
     const nameExists = currentDirectory?.children?.some((child, index) => {
-      const isSameTarget = promptKind === 'rename' && promptTarget && index === promptTarget.index;
+      const isSameTarget = promptKind === 'rename' && promptTarget && child === promptTarget.item;
       return !isSameTarget && child.name.toLowerCase() === trimmedName.toLowerCase();
     });
 
@@ -265,7 +265,8 @@ function FilesPage({ tree, onTreeChange, onOpenFile = () => {}, trashCans = [], 
     let nextTree = directoryTree;
 
     if (promptKind === 'rename' && promptTarget) {
-      nextTree = renameItem(directoryTree, currentPath, promptTarget.index, trimmedName);
+      const itemIndex = currentDirectory?.children?.findIndex((child) => child === promptTarget.item) ?? -1;
+      nextTree = renameItem(directoryTree, currentPath, itemIndex, trimmedName);
     } else if (promptKind === 'file' || promptKind === 'folder') {
       nextTree = addItem(directoryTree, currentPath, promptKind, trimmedName);
     }
@@ -347,7 +348,7 @@ function FilesPage({ tree, onTreeChange, onOpenFile = () => {}, trashCans = [], 
 
                 {isMenuOpen ? (
                   <div className="tdocs-files-menu">
-                    <button type="button" onClick={() => handleRenameItem(index, item)}>
+                    <button type="button" onClick={() => handleRenameItem(item)}>
                       Rename
                     </button>
                     {item.type === 'file' ? (
