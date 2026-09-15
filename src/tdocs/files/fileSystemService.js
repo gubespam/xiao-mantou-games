@@ -129,6 +129,21 @@ export function renameItem(tree, pathSegments, index, name) {
   return nextTree;
 }
 
+export function updateFileContent(tree, pathSegments, fileName, content) {
+  const nextTree = cloneTree(tree);
+  const currentDirectory = findDirectoryByPath(nextTree, pathSegments);
+  const file = currentDirectory?.children?.find(
+    (child) => child.type === 'file' && child.name === fileName,
+  );
+
+  if (!file) {
+    return tree;
+  }
+
+  file.content = content;
+  return nextTree;
+}
+
 export function deleteItem(tree, pathSegments, index) {
   const nextTree = cloneTree(tree);
   const currentDirectory = findDirectoryByPath(nextTree, pathSegments);

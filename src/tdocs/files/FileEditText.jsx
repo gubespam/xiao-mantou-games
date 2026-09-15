@@ -57,9 +57,14 @@ function TextLine({ text, indentLevel, onChangeText, onKeyDown, textAreaRef }) {
     );
 }
 
-function FileEditText({ fileContent = "food\n\tfruit\n\t\tapple\n\t\tbanana\n\tveggie", onChange = () => {} }) {
+function FileEditText({ fileContent = "food\n\tfruit\n\t\tapple\n\t\tbanana\n\tveggie", filePath = '', onChange = () => {} }) {
     const [lines, setLines] = React.useState(() => parseText(fileContent));
     const textAreaRefs = React.useRef([]);
+
+    React.useEffect(() => {
+        setLines(parseText(fileContent));
+        textAreaRefs.current = [];
+    }, [filePath]);
 
     const emitLinesChange = (nextLines) => {
         const compiledText = compileText(nextLines);
@@ -103,8 +108,7 @@ function FileEditText({ fileContent = "food\n\tfruit\n\t\tapple\n\t\tbanana\n\tv
             const nextLines = lines.map((line, index) => index === lineIndex
                 ? { ...line, indentLevel: nextIndentLevel }
                 : line);
-            setLines(nextLines);
-            emitLinesChange(nextLines);
+            applyLineChange(nextLines, lineIndex, cursorStart);
             return;
         }
 
