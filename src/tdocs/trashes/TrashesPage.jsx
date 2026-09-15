@@ -2,6 +2,7 @@ import React, { useMemo, useRef, useState } from 'react';
 import FileNameWindow from '../files/FileNameWindow.jsx';
 import { restoreItem } from '../files/fileSystemService.js';
 import TrashCanSettingsWindow from './TrashCanSettingsWindow.jsx';
+import useMenuDismissal from '../useMenuDismissal.js';
 
 function TrashesPage({ tree, onTreeChange = () => {}, trashCans = [], onTrashCansChange = () => {} }) {
   const [selectedTrashCanId, setSelectedTrashCanId] = useState(null);
@@ -15,6 +16,11 @@ function TrashesPage({ tree, onTreeChange = () => {}, trashCans = [], onTrashCan
   const [newTrashCanName, setNewTrashCanName] = useState('');
   const [settingsTargetId, setSettingsTargetId] = useState(null);
   const nameInputRef = useRef(null);
+
+  useMenuDismissal(() => {
+    setMenuOpenId(null);
+    setItemMenuOpenId(null);
+  });
 
   const selectedTrashCan = useMemo(
     () => trashCans.find((trashCan) => trashCan.id === selectedTrashCanId) ?? null,
@@ -206,6 +212,7 @@ function TrashesPage({ tree, onTreeChange = () => {}, trashCans = [], onTrashCan
                     aria-label={`More actions for ${trashCan.name}`}
                     onClick={(event) => {
                       event.stopPropagation();
+                      setItemMenuOpenId(null);
                       setMenuOpenId((currentId) => (currentId === trashCan.id ? null : trashCan.id));
                     }}
                   >
@@ -288,7 +295,10 @@ function TrashesPage({ tree, onTreeChange = () => {}, trashCans = [], onTrashCan
                     type="button"
                     className="tdocs-trash-item-menu-button"
                     aria-label={`More actions for ${item.originalFilename}`}
-                    onClick={() => setItemMenuOpenId((currentId) => (currentId === item.id ? null : item.id))}
+                    onClick={() => {
+                      setMenuOpenId(null);
+                      setItemMenuOpenId((currentId) => (currentId === item.id ? null : item.id));
+                    }}
                   >
                     ⋯
                   </button>
@@ -370,6 +380,12 @@ function TrashesPage({ tree, onTreeChange = () => {}, trashCans = [], onTrashCan
                 ? `Are you sure you want to delete "${trashCanActionTarget?.name ?? 'this trash can'}"?`
                 : `Are you sure you want to empty "${trashCanActionTarget?.name ?? 'this trash can'}"?`}
             </div>
+            {trashCanAction.type !== 'delete' ? 
+            (
+              <div>
+                All items inside this trash can will be deleted forevermore.
+              </div>
+              ) : null}
             <div className="tdocs-files-prompt-actions">
               <button type="button" className="tdocs-files-danger-button" onClick={handleTrashCanActionConfirm}>
                 {trashCanAction.type === 'delete' ? 'Delete' : 'Empty'}

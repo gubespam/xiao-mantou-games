@@ -2,6 +2,7 @@
 import React, { useMemo, useState } from 'react';
 import FileNameWindow from '../files/FileNameWindow.jsx';
 import MoveToWindow from '../files/MoveToWindow.jsx';
+import useMenuDismissal from '../useMenuDismissal.js';
 import {
   deleteItem,
   explodeFolder,
@@ -88,6 +89,10 @@ function SmartFoldersPage({ tree, onTreeChange, smartFolders = [], onSmartFolder
   const [trashTarget, setTrashTarget] = useState(null);
   const [selectedTrashCanId, setSelectedTrashCanId] = useState('');
   const [browsePath, setBrowsePath] = useState([]);
+  useMenuDismissal(() => {
+    setMenuId(null);
+    setDeleteMenuId(null);
+  });
   const allItems = useMemo(() => collectItems(tree), [tree]);
   const locations = useMemo(() => ['/', ...allItems.filter(({ item }) => item.type === 'dir').map(({ itemPath }) => getDisplayPath(itemPath))], [allItems]);
   const selectedFolder = smartFolders.find((folder) => folder.id === selectedId);

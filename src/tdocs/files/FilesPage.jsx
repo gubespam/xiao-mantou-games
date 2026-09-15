@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import FileNameWindow from './FileNameWindow';
 import MoveToWindow from './MoveToWindow';
+import useMenuDismissal from '../useMenuDismissal';
 import {
   addItem,
   deleteItem,
@@ -31,6 +32,12 @@ function FilesPage({ tree, onTreeChange, onOpenFile = () => {}, trashCans = [], 
   const [newName, setNewName] = useState('');
   const [statusMessage, setStatusMessage] = useState('');
   const nameInputRef = useRef(null);
+
+  useMenuDismissal(() => {
+    setMenuOpen(false);
+    setActiveMenuItemKey(null);
+    setDeleteMenuItemKey(null);
+  });
 
   useEffect(() => {
     setDirectoryTree(tree);
@@ -415,7 +422,11 @@ function FilesPage({ tree, onTreeChange, onOpenFile = () => {}, trashCans = [], 
           <button
             type="button"
             className="tdocs-files-add-button"
-            onClick={() => setMenuOpen((open) => !open)}
+            onClick={() => {
+              setMenuOpen((open) => !open);
+              setActiveMenuItemKey(null);
+              setDeleteMenuItemKey(null);
+            }}
             aria-label="Create a new file or folder"
           >
             +
