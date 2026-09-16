@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 
 function FileNameWindow({
   title,
@@ -10,21 +10,21 @@ function FileNameWindow({
   validateName,
   inputRef,
 }) {
-  const [promptError, setPromptError] = useState('');
-  const labelText = isFolder ? 'Folder name' : 'File name';
-  const placeholder = isFolder ? 'New folder' : 'example.txt';
+  const [promptError, setPromptError] = useState("");
+  const labelText = isFolder ? "Folder name" : "File name";
+  const placeholder = isFolder ? "New folder" : "example.txt";
 
   function handleChange(nextValue) {
     onChange(nextValue);
 
     if (promptError) {
-      setPromptError('');
+      setPromptError("");
     }
   }
 
   function handleConfirm() {
     const trimmedValue = value.trim();
-    const validationMessage = validateName ? validateName(trimmedValue) : '';
+    const validationMessage = validateName ? validateName(trimmedValue) : "";
 
     if (validationMessage) {
       setPromptError(validationMessage);
@@ -35,7 +35,7 @@ function FileNameWindow({
   }
 
   function handleCancel() {
-    setPromptError('');
+    setPromptError("");
     onCancel();
   }
 
@@ -51,12 +51,12 @@ function FileNameWindow({
             value={value}
             onChange={(event) => handleChange(event.target.value)}
             onKeyDown={(event) => {
-              if (event.key === 'Escape') {
+              if (event.key === "Escape") {
                 event.preventDefault();
                 handleCancel();
               }
 
-              if (event.key === 'Enter') {
+              if (event.key === "Enter") {
                 event.preventDefault();
                 handleConfirm();
               }
@@ -64,7 +64,9 @@ function FileNameWindow({
             placeholder={placeholder}
           />
         </label>
-        {promptError ? <div className="tdocs-files-prompt-error">{promptError}</div> : null}
+        {promptError ? (
+          <div className="tdocs-files-prompt-error">{promptError}</div>
+        ) : null}
         <div className="tdocs-files-prompt-actions">
           <button type="button" onClick={handleConfirm}>
             OK

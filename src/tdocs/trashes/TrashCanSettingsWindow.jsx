@@ -1,33 +1,33 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
 
 function TrashCanSettingsWindow({ trashCan, onSave, onCancel }) {
   const [formState, setFormState] = useState({
-    action: trashCan?.settings?.action ?? 'nothing',
+    action: trashCan?.settings?.action ?? "nothing",
     deleteAfterDays: trashCan?.settings?.deleteAfterDays ?? 30,
   });
 
   useEffect(() => {
     setFormState({
-      action: trashCan?.settings?.action ?? 'nothing',
+      action: trashCan?.settings?.action ?? "nothing",
       deleteAfterDays: trashCan?.settings?.deleteAfterDays ?? 30,
     });
   }, [trashCan]);
 
   useEffect(() => {
     function handleKeyDown(event) {
-      if (event.key === 'Escape') {
+      if (event.key === "Escape") {
         event.preventDefault();
         onCancel();
       }
 
-      if (event.key === 'Enter') {
+      if (event.key === "Enter") {
         event.preventDefault();
         onSave(formState);
       }
     }
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
   }, [formState, onCancel, onSave]);
 
   function handleSubmit(event) {
@@ -47,8 +47,10 @@ function TrashCanSettingsWindow({ trashCan, onSave, onCancel }) {
               <input
                 type="radio"
                 name="trash-action"
-                checked={formState.action === 'nothing'}
-                onChange={() => setFormState((current) => ({ ...current, action: 'nothing' }))}
+                checked={formState.action === "nothing"}
+                onChange={() =>
+                  setFormState((current) => ({ ...current, action: "nothing" }))
+                }
               />
               Do nothing
             </label>
@@ -56,8 +58,10 @@ function TrashCanSettingsWindow({ trashCan, onSave, onCancel }) {
               <input
                 type="radio"
                 name="trash-action"
-                checked={formState.action === 'delete'}
-                onChange={() => setFormState((current) => ({ ...current, action: 'delete' }))}
+                checked={formState.action === "delete"}
+                onChange={() =>
+                  setFormState((current) => ({ ...current, action: "delete" }))
+                }
               />
               Auto-delete
             </label>
@@ -65,14 +69,16 @@ function TrashCanSettingsWindow({ trashCan, onSave, onCancel }) {
               <input
                 type="radio"
                 name="trash-action"
-                checked={formState.action === 'recover'}
-                onChange={() => setFormState((current) => ({ ...current, action: 'recover' }))}
+                checked={formState.action === "recover"}
+                onChange={() =>
+                  setFormState((current) => ({ ...current, action: "recover" }))
+                }
               />
               Auto-recover
             </label>
           </fieldset>
 
-          {formState.action !== 'nothing' ? (
+          {formState.action !== "nothing" ? (
             <fieldset className="tdocs-trash-settings-group">
               <legend>After how long?</legend>
               <label>
@@ -80,7 +86,12 @@ function TrashCanSettingsWindow({ trashCan, onSave, onCancel }) {
                   type="radio"
                   name="trash-delete-after"
                   checked={formState.deleteAfterDays === 1}
-                  onChange={() => setFormState((current) => ({ ...current, deleteAfterDays: 1 }))}
+                  onChange={() =>
+                    setFormState((current) => ({
+                      ...current,
+                      deleteAfterDays: 1,
+                    }))
+                  }
                 />
                 24 hours
               </label>
@@ -89,7 +100,12 @@ function TrashCanSettingsWindow({ trashCan, onSave, onCancel }) {
                   type="radio"
                   name="trash-delete-after"
                   checked={formState.deleteAfterDays === 7}
-                  onChange={() => setFormState((current) => ({ ...current, deleteAfterDays: 7 }))}
+                  onChange={() =>
+                    setFormState((current) => ({
+                      ...current,
+                      deleteAfterDays: 7,
+                    }))
+                  }
                 />
                 1 week
               </label>
@@ -98,7 +114,12 @@ function TrashCanSettingsWindow({ trashCan, onSave, onCancel }) {
                   type="radio"
                   name="trash-delete-after"
                   checked={formState.deleteAfterDays === 30}
-                  onChange={() => setFormState((current) => ({ ...current, deleteAfterDays: 30 }))}
+                  onChange={() =>
+                    setFormState((current) => ({
+                      ...current,
+                      deleteAfterDays: 30,
+                    }))
+                  }
                 />
                 30 days
               </label>

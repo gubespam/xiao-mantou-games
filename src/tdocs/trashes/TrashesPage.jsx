@@ -1,19 +1,24 @@
-import React, { useMemo, useRef, useState } from 'react';
-import FileNameWindow from '../files/FileNameWindow.jsx';
-import { restoreItem } from '../files/fileSystemService.js';
-import TrashCanSettingsWindow from './TrashCanSettingsWindow.jsx';
-import useMenuDismissal from '../useMenuDismissal.js';
+import React, { useMemo, useRef, useState } from "react";
+import FileNameWindow from "../files/FileNameWindow.jsx";
+import { restoreItem } from "../files/fileSystemService.js";
+import TrashCanSettingsWindow from "./TrashCanSettingsWindow.jsx";
+import useMenuDismissal from "../useMenuDismissal.js";
 
-function TrashesPage({ tree, onTreeChange = () => {}, trashCans = [], onTrashCansChange = () => {} }) {
+function TrashesPage({
+  tree,
+  onTreeChange = () => {},
+  trashCans = [],
+  onTrashCansChange = () => {},
+}) {
   const [selectedTrashCanId, setSelectedTrashCanId] = useState(null);
   const [menuOpenId, setMenuOpenId] = useState(null);
   const [itemMenuOpenId, setItemMenuOpenId] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [trashCanAction, setTrashCanAction] = useState(null);
   const [renameTargetId, setRenameTargetId] = useState(null);
-  const [renameValue, setRenameValue] = useState('');
+  const [renameValue, setRenameValue] = useState("");
   const [isAddingTrashCan, setIsAddingTrashCan] = useState(false);
-  const [newTrashCanName, setNewTrashCanName] = useState('');
+  const [newTrashCanName, setNewTrashCanName] = useState("");
   const [settingsTargetId, setSettingsTargetId] = useState(null);
   const nameInputRef = useRef(null);
 
@@ -23,11 +28,15 @@ function TrashesPage({ tree, onTreeChange = () => {}, trashCans = [], onTrashCan
   });
 
   const selectedTrashCan = useMemo(
-    () => trashCans.find((trashCan) => trashCan.id === selectedTrashCanId) ?? null,
+    () =>
+      trashCans.find((trashCan) => trashCan.id === selectedTrashCanId) ?? null,
     [selectedTrashCanId, trashCans],
   );
   const trashCanActionTarget = useMemo(
-    () => trashCans.find((trashCan) => trashCan.id === trashCanAction?.trashCanId) ?? null,
+    () =>
+      trashCans.find(
+        (trashCan) => trashCan.id === trashCanAction?.trashCanId,
+      ) ?? null,
     [trashCanAction, trashCans],
   );
 
@@ -47,12 +56,12 @@ function TrashesPage({ tree, onTreeChange = () => {}, trashCans = [], onTrashCan
 
   function handleAddTrashCanRequest() {
     setIsAddingTrashCan(true);
-    setNewTrashCanName('');
+    setNewTrashCanName("");
   }
 
   function validateTrashCanName(trimmedName) {
     if (!trimmedName) {
-      return 'Please enter a name.';
+      return "Please enter a name.";
     }
 
     const duplicateName = trashCans.some(
@@ -62,10 +71,10 @@ function TrashesPage({ tree, onTreeChange = () => {}, trashCans = [], onTrashCan
     );
 
     if (duplicateName) {
-      return 'That trash can already exists.';
+      return "That trash can already exists.";
     }
 
-    return '';
+    return "";
   }
 
   function handleAddTrashCanConfirm(trimmedName) {
@@ -73,13 +82,16 @@ function TrashesPage({ tree, onTreeChange = () => {}, trashCans = [], onTrashCan
     const newTrashCan = {
       id: newTrashCanId,
       name: trimmedName,
-      settings: { action: 'nothing', deleteAfterDays: 30 },
+      settings: { action: "nothing", deleteAfterDays: 30 },
       items: [],
     };
 
-    onTrashCansChange((currentTrashCans) => [...(currentTrashCans ?? []), newTrashCan]);
+    onTrashCansChange((currentTrashCans) => [
+      ...(currentTrashCans ?? []),
+      newTrashCan,
+    ]);
     setIsAddingTrashCan(false);
-    setNewTrashCanName('');
+    setNewTrashCanName("");
     setSettingsTargetId(newTrashCanId);
   }
 
@@ -88,13 +100,18 @@ function TrashesPage({ tree, onTreeChange = () => {}, trashCans = [], onTrashCan
       return;
     }
 
-    updateTrashCan(renameTargetId, (trashCan) => ({ ...trashCan, name: trimmedName }));
+    updateTrashCan(renameTargetId, (trashCan) => ({
+      ...trashCan,
+      name: trimmedName,
+    }));
     setRenameTargetId(null);
-    setRenameValue('');
+    setRenameValue("");
   }
 
   function handleDeleteEmptyTrashCan(trashCanId) {
-    onTrashCansChange((currentTrashCans) => (currentTrashCans ?? []).filter((trashCan) => trashCan.id !== trashCanId));
+    onTrashCansChange((currentTrashCans) =>
+      (currentTrashCans ?? []).filter((trashCan) => trashCan.id !== trashCanId),
+    );
     setMenuOpenId(null);
     setTrashCanAction(null);
 
@@ -114,7 +131,7 @@ function TrashesPage({ tree, onTreeChange = () => {}, trashCans = [], onTrashCan
       return;
     }
 
-    if (trashCanAction.type === 'delete') {
+    if (trashCanAction.type === "delete") {
       handleDeleteEmptyTrashCan(trashCanAction.trashCanId);
       return;
     }
@@ -129,7 +146,9 @@ function TrashesPage({ tree, onTreeChange = () => {}, trashCans = [], onTrashCan
 
     updateTrashCan(deleteTarget.trashCanId, (trashCan) => ({
       ...trashCan,
-      items: (trashCan.items ?? []).filter((item) => item.id !== deleteTarget.item.id),
+      items: (trashCan.items ?? []).filter(
+        (item) => item.id !== deleteTarget.item.id,
+      ),
     }));
     setDeleteTarget(null);
     setItemMenuOpenId(null);
@@ -140,9 +159,10 @@ function TrashesPage({ tree, onTreeChange = () => {}, trashCans = [], onTrashCan
       return;
     }
 
-    const originalPath = item.originalPath
-      ?? item.originalFolderPath?.split('/').filter(Boolean)
-      ?? [];
+    const originalPath =
+      item.originalPath ??
+      item.originalFolderPath?.split("/").filter(Boolean) ??
+      [];
     const nextTree = restoreItem(tree, item.item, originalPath);
 
     if (nextTree === tree) {
@@ -152,7 +172,9 @@ function TrashesPage({ tree, onTreeChange = () => {}, trashCans = [], onTrashCan
     onTreeChange(nextTree);
     updateTrashCan(trashCanId, (trashCan) => ({
       ...trashCan,
-      items: (trashCan.items ?? []).filter((trashItem) => trashItem.id !== item.id),
+      items: (trashCan.items ?? []).filter(
+        (trashItem) => trashItem.id !== item.id,
+      ),
     }));
     setItemMenuOpenId(null);
   }
@@ -166,7 +188,8 @@ function TrashesPage({ tree, onTreeChange = () => {}, trashCans = [], onTrashCan
       ...trashCan,
       settings: {
         action: nextSettings.action,
-        deleteAfterDays: nextSettings.action === 'nothing' ? 30 : nextSettings.deleteAfterDays,
+        deleteAfterDays:
+          nextSettings.action === "nothing" ? 30 : nextSettings.deleteAfterDays,
       },
     }));
     setSettingsTargetId(null);
@@ -213,7 +236,9 @@ function TrashesPage({ tree, onTreeChange = () => {}, trashCans = [], onTrashCan
                     onClick={(event) => {
                       event.stopPropagation();
                       setItemMenuOpenId(null);
-                      setMenuOpenId((currentId) => (currentId === trashCan.id ? null : trashCan.id));
+                      setMenuOpenId((currentId) =>
+                        currentId === trashCan.id ? null : trashCan.id,
+                      );
                     }}
                   >
                     ⋯
@@ -222,19 +247,44 @@ function TrashesPage({ tree, onTreeChange = () => {}, trashCans = [], onTrashCan
                   {menuOpenId === trashCan.id ? (
                     <div className="tdocs-files-menu tdocs-trash-menu">
                       {trashCan.items.length === 0 ? (
-                        <button type="button" onClick={() => setTrashCanAction({ type: 'delete', trashCanId: trashCan.id })}>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setTrashCanAction({
+                              type: "delete",
+                              trashCanId: trashCan.id,
+                            })
+                          }
+                        >
                           Delete
                         </button>
                       ) : null}
                       {trashCan.items.length > 0 ? (
-                        <button type="button" onClick={() => setTrashCanAction({ type: 'empty', trashCanId: trashCan.id })}>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setTrashCanAction({
+                              type: "empty",
+                              trashCanId: trashCan.id,
+                            })
+                          }
+                        >
                           Empty
                         </button>
                       ) : null}
-                      <button type="button" onClick={() => handleRenameRequest(trashCan)}>
+                      <button
+                        type="button"
+                        onClick={() => handleRenameRequest(trashCan)}
+                      >
                         Rename
                       </button>
-                      <button type="button" onClick={() => { setSettingsTargetId(trashCan.id); setMenuOpenId(null); }}>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSettingsTargetId(trashCan.id);
+                          setMenuOpenId(null);
+                        }}
+                      >
                         Settings...
                       </button>
                     </div>
@@ -275,20 +325,29 @@ function TrashesPage({ tree, onTreeChange = () => {}, trashCans = [], onTrashCan
           >
             ←
           </button>
-          <div className="tdocs-trash-detail-title">{selectedTrashCan.name}</div>
+          <div className="tdocs-trash-detail-title">
+            {selectedTrashCan.name}
+          </div>
         </div>
 
         {selectedTrashCan.items.length === 0 ? (
-          <div className="tdocs-trash-empty-state">This trash can is empty.</div>
+          <div className="tdocs-trash-empty-state">
+            This trash can is empty.
+          </div>
         ) : (
           <div className="tdocs-trash-item-list">
             {selectedTrashCan.items.map((item) => (
               <div className="tdocs-trash-item-row" key={item.id}>
                 <div className="tdocs-trash-item-row-main">
-                  <span className="tdocs-trash-item-row-icon" aria-hidden="true">
+                  <span
+                    className="tdocs-trash-item-row-icon"
+                    aria-hidden="true"
+                  >
                     📄
                   </span>
-                  <span className="tdocs-trash-item-row-name">{item.originalFilename}</span>
+                  <span className="tdocs-trash-item-row-name">
+                    {item.originalFilename}
+                  </span>
                 </div>
                 <div className="tdocs-trash-item-actions">
                   <button
@@ -297,17 +356,32 @@ function TrashesPage({ tree, onTreeChange = () => {}, trashCans = [], onTrashCan
                     aria-label={`More actions for ${item.originalFilename}`}
                     onClick={() => {
                       setMenuOpenId(null);
-                      setItemMenuOpenId((currentId) => (currentId === item.id ? null : item.id));
+                      setItemMenuOpenId((currentId) =>
+                        currentId === item.id ? null : item.id,
+                      );
                     }}
                   >
                     ⋯
                   </button>
                   {itemMenuOpenId === item.id ? (
                     <div className="tdocs-files-menu tdocs-trash-menu">
-                      <button type="button" onClick={() => setDeleteTarget({ trashCanId: selectedTrashCan.id, item })}>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setDeleteTarget({
+                            trashCanId: selectedTrashCan.id,
+                            item,
+                          })
+                        }
+                      >
                         Delete forevermore
                       </button>
-                      <button type="button" onClick={() => handleRestoreItem(selectedTrashCan.id, item)}>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          handleRestoreItem(selectedTrashCan.id, item)
+                        }
+                      >
                         Restore
                       </button>
                       <button type="button" disabled>
@@ -337,7 +411,7 @@ function TrashesPage({ tree, onTreeChange = () => {}, trashCans = [], onTrashCan
           onConfirm={handleRenameConfirm}
           onCancel={() => {
             setRenameTargetId(null);
-            setRenameValue('');
+            setRenameValue("");
             setSelectedTrashCanId(null);
           }}
           validateName={validateTrashCanName}
@@ -354,7 +428,7 @@ function TrashesPage({ tree, onTreeChange = () => {}, trashCans = [], onTrashCan
           onConfirm={handleAddTrashCanConfirm}
           onCancel={() => {
             setIsAddingTrashCan(false);
-            setNewTrashCanName('');
+            setNewTrashCanName("");
           }}
           validateName={validateTrashCanName}
           inputRef={nameInputRef}
@@ -363,7 +437,9 @@ function TrashesPage({ tree, onTreeChange = () => {}, trashCans = [], onTrashCan
 
       {settingsTargetId ? (
         <TrashCanSettingsWindow
-          trashCan={trashCans.find((trashCan) => trashCan.id === settingsTargetId)}
+          trashCan={trashCans.find(
+            (trashCan) => trashCan.id === settingsTargetId,
+          )}
           onSave={handleSaveSettings}
           onCancel={() => {
             setSettingsTargetId(null);
@@ -374,23 +450,32 @@ function TrashesPage({ tree, onTreeChange = () => {}, trashCans = [], onTrashCan
 
       {trashCanAction ? (
         <div className="tdocs-files-prompt-overlay">
-          <div className="tdocs-files-prompt-card" role="alertdialog" aria-modal="true">
+          <div
+            className="tdocs-files-prompt-card"
+            role="alertdialog"
+            aria-modal="true"
+          >
             <div className="tdocs-files-prompt-title">
-              {trashCanAction.type === 'delete'
-                ? `Are you sure you want to delete "${trashCanActionTarget?.name ?? 'this trash can'}"?`
-                : `Are you sure you want to empty "${trashCanActionTarget?.name ?? 'this trash can'}"?`}
+              {trashCanAction.type === "delete"
+                ? `Are you sure you want to delete "${trashCanActionTarget?.name ?? "this trash can"}"?`
+                : `Are you sure you want to empty "${trashCanActionTarget?.name ?? "this trash can"}"?`}
             </div>
-            {trashCanAction.type !== 'delete' ? 
-            (
+            {trashCanAction.type !== "delete" ? (
               <div>
                 All items inside this trash can will be deleted forevermore.
               </div>
-              ) : null}
+            ) : null}
             <div className="tdocs-files-prompt-actions">
-              <button type="button" className="tdocs-files-danger-button" onClick={handleTrashCanActionConfirm}>
-                {trashCanAction.type === 'delete' ? 'Delete' : 'Empty'}
+              <button
+                type="button"
+                className="tdocs-files-danger-button"
+                onClick={handleTrashCanActionConfirm}
+              >
+                {trashCanAction.type === "delete" ? "Delete" : "Empty"}
               </button>
-              <button type="button" onClick={() => setTrashCanAction(null)}>Cancel</button>
+              <button type="button" onClick={() => setTrashCanAction(null)}>
+                Cancel
+              </button>
             </div>
           </div>
         </div>
@@ -398,15 +483,26 @@ function TrashesPage({ tree, onTreeChange = () => {}, trashCans = [], onTrashCan
 
       {deleteTarget ? (
         <div className="tdocs-files-prompt-overlay">
-          <div className="tdocs-files-prompt-card" role="alertdialog" aria-modal="true">
+          <div
+            className="tdocs-files-prompt-card"
+            role="alertdialog"
+            aria-modal="true"
+          >
             <div className="tdocs-files-prompt-title">
-              Are you sure you want to delete &quot;{deleteTarget.item.originalFilename}&quot; forevermore?
+              Are you sure you want to delete &quot;
+              {deleteTarget.item.originalFilename}&quot; forevermore?
             </div>
             <div className="tdocs-files-prompt-actions">
-              <button type="button" className="tdocs-files-danger-button" onClick={handleDeleteForevermore}>
+              <button
+                type="button"
+                className="tdocs-files-danger-button"
+                onClick={handleDeleteForevermore}
+              >
                 Delete
               </button>
-              <button type="button" onClick={() => setDeleteTarget(null)}>Cancel</button>
+              <button type="button" onClick={() => setDeleteTarget(null)}>
+                Cancel
+              </button>
             </div>
           </div>
         </div>

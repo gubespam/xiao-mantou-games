@@ -1,21 +1,21 @@
-import React, { useEffect, useState } from 'react';
-import './TDocs.css';
-import TabsBar from './TabsBar.jsx';
-import TrashesPage from './trashes/TrashesPage.jsx';
-import FilesPage from './files/FilesPage.jsx';
-import SmartFoldersPage from './smartfolders/SmartFoldersPage.jsx';
-import FileEditText from './files/FileEditText.jsx';
+import React, { useEffect, useState } from "react";
+import "./TDocs.css";
+import TabsBar from "./TabsBar.jsx";
+import TrashesPage from "./trashes/TrashesPage.jsx";
+import FilesPage from "./files/FilesPage.jsx";
+import SmartFoldersPage from "./smartfolders/SmartFoldersPage.jsx";
+import FileEditText from "./files/FileEditText.jsx";
 import {
   loadTreeFromStorage,
   saveTreeToStorage,
   updateFileContent,
-} from './files/fileSystemService';
+} from "./files/fileSystemService";
 
-const TRASH_CANS_STORAGE_KEY = 'tdocs-trash-cans';
-const SMART_FOLDERS_STORAGE_KEY = 'tdocs-smart-folders';
+const TRASH_CANS_STORAGE_KEY = "tdocs-trash-cans";
+const SMART_FOLDERS_STORAGE_KEY = "tdocs-smart-folders";
 
 function getDefaultTrashCans() {
-  return []
+  return [];
 }
 
 function loadTrashCansFromStorage(storage) {
@@ -67,7 +67,7 @@ function EditFilePage({ selectedFile, onClose, onContentChange }) {
   return (
     <section className="tdocs-file-editor-screen">
       <div className="tdocs-file-editor-header">
-        <span>{`/${selectedFile.path.join('/')}`}</span>
+        <span>{`/${selectedFile.path.join("/")}`}</span>
         <button
           type="button"
           className="tdocs-file-editor-close"
@@ -79,7 +79,7 @@ function EditFilePage({ selectedFile, onClose, onContentChange }) {
       </div>
       <FileEditText
         fileContent={selectedFile.content}
-        filePath={selectedFile.path.join('/')}
+        filePath={selectedFile.path.join("/")}
         onChange={onContentChange}
       />
     </section>
@@ -87,12 +87,18 @@ function EditFilePage({ selectedFile, onClose, onContentChange }) {
 }
 
 function TDocs() {
-  const [activeTab, setActiveTab] = useState('trashes');
-  const [directoryTree, setDirectoryTree] = useState(() => loadTreeFromStorage(window.localStorage));
+  const [activeTab, setActiveTab] = useState("trashes");
+  const [directoryTree, setDirectoryTree] = useState(() =>
+    loadTreeFromStorage(window.localStorage),
+  );
   const [selectedFile, setSelectedFile] = useState(null);
   const [filesPath, setFilesPath] = useState([]);
-  const [trashCans, setTrashCans] = useState(() => loadTrashCansFromStorage(window.localStorage));
-  const [smartFolders, setSmartFolders] = useState(() => loadSmartFoldersFromStorage(window.localStorage));
+  const [trashCans, setTrashCans] = useState(() =>
+    loadTrashCansFromStorage(window.localStorage),
+  );
+  const [smartFolders, setSmartFolders] = useState(() =>
+    loadSmartFoldersFromStorage(window.localStorage),
+  );
 
   useEffect(() => {
     saveTreeToStorage(directoryTree, window.localStorage);
@@ -100,12 +106,12 @@ function TDocs() {
 
   function handleOpenFile(file) {
     setSelectedFile(file);
-    setActiveTab('edit');
+    setActiveTab("edit");
   }
 
   function handleOpenFolder(path) {
     setFilesPath(path);
-    setActiveTab('files');
+    setActiveTab("files");
   }
 
   function handleFileContentChange(content) {
@@ -113,13 +119,17 @@ function TDocs() {
       return;
     }
 
-    setDirectoryTree((currentTree) => updateFileContent(
-      currentTree,
-      selectedFile.path.slice(0, -1),
-      selectedFile.name,
-      content,
-    ));
-    setSelectedFile((currentFile) => currentFile ? { ...currentFile, content } : currentFile);
+    setDirectoryTree((currentTree) =>
+      updateFileContent(
+        currentTree,
+        selectedFile.path.slice(0, -1),
+        selectedFile.name,
+        content,
+      ),
+    );
+    setSelectedFile((currentFile) =>
+      currentFile ? { ...currentFile, content } : currentFile,
+    );
   }
 
   useEffect(() => {
@@ -131,23 +141,62 @@ function TDocs() {
   }, [smartFolders]);
 
   const tabs = [
-    { id: 'trashes', label: 'Trashes', component: () => <TrashesPage tree={directoryTree} onTreeChange={setDirectoryTree} trashCans={trashCans} onTrashCansChange={setTrashCans} /> },
-    { id: 'files', label: 'Files', component: () => <FilesPage tree={directoryTree} onTreeChange={setDirectoryTree} onOpenFile={handleOpenFile} initialPath={filesPath} trashCans={trashCans} onTrashCansChange={setTrashCans} /> },
-    { id: 'edit', label: 'Edit File', component: EditFilePage },
-    { id: 'smartfolders', label: 'Smart Folders', component: () => <SmartFoldersPage tree={directoryTree} smartFolders={smartFolders} onSmartFoldersChange={setSmartFolders} onOpenFolder={handleOpenFolder} onOpenFile={handleOpenFile} /> },
+    {
+      id: "trashes",
+      label: "Trashes",
+      component: () => (
+        <TrashesPage
+          tree={directoryTree}
+          onTreeChange={setDirectoryTree}
+          trashCans={trashCans}
+          onTrashCansChange={setTrashCans}
+        />
+      ),
+    },
+    {
+      id: "files",
+      label: "Files",
+      component: () => (
+        <FilesPage
+          tree={directoryTree}
+          onTreeChange={setDirectoryTree}
+          onOpenFile={handleOpenFile}
+          initialPath={filesPath}
+          trashCans={trashCans}
+          onTrashCansChange={setTrashCans}
+        />
+      ),
+    },
+    { id: "edit", label: "Edit File", component: EditFilePage },
+    {
+      id: "smartfolders",
+      label: "Smart Folders",
+      component: () => (
+        <SmartFoldersPage
+          tree={directoryTree}
+          smartFolders={smartFolders}
+          onSmartFoldersChange={setSmartFolders}
+          onOpenFolder={handleOpenFolder}
+          onOpenFile={handleOpenFile}
+        />
+      ),
+    },
   ];
 
-  const ActiveScreen = tabs.find((tab) => tab.id === activeTab)?.component ?? FileEditText;
+  const ActiveScreen =
+    tabs.find((tab) => tab.id === activeTab)?.component ?? FileEditText;
 
   return (
     <div className="tdocs-base">
       <TabsBar tabs={tabs} activeTab={activeTab} onSelect={setActiveTab} />
       <main className="tdocs-main-content">
-        {<ActiveScreen
-          selectedFile={selectedFile}
-          onClose={() => setSelectedFile(null)}
-          onContentChange={handleFileContentChange}
-        />}
+        {
+          <ActiveScreen
+            selectedFile={selectedFile}
+            onClose={() => setSelectedFile(null)}
+            onContentChange={handleFileContentChange}
+          />
+        }
       </main>
     </div>
   );

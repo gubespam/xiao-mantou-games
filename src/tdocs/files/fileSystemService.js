@@ -1,23 +1,23 @@
-export const STORAGE_KEY = 'xmg-tdocs-files';
+export const STORAGE_KEY = "xmg-tdocs-files";
 
 export function createDirectoryNode(name, children = []) {
   return {
-    type: 'dir',
+    type: "dir",
     name,
     children,
   };
 }
 
-export function createFileNode(name, content = '') {
+export function createFileNode(name, content = "") {
   return {
-    type: 'file',
+    type: "file",
     name,
     content,
   };
 }
 
 export function buildInitialTree() {
-  return createDirectoryNode('root', []);
+  return createDirectoryNode("root", []);
 }
 
 export function cloneTree(tree) {
@@ -25,7 +25,7 @@ export function cloneTree(tree) {
 }
 
 export function loadTreeFromStorage(storage) {
-  if (typeof window === 'undefined' || !storage) {
+  if (typeof window === "undefined" || !storage) {
     return buildInitialTree();
   }
 
@@ -40,7 +40,11 @@ export function loadTreeFromStorage(storage) {
   try {
     const parsedTree = JSON.parse(rawTree);
 
-    if (parsedTree && parsedTree.type === 'dir' && Array.isArray(parsedTree.children)) {
+    if (
+      parsedTree &&
+      parsedTree.type === "dir" &&
+      Array.isArray(parsedTree.children)
+    ) {
       return parsedTree;
     }
   } catch {
@@ -53,7 +57,7 @@ export function loadTreeFromStorage(storage) {
 }
 
 export function saveTreeToStorage(tree, storage) {
-  if (typeof window !== 'undefined' && storage) {
+  if (typeof window !== "undefined" && storage) {
     storage.setItem(STORAGE_KEY, JSON.stringify(tree));
   }
 }
@@ -62,12 +66,12 @@ export function findDirectoryByPath(root, pathSegments) {
   let currentNode = root;
 
   for (const segment of pathSegments) {
-    if (!currentNode || currentNode.type !== 'dir') {
+    if (!currentNode || currentNode.type !== "dir") {
       return null;
     }
 
     const nextNode = currentNode.children.find(
-      (child) => child.type === 'dir' && child.name === segment,
+      (child) => child.type === "dir" && child.name === segment,
     );
 
     if (!nextNode) {
@@ -82,10 +86,10 @@ export function findDirectoryByPath(root, pathSegments) {
 
 export function getDisplayPath(pathSegments) {
   if (pathSegments.length === 0) {
-    return '/';
+    return "/";
   }
 
-  return `/${pathSegments.join('/')}`;
+  return `/${pathSegments.join("/")}`;
 }
 
 export function getDirectoryItems(tree, pathSegments) {
@@ -111,7 +115,7 @@ export function addItem(tree, pathSegments, kind, name) {
 
   currentDirectory.children = currentDirectory.children ?? [];
   currentDirectory.children.push(
-    kind === 'folder' ? createDirectoryNode(name) : createFileNode(name, ''),
+    kind === "folder" ? createDirectoryNode(name) : createFileNode(name, ""),
   );
 
   return nextTree;
@@ -133,7 +137,7 @@ export function updateFileContent(tree, pathSegments, fileName, content) {
   const nextTree = cloneTree(tree);
   const currentDirectory = findDirectoryByPath(nextTree, pathSegments);
   const file = currentDirectory?.children?.find(
-    (child) => child.type === 'file' && child.name === fileName,
+    (child) => child.type === "file" && child.name === fileName,
   );
 
   if (!file) {
@@ -148,7 +152,11 @@ export function deleteItem(tree, pathSegments, index) {
   const nextTree = cloneTree(tree);
   const currentDirectory = findDirectoryByPath(nextTree, pathSegments);
 
-  if (!currentDirectory?.children || index < 0 || index >= currentDirectory.children.length) {
+  if (
+    !currentDirectory?.children ||
+    index < 0 ||
+    index >= currentDirectory.children.length
+  ) {
     return tree;
   }
 
@@ -160,13 +168,17 @@ export function explodeFolder(tree, pathSegments, index) {
   const nextTree = cloneTree(tree);
   const currentDirectory = findDirectoryByPath(nextTree, pathSegments);
 
-  if (!currentDirectory?.children || index < 0 || index >= currentDirectory.children.length) {
+  if (
+    !currentDirectory?.children ||
+    index < 0 ||
+    index >= currentDirectory.children.length
+  ) {
     return tree;
   }
 
   const folder = currentDirectory.children[index];
 
-  if (folder.type !== 'dir') {
+  if (folder.type !== "dir") {
     return tree;
   }
 
@@ -175,7 +187,10 @@ export function explodeFolder(tree, pathSegments, index) {
 }
 
 export function moveItem(tree, sourcePath, index, targetPath) {
-  if (sourcePath.length === targetPath.length && sourcePath.every((segment, pathIndex) => segment === targetPath[pathIndex])) {
+  if (
+    sourcePath.length === targetPath.length &&
+    sourcePath.every((segment, pathIndex) => segment === targetPath[pathIndex])
+  ) {
     return tree;
   }
 
@@ -183,15 +198,21 @@ export function moveItem(tree, sourcePath, index, targetPath) {
   const sourceDirectory = findDirectoryByPath(nextTree, sourcePath);
   const targetDirectory = findDirectoryByPath(nextTree, targetPath);
 
-  if (!sourceDirectory?.children || !targetDirectory || index < 0 || index >= sourceDirectory.children.length) {
+  if (
+    !sourceDirectory?.children ||
+    !targetDirectory ||
+    index < 0 ||
+    index >= sourceDirectory.children.length
+  ) {
     return tree;
   }
 
   const item = sourceDirectory.children[index];
   const itemPath = [...sourcePath, item.name];
-  const targetIsInsideItem = item.type === 'dir'
-    && targetPath.length >= itemPath.length
-    && itemPath.every((segment, pathIndex) => targetPath[pathIndex] === segment);
+  const targetIsInsideItem =
+    item.type === "dir" &&
+    targetPath.length >= itemPath.length &&
+    itemPath.every((segment, pathIndex) => targetPath[pathIndex] === segment);
 
   if (targetIsInsideItem) {
     return tree;
