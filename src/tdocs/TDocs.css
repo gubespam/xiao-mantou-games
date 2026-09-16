@@ -453,6 +453,13 @@
   gap: 1rem;
 }
 
+.tdocs-smart-folder-row .tdocs-files-item-action-button {
+  width: auto;
+  min-width: 4.5rem;
+  padding: 0 0.75rem;
+  white-space: nowrap;
+}
+
 .tdocs-smart-folders-header h2,
 .tdocs-smart-folders-header p {
   margin: 0;

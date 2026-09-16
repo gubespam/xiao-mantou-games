@@ -16,9 +16,9 @@ import {
   saveTreeToStorage,
 } from './fileSystemService';
 
-function FilesPage({ tree, onTreeChange, onOpenFile = () => {}, trashCans = [], onTrashCansChange = () => {} }) {
+function FilesPage({ tree, onTreeChange, onOpenFile = () => {}, initialPath = [], trashCans = [], onTrashCansChange = () => {} }) {
   const [directoryTree, setDirectoryTree] = useState(tree);
-  const [currentPath, setCurrentPath] = useState([]);
+  const [currentPath, setCurrentPath] = useState(initialPath);
   const [menuOpen, setMenuOpen] = useState(false);
   const [activeMenuItemKey, setActiveMenuItemKey] = useState(null);
   const [deleteMenuItemKey, setDeleteMenuItemKey] = useState(null);
@@ -42,6 +42,10 @@ function FilesPage({ tree, onTreeChange, onOpenFile = () => {}, trashCans = [], 
   useEffect(() => {
     setDirectoryTree(tree);
   }, [tree]);
+
+  useEffect(() => {
+    setCurrentPath(initialPath);
+  }, [initialPath]);
 
   useEffect(() => {
     saveTreeToStorage(directoryTree, window.localStorage);

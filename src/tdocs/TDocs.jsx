@@ -90,6 +90,7 @@ function TDocs() {
   const [activeTab, setActiveTab] = useState('trashes');
   const [directoryTree, setDirectoryTree] = useState(() => loadTreeFromStorage(window.localStorage));
   const [selectedFile, setSelectedFile] = useState(null);
+  const [filesPath, setFilesPath] = useState([]);
   const [trashCans, setTrashCans] = useState(() => loadTrashCansFromStorage(window.localStorage));
   const [smartFolders, setSmartFolders] = useState(() => loadSmartFoldersFromStorage(window.localStorage));
 
@@ -100,6 +101,11 @@ function TDocs() {
   function handleOpenFile(file) {
     setSelectedFile(file);
     setActiveTab('edit');
+  }
+
+  function handleOpenFolder(path) {
+    setFilesPath(path);
+    setActiveTab('files');
   }
 
   function handleFileContentChange(content) {
@@ -126,9 +132,9 @@ function TDocs() {
 
   const tabs = [
     { id: 'trashes', label: 'Trashes', component: () => <TrashesPage tree={directoryTree} onTreeChange={setDirectoryTree} trashCans={trashCans} onTrashCansChange={setTrashCans} /> },
-    { id: 'files', label: 'Files', component: () => <FilesPage tree={directoryTree} onTreeChange={setDirectoryTree} onOpenFile={handleOpenFile} trashCans={trashCans} onTrashCansChange={setTrashCans} /> },
+    { id: 'files', label: 'Files', component: () => <FilesPage tree={directoryTree} onTreeChange={setDirectoryTree} onOpenFile={handleOpenFile} initialPath={filesPath} trashCans={trashCans} onTrashCansChange={setTrashCans} /> },
     { id: 'edit', label: 'Edit File', component: EditFilePage },
-    { id: 'smartfolders', label: 'Smart Folders', component: () => <SmartFoldersPage tree={directoryTree} onTreeChange={setDirectoryTree} smartFolders={smartFolders} onSmartFoldersChange={setSmartFolders} trashCans={trashCans} onTrashCansChange={setTrashCans} /> },
+    { id: 'smartfolders', label: 'Smart Folders', component: () => <SmartFoldersPage tree={directoryTree} smartFolders={smartFolders} onSmartFoldersChange={setSmartFolders} onOpenFolder={handleOpenFolder} onOpenFile={handleOpenFile} /> },
   ];
 
   const ActiveScreen = tabs.find((tab) => tab.id === activeTab)?.component ?? FileEditText;
