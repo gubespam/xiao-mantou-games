@@ -227,9 +227,9 @@ function SmartFoldersPage({
           <div className="tdocs-files-prompt-overlay">
             <div className="tdocs-files-prompt-card">
               <div className="tdocs-files-prompt-title">
-                Delete “{deleteTarget.name}” permanently?
+                Delete “{deleteTarget.name}” ?
               </div>
-              <p>This will not affect the files it finds.</p>
+              <p>This will not affect the files within this Smart Folder.</p>
               <div className="tdocs-files-prompt-actions">
                 <button
                   type="button"
