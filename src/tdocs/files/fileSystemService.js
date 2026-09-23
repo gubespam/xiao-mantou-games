@@ -224,25 +224,74 @@ export function moveItem(tree, sourcePath, index, targetPath) {
   return nextTree;
 }
 
+function getUniqueRestoredName(existingChildren, preferredName) {
+  let candidateName = preferredName || "item";
+  let attempt = 0;
+
+  while (
+    existingChildren.some(
+      (child) => child && child.name && child.name === candidateName,
+    )
+  ) {
+    const dotIndex = candidateName.lastIndexOf(".");
+
+    if (dotIndex > 0 && dotIndex < candidateName.length - 1) {
+      candidateName = `${candidateName.slice(0, dotIndex)} - recovered${candidateName.slice(dotIndex)}`;
+    } else {
+      candidateName = `${candidateName} - recovered`;
+    }
+
+    attempt += 1;
+
+    if (attempt > 20) {
+      return `${candidateName}-${Date.now()}`;
+    }
+  }
+
+  return candidateName;
+}
+
 export function restoreItem(tree, item, originalPath = []) {
   if (!item || !Array.isArray(originalPath)) {
     return tree;
   }
 
   const nextTree = cloneTree(tree);
-  let targetPath = originalPath.slice();
-  let targetDirectory = findDirectoryByPath(nextTree, targetPath);
+  const normalizedPath = originalPath.filter((segment) => segment !== "");
+  const itemToRestore = cloneTree(item.item ?? item);
+  const itemName = itemToRestore?.name ?? item?.originalFilename ?? "item";
 
-  while (!targetDirectory && targetPath.length > 0) {
-    targetPath = targetPath.slice(0, -1);
-    targetDirectory = findDirectoryByPath(nextTree, targetPath);
+  if (normalizedPath.length === 0) {
+    nextTree.children = nextTree.children ?? [];
+    const restoredName = getUniqueRestoredName(nextTree.children, itemName);
+    itemToRestore.name = restoredName;
+    nextTree.children.push(itemToRestore);
+    return nextTree;
   }
 
-  if (!targetDirectory) {
-    return tree;
+  let targetDirectory = nextTree;
+
+  for (const segment of normalizedPath) {
+    if (!targetDirectory || targetDirectory.type !== "dir") {
+      return tree;
+    }
+
+    targetDirectory.children = targetDirectory.children ?? [];
+    let nextDirectory = targetDirectory.children.find(
+      (child) => child.type === "dir" && child.name === segment,
+    );
+
+    if (!nextDirectory) {
+      nextDirectory = createDirectoryNode(segment);
+      targetDirectory.children.push(nextDirectory);
+    }
+
+    targetDirectory = nextDirectory;
   }
 
   targetDirectory.children = targetDirectory.children ?? [];
-  targetDirectory.children.push(cloneTree(item));
+  const restoredName = getUniqueRestoredName(targetDirectory.children, itemName);
+  itemToRestore.name = restoredName;
+  targetDirectory.children.push(itemToRestore);
   return nextTree;
 }

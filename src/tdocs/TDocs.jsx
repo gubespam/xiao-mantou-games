@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import "./TDocs.css";
 import TabsBar from "./TabsBar.jsx";
 import TrashesPage from "./trashes/TrashesPage.jsx";
@@ -10,6 +10,10 @@ import {
   saveTreeToStorage,
   updateFileContent,
 } from "./files/fileSystemService";
+import {
+  runTrashCanAutomation,
+  TRASH_CANS_AUTOMATION_INTERVAL_MS,
+} from "./trashes/trashCanAutomation.js";
 
 const TRASH_CANS_STORAGE_KEY = "tdocs-trash-cans";
 const SMART_FOLDERS_STORAGE_KEY = "tdocs-smart-folders";
@@ -99,6 +103,17 @@ function TDocs() {
   const [smartFolders, setSmartFolders] = useState(() =>
     loadSmartFoldersFromStorage(window.localStorage),
   );
+  const directoryTreeRef = useRef(directoryTree);
+  const trashCansRef = useRef(trashCans);
+  const automationTimerRef = useRef(null);
+
+  useEffect(() => {
+    directoryTreeRef.current = directoryTree;
+  }, [directoryTree]);
+
+  useEffect(() => {
+    trashCansRef.current = trashCans;
+  }, [trashCans]);
 
   useEffect(() => {
     saveTreeToStorage(directoryTree, window.localStorage);
@@ -139,6 +154,50 @@ function TDocs() {
   useEffect(() => {
     saveSmartFoldersToStorage(smartFolders, window.localStorage);
   }, [smartFolders]);
+
+  const runTrashCanAutomationCycle = useCallback(() => {
+    // Run the scheduled trash-can cleanup pass against the latest tree and trash
+    // can state, then persist the last automation timestamp to local storage.
+    const { nextTree, nextTrashCans, nextRunInMs } = runTrashCanAutomation({
+      tree: directoryTreeRef.current,
+      trashCans: trashCansRef.current,
+      storage: window.localStorage,
+      now: Date.now(),
+    });
+
+    // Only update React state if the automation actually changed the filesystem or
+    // the trash-can records, so the page stays stable and avoids unnecessary renders.
+    if (nextTree !== directoryTreeRef.current) {
+      setDirectoryTree(nextTree);
+      directoryTreeRef.current = nextTree;
+    }
+
+    if (nextTrashCans !== trashCansRef.current) {
+      setTrashCans(nextTrashCans);
+      trashCansRef.current = nextTrashCans;
+    }
+
+    // Clear the previously scheduled timer before setting the next one so there is
+    // never more than one pending hourly automation check in flight.
+    if (automationTimerRef.current) {
+      window.clearTimeout(automationTimerRef.current);
+    }
+
+    automationTimerRef.current = window.setTimeout(
+      runTrashCanAutomationCycle,
+      Math.max(nextRunInMs ?? TRASH_CANS_AUTOMATION_INTERVAL_MS, 0),
+    );
+  }, []);
+
+  useEffect(() => {
+    runTrashCanAutomationCycle();
+
+    return () => {
+      if (automationTimerRef.current) {
+        window.clearTimeout(automationTimerRef.current);
+      }
+    };
+  }, [runTrashCanAutomationCycle]);
 
   const tabs = [
     {
