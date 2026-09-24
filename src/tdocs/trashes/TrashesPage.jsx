@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import FileNameWindow from "../files/FileNameWindow.jsx";
 import { restoreItem } from "../files/fileSystemService.js";
 import TrashCanSettingsWindow from "./TrashCanSettingsWindow.jsx";
@@ -9,8 +9,12 @@ function TrashesPage({
   onTreeChange = () => {},
   trashCans = [],
   onTrashCansChange = () => {},
+  initialSelectedTrashCanId = null,
+  onSelectedTrashCanChange = () => {},
 }) {
-  const [selectedTrashCanId, setSelectedTrashCanId] = useState(null);
+  const [selectedTrashCanId, setSelectedTrashCanId] = useState(
+    initialSelectedTrashCanId,
+  );
   const [menuOpenId, setMenuOpenId] = useState(null);
   const [itemMenuOpenId, setItemMenuOpenId] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
@@ -20,7 +24,17 @@ function TrashesPage({
   const [isAddingTrashCan, setIsAddingTrashCan] = useState(false);
   const [newTrashCanName, setNewTrashCanName] = useState("");
   const [settingsTargetId, setSettingsTargetId] = useState(null);
+  const [resetClockMessage, setResetClockMessage] = useState("");
   const nameInputRef = useRef(null);
+
+  useEffect(() => {
+    setSelectedTrashCanId(initialSelectedTrashCanId);
+  }, [initialSelectedTrashCanId]);
+
+  function selectTrashCan(trashCanId) {
+    setSelectedTrashCanId(trashCanId);
+    onSelectedTrashCanChange(trashCanId);
+  }
 
   useMenuDismissal(() => {
     setMenuOpenId(null);
@@ -116,7 +130,7 @@ function TrashesPage({
     setTrashCanAction(null);
 
     if (selectedTrashCanId === trashCanId) {
-      setSelectedTrashCanId(null);
+      selectTrashCan(null);
     }
   }
 
@@ -153,6 +167,35 @@ function TrashesPage({
     setDeleteTarget(null);
     setItemMenuOpenId(null);
   }
+
+  function handleResetClock(trashCanId, item) {
+    if (!item) {
+      return;
+    }
+
+    updateTrashCan(trashCanId, (trashCan) => ({
+      ...trashCan,
+      items: (trashCan.items ?? []).map((trashItem) =>
+        trashItem.id === item.id
+          ? { ...trashItem, deletedAt: new Date().toISOString() }
+          : trashItem,
+      ),
+    }));
+    setResetClockMessage(`Clock reset for ${item.originalFilename}.`);
+    setItemMenuOpenId(null);
+  }
+
+  useEffect(() => {
+    if (!resetClockMessage) {
+      return undefined;
+    }
+
+    const timerId = window.setTimeout(() => {
+      setResetClockMessage("");
+    }, 10000);
+
+    return () => window.clearTimeout(timerId);
+  }, [resetClockMessage]);
 
   function handleRestoreItem(trashCanId, item) {
     if (!item.item) {
@@ -210,7 +253,7 @@ function TrashesPage({
               <div
                 className="tdocs-trash-item"
                 key={trashCan.id}
-                onClick={() => setSelectedTrashCanId(trashCan.id)}
+                onClick={() => selectTrashCan(trashCan.id)}
               >
                 <div className="tdocs-trash-item-main">
                   <span className="tdocs-trash-item-icon" aria-hidden="true">
@@ -221,7 +264,7 @@ function TrashesPage({
                     className="tdocs-trash-item-name"
                     onClick={(event) => {
                       event.stopPropagation();
-                      setSelectedTrashCanId(trashCan.id);
+                      selectTrashCan(trashCan.id);
                     }}
                   >
                     {trashCan.name}
@@ -320,7 +363,7 @@ function TrashesPage({
           <button
             type="button"
             className="tdocs-files-back-button"
-            onClick={() => setSelectedTrashCanId(null)}
+            onClick={() => selectTrashCan(null)}
             aria-label="Back to trash can list"
           >
             ←
@@ -329,6 +372,20 @@ function TrashesPage({
             {selectedTrashCan.name}
           </div>
         </div>
+
+        {resetClockMessage ? (
+          <div className="tdocs-trash-reset-banner" role="status" aria-live="polite">
+            <span>{resetClockMessage}</span>
+            <button
+              type="button"
+              className="tdocs-trash-reset-banner-close"
+              aria-label="Close reset message"
+              onClick={() => setResetClockMessage("")}
+            >
+              ×
+            </button>
+          </div>
+        ) : null}
 
         {selectedTrashCan.items.length === 0 ? (
           <div className="tdocs-trash-empty-state">
@@ -367,24 +424,32 @@ function TrashesPage({
                     <div className="tdocs-files-menu tdocs-trash-menu">
                       <button
                         type="button"
-                        onClick={() =>
+                        onClick={(event) => {
+                          event.stopPropagation();
                           setDeleteTarget({
                             trashCanId: selectedTrashCan.id,
                             item,
-                          })
-                        }
+                          });
+                        }}
                       >
                         Delete forevermore
                       </button>
                       <button
                         type="button"
-                        onClick={() =>
-                          handleRestoreItem(selectedTrashCan.id, item)
-                        }
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          handleRestoreItem(selectedTrashCan.id, item);
+                        }}
                       >
                         Restore
                       </button>
-                      <button type="button" disabled>
+                      <button
+                        type="button"
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          handleResetClock(selectedTrashCan.id, item);
+                        }}
+                      >
                         Reset clock
                       </button>
                     </div>
@@ -412,7 +477,6 @@ function TrashesPage({
           onCancel={() => {
             setRenameTargetId(null);
             setRenameValue("");
-            setSelectedTrashCanId(null);
           }}
           validateName={validateTrashCanName}
           inputRef={nameInputRef}
@@ -443,7 +507,6 @@ function TrashesPage({
           onSave={handleSaveSettings}
           onCancel={() => {
             setSettingsTargetId(null);
-            setSelectedTrashCanId(null);
           }}
         />
       ) : null}

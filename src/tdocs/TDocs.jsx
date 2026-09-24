@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import "./TDocs.css";
 import TabsBar from "./TabsBar.jsx";
 import TrashesPage from "./trashes/TrashesPage.jsx";
@@ -59,6 +60,11 @@ function saveSmartFoldersToStorage(smartFolders, storage) {
   storage?.setItem?.(SMART_FOLDERS_STORAGE_KEY, JSON.stringify(smartFolders));
 }
 
+function getPathFromSearchParams(searchParams) {
+  const path = searchParams.get("path");
+  return path ? path.split("/").filter(Boolean) : [];
+}
+
 function EditFilePage({ selectedFile, onClose, onContentChange }) {
   if (!selectedFile) {
     return (
@@ -91,12 +97,14 @@ function EditFilePage({ selectedFile, onClose, onContentChange }) {
 }
 
 function TDocs() {
-  const [activeTab, setActiveTab] = useState("trashes");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const activeTab = searchParams.get("tab") ?? "trashes";
+  const filesPath = getPathFromSearchParams(searchParams);
+  const selectedTrashCanId = searchParams.get("trash") || null;
   const [directoryTree, setDirectoryTree] = useState(() =>
     loadTreeFromStorage(window.localStorage),
   );
   const [selectedFile, setSelectedFile] = useState(null);
-  const [filesPath, setFilesPath] = useState([]);
   const [trashCans, setTrashCans] = useState(() =>
     loadTrashCansFromStorage(window.localStorage),
   );
@@ -106,6 +114,17 @@ function TDocs() {
   const directoryTreeRef = useRef(directoryTree);
   const trashCansRef = useRef(trashCans);
   const automationTimerRef = useRef(null);
+
+  function updateLocation(updates) {
+    setSearchParams(
+      (currentParams) => {
+        const nextParams = new URLSearchParams(currentParams);
+        updates(nextParams);
+        return nextParams;
+      },
+      { replace: true },
+    );
+  }
 
   useEffect(() => {
     directoryTreeRef.current = directoryTree;
@@ -121,12 +140,18 @@ function TDocs() {
 
   function handleOpenFile(file) {
     setSelectedFile(file);
-    setActiveTab("edit");
+    updateLocation((params) => params.set("tab", "edit"));
   }
 
   function handleOpenFolder(path) {
-    setFilesPath(path);
-    setActiveTab("files");
+    updateLocation((params) => {
+      params.set("tab", "files");
+      if (path.length > 0) {
+        params.set("path", path.join("/"));
+      } else {
+        params.delete("path");
+      }
+    });
   }
 
   function handleFileContentChange(content) {
@@ -209,6 +234,16 @@ function TDocs() {
           onTreeChange={setDirectoryTree}
           trashCans={trashCans}
           onTrashCansChange={setTrashCans}
+          initialSelectedTrashCanId={selectedTrashCanId}
+          onSelectedTrashCanChange={(trashCanId) =>
+            updateLocation((params) => {
+              if (trashCanId) {
+                params.set("trash", trashCanId);
+              } else {
+                params.delete("trash");
+              }
+            })
+          }
         />
       ),
     },
@@ -221,6 +256,15 @@ function TDocs() {
           onTreeChange={setDirectoryTree}
           onOpenFile={handleOpenFile}
           initialPath={filesPath}
+          onPathChange={(path) =>
+            updateLocation((params) => {
+              if (path.length > 0) {
+                params.set("path", path.join("/"));
+              } else {
+                params.delete("path");
+              }
+            })
+          }
           trashCans={trashCans}
           onTrashCansChange={setTrashCans}
         />
@@ -247,7 +291,11 @@ function TDocs() {
 
   return (
     <div className="tdocs-base">
-      <TabsBar tabs={tabs} activeTab={activeTab} onSelect={setActiveTab} />
+      <TabsBar
+        tabs={tabs}
+        activeTab={activeTab}
+        onSelect={(tabId) => updateLocation((params) => params.set("tab", tabId))}
+      />
       <main className="tdocs-main-content">
         {
           <ActiveScreen

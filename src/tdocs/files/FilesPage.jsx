@@ -21,6 +21,7 @@ function FilesPage({
   onTreeChange,
   onOpenFile = () => {},
   initialPath = [],
+  onPathChange = () => {},
   trashCans = [],
   onTrashCansChange = () => {},
 }) {
@@ -52,7 +53,7 @@ function FilesPage({
 
   useEffect(() => {
     setCurrentPath(initialPath);
-  }, [initialPath]);
+  }, [initialPath.join("/")]);
 
   useEffect(() => {
     saveTreeToStorage(directoryTree, window.localStorage);
@@ -84,16 +85,18 @@ function FilesPage({
   const displayPath = getDisplayPath(currentPath);
 
   function handleOpenDirectory(nextDirectoryName) {
-    setCurrentPath((previousPath) =>
-      navigateToDirectory(previousPath, nextDirectoryName),
-    );
+    const nextPath = navigateToDirectory(currentPath, nextDirectoryName);
+    setCurrentPath(nextPath);
+    onPathChange(nextPath);
     setMenuOpen(false);
     setActiveMenuItemKey(null);
     setDeleteMenuItemKey(null);
   }
 
   function handleGoBack() {
-    setCurrentPath((previousPath) => goToParentDirectory(previousPath));
+    const nextPath = goToParentDirectory(currentPath);
+    setCurrentPath(nextPath);
+    onPathChange(nextPath);
     setMenuOpen(false);
     setActiveMenuItemKey(null);
     setDeleteMenuItemKey(null);
