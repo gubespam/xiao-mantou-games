@@ -181,6 +181,7 @@ function TrashesPage({
           : trashItem,
       ),
     }));
+    console.log(`Clock reset for ${item.originalFilename}.`);
     setResetClockMessage(`Clock reset for ${item.originalFilename}.`);
     setItemMenuOpenId(null);
   }
@@ -373,20 +374,6 @@ function TrashesPage({
           </div>
         </div>
 
-        {resetClockMessage ? (
-          <div className="tdocs-trash-reset-banner" role="status" aria-live="polite">
-            <span>{resetClockMessage}</span>
-            <button
-              type="button"
-              className="tdocs-trash-reset-banner-close"
-              aria-label="Close reset message"
-              onClick={() => setResetClockMessage("")}
-            >
-              ×
-            </button>
-          </div>
-        ) : null}
-
         {selectedTrashCan.items.length === 0 ? (
           <div className="tdocs-trash-empty-state">
             This trash can is empty.
@@ -446,6 +433,7 @@ function TrashesPage({
                       <button
                         type="button"
                         onClick={(event) => {
+                          console.log("Reset clock clicked")
                           event.stopPropagation();
                           handleResetClock(selectedTrashCan.id, item);
                         }}
@@ -465,6 +453,24 @@ function TrashesPage({
 
   return (
     <>
+      {resetClockMessage ? (
+        <div
+          className="tdocs-trash-reset-banner"
+          role="status"
+          aria-live="polite"
+        >
+          <span>{resetClockMessage}</span>
+          <button
+            type="button"
+            className="tdocs-trash-reset-banner-close"
+            aria-label="Close reset message"
+            onClick={() => setResetClockMessage("")}
+          >
+            ×
+          </button>
+        </div>
+      ) : null}
+
       {selectedTrashCan ? renderSelectedTrashCan() : renderTrashList()}
 
       {renameTargetId ? (

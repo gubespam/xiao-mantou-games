@@ -96,6 +96,18 @@ function EditFilePage({ selectedFile, onClose, onContentChange }) {
   );
 }
 
+function TrashesTabScreen(props) {
+  return <TrashesPage {...props} />;
+}
+
+function FilesTabScreen(props) {
+  return <FilesPage {...props} />;
+}
+
+function SmartFoldersTabScreen(props) {
+  return <SmartFoldersPage {...props} />;
+}
+
 function TDocs() {
   const [searchParams, setSearchParams] = useSearchParams();
   const activeTab = searchParams.get("tab") ?? "trashes";
@@ -228,66 +240,61 @@ function TDocs() {
     {
       id: "trashes",
       label: "Trashes",
-      component: () => (
-        <TrashesPage
-          tree={directoryTree}
-          onTreeChange={setDirectoryTree}
-          trashCans={trashCans}
-          onTrashCansChange={setTrashCans}
-          initialSelectedTrashCanId={selectedTrashCanId}
-          onSelectedTrashCanChange={(trashCanId) =>
-            updateLocation((params) => {
-              if (trashCanId) {
-                params.set("trash", trashCanId);
-              } else {
-                params.delete("trash");
-              }
-            })
-          }
-        />
-      ),
+      component: TrashesTabScreen,
+      props: {
+        tree: directoryTree,
+        onTreeChange: setDirectoryTree,
+        trashCans,
+        onTrashCansChange: setTrashCans,
+        initialSelectedTrashCanId: selectedTrashCanId,
+        onSelectedTrashCanChange: (trashCanId) =>
+          updateLocation((params) => {
+            if (trashCanId) {
+              params.set("trash", trashCanId);
+            } else {
+              params.delete("trash");
+            }
+          }),
+      },
     },
     {
       id: "files",
       label: "Files",
-      component: () => (
-        <FilesPage
-          tree={directoryTree}
-          onTreeChange={setDirectoryTree}
-          onOpenFile={handleOpenFile}
-          initialPath={filesPath}
-          onPathChange={(path) =>
-            updateLocation((params) => {
-              if (path.length > 0) {
-                params.set("path", path.join("/"));
-              } else {
-                params.delete("path");
-              }
-            })
-          }
-          trashCans={trashCans}
-          onTrashCansChange={setTrashCans}
-        />
-      ),
+      component: FilesTabScreen,
+      props: {
+        tree: directoryTree,
+        onTreeChange: setDirectoryTree,
+        onOpenFile: handleOpenFile,
+        initialPath: filesPath,
+        onPathChange: (path) =>
+          updateLocation((params) => {
+            if (path.length > 0) {
+              params.set("path", path.join("/"));
+            } else {
+              params.delete("path");
+            }
+          }),
+        trashCans,
+        onTrashCansChange: setTrashCans,
+      },
     },
-    { id: "edit", label: "Edit File", component: EditFilePage },
+    { id: "edit", label: "Edit File", component: EditFilePage, props: {} },
     {
       id: "smartfolders",
       label: "Smart Folders",
-      component: () => (
-        <SmartFoldersPage
-          tree={directoryTree}
-          smartFolders={smartFolders}
-          onSmartFoldersChange={setSmartFolders}
-          onOpenFolder={handleOpenFolder}
-          onOpenFile={handleOpenFile}
-        />
-      ),
+      component: SmartFoldersTabScreen,
+      props: {
+        tree: directoryTree,
+        smartFolders,
+        onSmartFoldersChange: setSmartFolders,
+        onOpenFolder: handleOpenFolder,
+        onOpenFile: handleOpenFile,
+      },
     },
   ];
 
-  const ActiveScreen =
-    tabs.find((tab) => tab.id === activeTab)?.component ?? FileEditText;
+  const activeTabEntry = tabs.find((tab) => tab.id === activeTab);
+  const ActiveScreen = activeTabEntry?.component ?? FileEditText;
 
   return (
     <div className="tdocs-base">
@@ -299,6 +306,7 @@ function TDocs() {
       <main className="tdocs-main-content">
         {
           <ActiveScreen
+            {...(activeTabEntry?.props ?? {})}
             selectedFile={selectedFile}
             onClose={() => setSelectedFile(null)}
             onContentChange={handleFileContentChange}

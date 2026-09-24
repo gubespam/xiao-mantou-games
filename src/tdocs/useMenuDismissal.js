@@ -9,18 +9,25 @@ function useMenuDismissal(onDismiss) {
       const menuTrigger = element?.closest(
         ".tdocs-files-item-action-button, .tdocs-trash-item-menu-button, .tdocs-files-add-button",
       );
+      const clickedMenuAction =
+        element?.closest("button") && element.closest(".tdocs-files-menu");
 
       if (menu) {
-        if (
-          element.closest("button") &&
-          !element.closest(".tdocs-files-delete-option")
-        ) {
-          onDismiss();
+        // Clicking a menu action should perform that action; only outside clicks
+        // should dismiss the menu. This prevents reset/restore/delete actions from
+        // being canceled by the global dismissal behavior.
+        if (clickedMenuAction) {
+          console.log("Don't dismiss menu")
+          return;
         }
+
+        console.log("Dismiss menu")
+        onDismiss();
         return;
       }
 
       if (!menuTrigger) {
+        console.log("Dismiss menu")
         onDismiss();
       }
     }
