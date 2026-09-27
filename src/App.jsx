@@ -24,6 +24,7 @@ function App() {
           element={
             <div className="menu-container">
               <img src={mantouLogo} alt="Mantou Logo" className="mantou-logo" />
+              <a class="cross-site" href="/da-mantou-games/">Go to Da Mantou Games</a>
               <h1>Xiao Mantou Games</h1>
               <p className="subtitle">Little games by our favorite mantou</p>
               <nav className="vertical-menu">
