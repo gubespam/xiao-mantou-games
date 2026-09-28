@@ -15,7 +15,7 @@ import {
   saveTreeToStorage,
 } from './fileSystemService';
 
-function FilesPage({ tree, onTreeChange, trashCans = [], onTrashCansChange = () => {} }) {
+function FilesPage({ tree, onTreeChange, onOpenFile, trashCans = [], onTrashCansChange = () => {} }) {
   const [directoryTree, setDirectoryTree] = useState(tree);
   const [currentPath, setCurrentPath] = useState([]);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -320,7 +320,19 @@ function FilesPage({ tree, onTreeChange, trashCans = [], onTrashCansChange = () 
                     {item.name}
                   </button>
                 ) : (
-                  <span className="tdocs-files-item-name">{item.name}</span>
+                  <button
+                    type="button"
+                    className="tdocs-files-item-name tdocs-files-link"
+                    onClick={() =>
+                      onOpenFile?.({
+                        name: item.name,
+                        content: item.content ?? '',
+                        path: [...currentPath, item.name],
+                      })
+                    }
+                  >
+                    {item.name}
+                  </button>
                 )}
               </div>
 
