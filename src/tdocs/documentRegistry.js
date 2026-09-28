@@ -6,7 +6,6 @@ const markdownByPath = import.meta.glob(
     "./docu/Files/Files.md",
     "./docu/Edit-File/File-Editor.md",
     "./docu/Smart-Folders/Smart-Folders.md",
-    "./docu/Uh-Oh-Alerts/Uh-Oh-Alerts.md",
     "./docu/Documentation/TDocs-Overview.md",
   ],
   { eager: true, query: "?raw", import: "default" },
@@ -22,7 +21,6 @@ export const publicDocuments = new Map([
   ["Files/Files", markdownByPath["./docu/Files/Files.md"]],
   ["Edit-File/File-Editor", markdownByPath["./docu/Edit-File/File-Editor.md"]],
   ["Smart-Folders/Smart-Folders", markdownByPath["./docu/Smart-Folders/Smart-Folders.md"]],
-  ["Uh-Oh-Alerts/Uh-Oh-Alerts", markdownByPath["./docu/Uh-Oh-Alerts/Uh-Oh-Alerts.md"]],
   ["Documentation/TDocs-Overview", markdownByPath["./docu/Documentation/TDocs-Overview.md"]],
 ]);
 

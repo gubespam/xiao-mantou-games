@@ -302,15 +302,6 @@ function TDocs() {
       },
     },
     {
-      id: "uh-oh-alerts",
-      label: "Uh-Oh Alerts",
-      component: PlaceholderTabScreen,
-      props: {
-        title: "Uh-Oh Alerts",
-        message: "Nothing to report yet. Alerts will appear here.",
-      },
-    },
-    {
       id: "documentation",
       label: "Documentation",
       component: DocumentationPage,
