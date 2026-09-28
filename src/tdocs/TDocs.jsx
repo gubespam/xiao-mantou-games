@@ -108,6 +108,15 @@ function SmartFoldersTabScreen(props) {
   return <SmartFoldersPage {...props} />;
 }
 
+function PlaceholderTabScreen({ title, message }) {
+  return (
+    <section className="tdocs-tab-screen">
+      <h2>{title}</h2>
+      <p>{message}</p>
+    </section>
+  );
+}
+
 function TDocs() {
   const [searchParams, setSearchParams] = useSearchParams();
   const activeTab = searchParams.get("tab") ?? "trashes";
@@ -289,6 +298,24 @@ function TDocs() {
         onSmartFoldersChange: setSmartFolders,
         onOpenFolder: handleOpenFolder,
         onOpenFile: handleOpenFile,
+      },
+    },
+    {
+      id: "uh-oh-alerts",
+      label: "Uh-Oh Alerts",
+      component: PlaceholderTabScreen,
+      props: {
+        title: "Uh-Oh Alerts",
+        message: "Nothing to report yet. Alerts will appear here.",
+      },
+    },
+    {
+      id: "documentation",
+      label: "Documentation",
+      component: PlaceholderTabScreen,
+      props: {
+        title: "Documentation",
+        message: "Documentation is coming soon.",
       },
     },
   ];
