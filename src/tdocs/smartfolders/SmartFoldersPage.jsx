@@ -229,7 +229,7 @@ function SmartFoldersPage({
               <div className="tdocs-files-prompt-title">
                 Delete “{deleteTarget.name}” ?
               </div>
-              <p>This will not affect the files within this Smart Folder.</p>
+              <p>This will permanly delete the smart folder and will not affect the files within this Smart Folder.</p>
               <div className="tdocs-files-prompt-actions">
                 <button
                   type="button"
