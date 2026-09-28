@@ -2,7 +2,8 @@
 
 TDocs is the file and folder workspace in Xiao Mantou Games. Its tabs provide
 file browsing and editing, trash-can recovery, saved Smart Folder searches,
-and two placeholder areas. Start at the [documentation contents](../Main.md).
+alerts, and this navigable documentation. Start at the
+[documentation contents](../Main.md).
 
 ## Tabs
 
@@ -16,8 +17,9 @@ and two placeholder areas. Start at the [documentation contents](../Main.md).
 	of the current file tree.
 - [Uh-Oh Alerts](../Uh-Oh-Alerts/Uh-Oh-Alerts.md) currently shows
 	“Nothing to report yet. Alerts will appear here.”
-- **Documentation** currently shows “Documentation is coming soon.” The tab
-	does not yet render these Markdown guide files.
+- **Documentation** renders the published Markdown guides. Use Contents to
+	return to the index; selecting a guide updates the `doc` URL parameter, so
+	browser Back and Forward move between documentation pages.
 
 Select a tab in the tab bar to change views. The active tab is represented by
 the `tab` URL query parameter; if it is absent, TDocs opens Trashes.
@@ -30,6 +32,13 @@ values make the Files location and selected can part of the page URL. The file
 currently open in Edit File is different: it is held in page state, not in the
 URL. Reloading the page clears that selection, though saved file contents
 remain in the file tree.
+
+The selected documentation page is stored in the `doc` query parameter as a
+path relative to the documentation folder without the `.md` suffix. Without a
+valid `doc` value, the Documentation tab shows the contents page. Write guide
+links as relative `.md` links from the Markdown file containing the link, and
+add new published guides to the contents page and the application registry.
+Editorial planning files are not published pages.
 
 ## Local data
 

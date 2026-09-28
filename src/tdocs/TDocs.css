@@ -547,6 +547,108 @@
   font-size: 0.9rem;
 }
 
+.tdocs-documentation-screen {
+  max-width: 76rem;
+  margin: 0 auto;
+}
+
+.tdocs-documentation-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  margin: -0.25rem 0 1.5rem;
+  padding-bottom: 0.8rem;
+  border-bottom: 1px solid #2c3a2c;
+  color: #91a391;
+  font-size: 0.9rem;
+}
+
+.tdocs-documentation-nav button {
+  border: 1px solid #486448;
+  border-radius: 6px;
+  background: #243323;
+  color: #e2eee2;
+  padding: 0.45rem 0.7rem;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.tdocs-documentation-nav button:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.tdocs-documentation-notice {
+  border-left: 3px solid #d39b48;
+  padding: 0.55rem 0.8rem;
+  background: #282317;
+  color: #f0d9a9 !important;
+}
+
+.tdocs-markdown-content {
+  max-width: 76ch;
+  color: #e2e9e2;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+
+.tdocs-markdown-content h1,
+.tdocs-markdown-content h2,
+.tdocs-markdown-content h3,
+.tdocs-markdown-content h4 {
+  color: #f4f7f4;
+  line-height: 1.25;
+  margin: 1.7em 0 0.65em;
+  scroll-margin-top: 6rem;
+}
+
+.tdocs-markdown-content h1 {
+  margin-top: 0;
+  font-size: 1.8rem;
+}
+
+.tdocs-markdown-content p,
+.tdocs-markdown-content ul,
+.tdocs-markdown-content ol {
+  margin: 0 0 1rem;
+}
+
+.tdocs-markdown-content ul,
+.tdocs-markdown-content ol {
+  padding-left: 1.6rem;
+}
+
+.tdocs-markdown-content li + li {
+  margin-top: 0.35rem;
+}
+
+.tdocs-markdown-content a {
+  color: #a6e6ae;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.18em;
+}
+
+.tdocs-markdown-content a:hover {
+  color: #d0f5d4;
+}
+
+.tdocs-markdown-content code {
+  border: 1px solid #344634;
+  border-radius: 4px;
+  background: #101710;
+  padding: 0.08em 0.3em;
+  color: #d8e6d8;
+  font-size: 0.9em;
+  overflow-wrap: anywhere;
+}
+
+.tdocs-documentation-invalid-link {
+  color: #e7b982;
+  text-decoration: underline dotted;
+  text-underline-offset: 0.18em;
+}
+
 .tdocs-smart-folder-detail .tdocs-files-item-name {
   display: flex;
   flex-direction: column;

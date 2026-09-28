@@ -5,6 +5,7 @@ import TabsBar from "./TabsBar.jsx";
 import TrashesPage from "./trashes/TrashesPage.jsx";
 import FilesPage from "./files/FilesPage.jsx";
 import SmartFoldersPage from "./smartfolders/SmartFoldersPage.jsx";
+import DocumentationPage from "./DocumentationPage.jsx";
 import FileEditText from "./files/FileEditText.jsx";
 import {
   loadTreeFromStorage,
@@ -312,11 +313,8 @@ function TDocs() {
     {
       id: "documentation",
       label: "Documentation",
-      component: PlaceholderTabScreen,
-      props: {
-        title: "Documentation",
-        message: "Documentation is coming soon.",
-      },
+      component: DocumentationPage,
+      props: {},
     },
   ];
 

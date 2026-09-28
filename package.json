@@ -6,14 +6,17 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "test": "node --test src/tdocs/*.test.js",
     "preview": "vite preview",
     "deploy": "npm run build && git add dist -f && git commit -m 'Deploy' && git push"
   },
   "dependencies": {
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-markdown": "^10.1.0",
     "react-router-dom": "^7.9.6",
-    "react-use": "^17.6.0"
+    "react-use": "^17.6.0",
+    "rehype-slug": "^6.0.0"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^5.1.1",
