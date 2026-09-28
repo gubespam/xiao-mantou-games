@@ -1,7 +1,6 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
-import FileNameWindow from "./FileNameWindow";
-import MoveToWindow from "./MoveToWindow";
-import useMenuDismissal from "../useMenuDismissal";
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import FileNameWindow from './FileNameWindow';
+import MoveToWindow from './MoveToWindow';
 import {
   addItem,
   deleteItem,
@@ -14,19 +13,11 @@ import {
   moveItem,
   renameItem,
   saveTreeToStorage,
-} from "./fileSystemService";
+} from './fileSystemService';
 
-function FilesPage({
-  tree,
-  onTreeChange,
-  onOpenFile = () => {},
-  initialPath = [],
-  onPathChange = () => {},
-  trashCans = [],
-  onTrashCansChange = () => {},
-}) {
+function FilesPage({ tree, onTreeChange, trashCans = [], onTrashCansChange = () => {} }) {
   const [directoryTree, setDirectoryTree] = useState(tree);
-  const [currentPath, setCurrentPath] = useState(initialPath);
+  const [currentPath, setCurrentPath] = useState([]);
   const [menuOpen, setMenuOpen] = useState(false);
   const [activeMenuItemKey, setActiveMenuItemKey] = useState(null);
   const [deleteMenuItemKey, setDeleteMenuItemKey] = useState(null);
@@ -34,26 +25,16 @@ function FilesPage({
   const [explodeTarget, setExplodeTarget] = useState(null);
   const [trashTarget, setTrashTarget] = useState(null);
   const [moveTarget, setMoveTarget] = useState(null);
-  const [selectedTrashCanId, setSelectedTrashCanId] = useState("");
+  const [selectedTrashCanId, setSelectedTrashCanId] = useState('');
   const [promptKind, setPromptKind] = useState(null);
   const [promptTarget, setPromptTarget] = useState(null);
-  const [newName, setNewName] = useState("");
-  const [statusMessage, setStatusMessage] = useState("");
+  const [newName, setNewName] = useState('');
+  const [statusMessage, setStatusMessage] = useState('');
   const nameInputRef = useRef(null);
-
-  useMenuDismissal(() => {
-    setMenuOpen(false);
-    setActiveMenuItemKey(null);
-    setDeleteMenuItemKey(null);
-  });
 
   useEffect(() => {
     setDirectoryTree(tree);
   }, [tree]);
-
-  useEffect(() => {
-    setCurrentPath(initialPath);
-  }, [initialPath.join("/")]);
 
   useEffect(() => {
     saveTreeToStorage(directoryTree, window.localStorage);
@@ -67,7 +48,7 @@ function FilesPage({
   }, [promptKind]);
 
   useEffect(() => {
-    setStatusMessage("");
+    setStatusMessage('');
   }, [currentPath]);
 
   const currentDirectory = useMemo(
@@ -77,26 +58,20 @@ function FilesPage({
 
   const directoryItems = useMemo(() => {
     const items = getDirectoryItems(directoryTree, currentPath);
-    return [...items].sort((left, right) =>
-      left.name.localeCompare(right.name),
-    );
+    return [...items].sort((left, right) => left.name.localeCompare(right.name));
   }, [directoryTree, currentPath]);
 
   const displayPath = getDisplayPath(currentPath);
 
   function handleOpenDirectory(nextDirectoryName) {
-    const nextPath = navigateToDirectory(currentPath, nextDirectoryName);
-    setCurrentPath(nextPath);
-    onPathChange(nextPath);
+    setCurrentPath((previousPath) => navigateToDirectory(previousPath, nextDirectoryName));
     setMenuOpen(false);
     setActiveMenuItemKey(null);
     setDeleteMenuItemKey(null);
   }
 
   function handleGoBack() {
-    const nextPath = goToParentDirectory(currentPath);
-    setCurrentPath(nextPath);
-    onPathChange(nextPath);
+    setCurrentPath((previousPath) => goToParentDirectory(previousPath));
     setMenuOpen(false);
     setActiveMenuItemKey(null);
     setDeleteMenuItemKey(null);
@@ -105,23 +80,21 @@ function FilesPage({
   function handleAddItem(kind) {
     setPromptKind(kind);
     setPromptTarget(null);
-    setNewName("");
+    setNewName('');
     setMenuOpen(false);
     setActiveMenuItemKey(null);
     setDeleteMenuItemKey(null);
   }
 
   function toggleItemMenu(itemKey) {
-    setActiveMenuItemKey((currentKey) =>
-      currentKey === itemKey ? null : itemKey,
-    );
+    setActiveMenuItemKey((currentKey) => (currentKey === itemKey ? null : itemKey));
     setDeleteMenuItemKey(null);
     setMenuOpen(false);
   }
 
-  function handleRenameItem(item) {
-    setPromptKind("rename");
-    setPromptTarget({ item });
+  function handleRenameItem(index, item) {
+    setPromptKind('rename');
+    setPromptTarget({ index, item });
     setNewName(item.name);
     setActiveMenuItemKey(null);
     setDeleteMenuItemKey(null);
@@ -144,7 +117,7 @@ function FilesPage({
 
   function handleOpenTrashPrompt(index, item) {
     setTrashTarget({ index, item });
-    setSelectedTrashCanId(trashCans[0]?.id ?? "");
+    setSelectedTrashCanId(trashCans[0]?.id ?? '');
     setDeleteMenuItemKey(null);
     setActiveMenuItemKey(null);
   }
@@ -155,13 +128,11 @@ function FilesPage({
     }
 
     const currentItems = getDirectoryItems(directoryTree, currentPath);
-    const itemIndex = currentItems.findIndex(
-      (item) => item === trashTarget.item,
-    );
+    const itemIndex = currentItems.findIndex((item) => item === trashTarget.item);
 
     if (itemIndex < 0) {
       setTrashTarget(null);
-      setSelectedTrashCanId("");
+      setSelectedTrashCanId('');
       return;
     }
 
@@ -173,7 +144,6 @@ function FilesPage({
 
     const trashItem = {
       id: `${selectedTrashCanId}-${Date.now()}`,
-      originalPath: currentPath,
       originalFolderPath: displayPath,
       originalFilename: trashTarget.item.name,
       deletedAt: new Date().toISOString(),
@@ -190,7 +160,7 @@ function FilesPage({
     onTreeChange?.(nextTree);
     setDirectoryTree(nextTree);
     setTrashTarget(null);
-    setSelectedTrashCanId("");
+    setSelectedTrashCanId('');
     setStatusMessage(`${trashTarget.item.name} moved to trash.`);
   }
 
@@ -213,11 +183,7 @@ function FilesPage({
       return;
     }
 
-    const nextTree = explodeFolder(
-      directoryTree,
-      currentPath,
-      explodeTarget.index,
-    );
+    const nextTree = explodeFolder(directoryTree, currentPath, explodeTarget.index);
 
     if (nextTree === directoryTree) {
       return;
@@ -230,8 +196,7 @@ function FilesPage({
   }
 
   function handleMoveItem(index, item) {
-    const sourceIndex =
-      currentDirectory?.children?.findIndex((child) => child === item) ?? -1;
+    const sourceIndex = currentDirectory?.children?.findIndex((child) => child === item) ?? -1;
     setMoveTarget({ index: sourceIndex, item, sourcePath: currentPath });
     setActiveMenuItemKey(null);
     setDeleteMenuItemKey(null);
@@ -242,12 +207,7 @@ function FilesPage({
       return;
     }
 
-    const nextTree = moveItem(
-      directoryTree,
-      moveTarget.sourcePath,
-      moveTarget.index,
-      targetPath,
-    );
+    const nextTree = moveItem(directoryTree, moveTarget.sourcePath, moveTarget.index, targetPath);
 
     if (nextTree === directoryTree) {
       setStatusMessage(`${moveTarget.item.name} is already in that directory.`);
@@ -257,21 +217,17 @@ function FilesPage({
 
     setDirectoryTree(nextTree);
     setMoveTarget(null);
-    setStatusMessage(
-      `${moveTarget.item.name} moved to ${getDisplayPath(targetPath)}.`,
-    );
+    setStatusMessage(`${moveTarget.item.name} moved to ${getDisplayPath(targetPath)}.`);
   }
 
   function handleDownloadItem(item) {
-    if (item.type !== "file") {
+    if (item.type !== 'file') {
       return;
     }
 
-    const blob = new Blob([item.content ?? ""], {
-      type: "text/plain;charset=utf-8",
-    });
+    const blob = new Blob([item.content ?? ''], { type: 'text/plain;charset=utf-8' });
     const objectUrl = window.URL.createObjectURL(blob);
-    const anchor = document.createElement("a");
+    const anchor = document.createElement('a');
     anchor.href = objectUrl;
     anchor.download = item.name;
     anchor.click();
@@ -282,43 +238,34 @@ function FilesPage({
 
   function validateNewName(trimmedName) {
     if (!trimmedName) {
-      return "Please enter a name.";
+      return 'Please enter a name.';
     }
 
-    if (promptKind === "rename" && promptTarget) {
-      const currentItem = currentDirectory?.children?.find(
-        (child) => child === promptTarget.item,
-      );
+    if (promptKind === 'rename' && promptTarget) {
+      const currentItem = currentDirectory?.children?.[promptTarget.index];
       if (currentItem && currentItem.name === trimmedName) {
-        return "Please choose a different name.";
+        return 'Please choose a different name.';
       }
     }
 
     const nameExists = currentDirectory?.children?.some((child, index) => {
-      const isSameTarget =
-        promptKind === "rename" && promptTarget && child === promptTarget.item;
-      return (
-        !isSameTarget && child.name.toLowerCase() === trimmedName.toLowerCase()
-      );
+      const isSameTarget = promptKind === 'rename' && promptTarget && index === promptTarget.index;
+      return !isSameTarget && child.name.toLowerCase() === trimmedName.toLowerCase();
     });
 
     if (nameExists) {
-      return "That name already exists in this directory.";
+      return 'That name already exists in this directory.';
     }
 
-    return "";
+    return '';
   }
 
   function handleConfirmNewItem(trimmedName) {
     let nextTree = directoryTree;
 
-    if (promptKind === "rename" && promptTarget) {
-      const itemIndex =
-        currentDirectory?.children?.findIndex(
-          (child) => child === promptTarget.item,
-        ) ?? -1;
-      nextTree = renameItem(directoryTree, currentPath, itemIndex, trimmedName);
-    } else if (promptKind === "file" || promptKind === "folder") {
+    if (promptKind === 'rename' && promptTarget) {
+      nextTree = renameItem(directoryTree, currentPath, promptTarget.index, trimmedName);
+    } else if (promptKind === 'file' || promptKind === 'folder') {
       nextTree = addItem(directoryTree, currentPath, promptKind, trimmedName);
     }
 
@@ -329,13 +276,13 @@ function FilesPage({
     setDirectoryTree(nextTree);
     setPromptKind(null);
     setPromptTarget(null);
-    setNewName("");
+    setNewName('');
   }
 
   function handleCancelNewItem() {
     setPromptKind(null);
     setPromptTarget(null);
-    setNewName("");
+    setNewName('');
   }
 
   return (
@@ -362,9 +309,9 @@ function FilesPage({
             <div className="tdocs-files-item" key={itemKey}>
               <div className="tdocs-files-item-left">
                 <span className="tdocs-files-item-icon" aria-hidden="true">
-                  {item.type === "dir" ? "📁" : "📄"}
+                  {item.type === 'dir' ? '📁' : '📄'}
                 </span>
-                {item.type === "dir" ? (
+                {item.type === 'dir' ? (
                   <button
                     type="button"
                     className="tdocs-files-item-name tdocs-files-link"
@@ -373,19 +320,7 @@ function FilesPage({
                     {item.name}
                   </button>
                 ) : (
-                  <button
-                    type="button"
-                    className="tdocs-files-item-name tdocs-files-link"
-                    onClick={() =>
-                      onOpenFile({
-                        name: item.name,
-                        content: item.content ?? "",
-                        path: [...currentPath, item.name],
-                      })
-                    }
-                  >
-                    {item.name}
-                  </button>
+                  <span className="tdocs-files-item-name">{item.name}</span>
                 )}
               </div>
 
@@ -401,13 +336,10 @@ function FilesPage({
 
                 {isMenuOpen ? (
                   <div className="tdocs-files-menu">
-                    <button
-                      type="button"
-                      onClick={() => handleRenameItem(item)}
-                    >
+                    <button type="button" onClick={() => handleRenameItem(index, item)}>
                       Rename
                     </button>
-                    {item.type === "file" ? (
+                    {item.type === 'file' ? (
                       <div className="tdocs-files-submenu-container">
                         <button
                           type="button"
@@ -443,32 +375,20 @@ function FilesPage({
                         </div>
                       </div>
                     ) : null}
-                    {item.type === "dir" ? (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const sourceIndex =
-                            currentDirectory?.children?.findIndex(
-                              (child) => child === item,
-                            ) ?? -1;
-                          setExplodeTarget({ index: sourceIndex, item });
-                          setActiveMenuItemKey(null);
-                        }}
-                      >
+                    {item.type === 'dir' ? (
+                      <button type="button" onClick={() => {
+                        const sourceIndex = currentDirectory?.children?.findIndex((child) => child === item) ?? -1;
+                        setExplodeTarget({ index: sourceIndex, item });
+                        setActiveMenuItemKey(null);
+                      }}>
                         Explode
                       </button>
                     ) : null}
-                    <button
-                      type="button"
-                      onClick={() => handleMoveItem(index, item)}
-                    >
+                    <button type="button" onClick={() => handleMoveItem(index, item)}>
                       Move to...
                     </button>
-                    {item.type === "file" ? (
-                      <button
-                        type="button"
-                        onClick={() => handleDownloadItem(item)}
-                      >
+                    {item.type === 'file' ? (
+                      <button type="button" onClick={() => handleDownloadItem(item)}>
                         Download
                       </button>
                     ) : null}
@@ -483,11 +403,7 @@ function FilesPage({
           <button
             type="button"
             className="tdocs-files-add-button"
-            onClick={() => {
-              setMenuOpen((open) => !open);
-              setActiveMenuItemKey(null);
-              setDeleteMenuItemKey(null);
-            }}
+            onClick={() => setMenuOpen((open) => !open)}
             aria-label="Create a new file or folder"
           >
             +
@@ -495,10 +411,10 @@ function FilesPage({
 
           {menuOpen ? (
             <div className="tdocs-files-menu">
-              <button type="button" onClick={() => handleAddItem("file")}>
+              <button type="button" onClick={() => handleAddItem('file')}>
                 File
               </button>
-              <button type="button" onClick={() => handleAddItem("folder")}>
+              <button type="button" onClick={() => handleAddItem('folder')}>
                 Folder
               </button>
             </div>
@@ -506,18 +422,12 @@ function FilesPage({
         </div>
       </div>
 
-      {statusMessage ? (
-        <div className="tdocs-files-status">{statusMessage}</div>
-      ) : null}
+      {statusMessage ? <div className="tdocs-files-status">{statusMessage}</div> : null}
 
       {promptKind ? (
         <FileNameWindow
-          title={
-            promptKind === "rename"
-              ? "Rename item"
-              : `New ${promptKind === "file" ? "file" : "folder"}`
-          }
-          isFolder={promptKind === "folder"}
+          title={promptKind === 'rename' ? 'Rename item' : `New ${promptKind === 'file' ? 'file' : 'folder'}`}
+          isFolder={promptKind === 'folder'}
           value={newName}
           onChange={setNewName}
           onConfirm={handleConfirmNewItem}
@@ -529,21 +439,12 @@ function FilesPage({
 
       {deleteTarget ? (
         <div className="tdocs-files-prompt-overlay">
-          <div
-            className="tdocs-files-prompt-card"
-            role="alertdialog"
-            aria-modal="true"
-          >
+          <div className="tdocs-files-prompt-card" role="alertdialog" aria-modal="true">
             <div className="tdocs-files-prompt-title">
-              Are you sure you want to delete &quot;{deleteTarget.item.name}
-              &quot; forevermore?
+              Are you sure you want to delete &quot;{deleteTarget.item.name}&quot; forevermore?
             </div>
             <div className="tdocs-files-prompt-actions">
-              <button
-                type="button"
-                className="tdocs-files-danger-button"
-                onClick={handleDeleteForevermore}
-              >
+              <button type="button" className="tdocs-files-danger-button" onClick={handleDeleteForevermore}>
                 Delete
               </button>
               <button type="button" onClick={() => setDeleteTarget(null)}>
@@ -556,24 +457,15 @@ function FilesPage({
 
       {explodeTarget ? (
         <div className="tdocs-files-prompt-overlay">
-          <div
-            className="tdocs-files-prompt-card"
-            role="alertdialog"
-            aria-modal="true"
-          >
+          <div className="tdocs-files-prompt-card" role="alertdialog" aria-modal="true">
             <div className="tdocs-files-prompt-title">
               Explode &quot;{explodeTarget.item.name}&quot;?
             </div>
             <div>
-              All items inside this folder will move here, and the folder will
-              be permanently deleted.
+              All items inside this folder will move here, and the folder will be permanently deleted.
             </div>
             <div className="tdocs-files-prompt-actions">
-              <button
-                type="button"
-                className="tdocs-files-danger-button"
-                onClick={handleExplodeFolder}
-              >
+              <button type="button" className="tdocs-files-danger-button" onClick={handleExplodeFolder}>
                 Explode
               </button>
               <button type="button" onClick={() => setExplodeTarget(null)}>
@@ -586,24 +478,14 @@ function FilesPage({
 
       {trashTarget ? (
         <div className="tdocs-files-prompt-overlay">
-          <div
-            className="tdocs-files-prompt-card"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="trash-prompt-title"
-          >
+          <div className="tdocs-files-prompt-card" role="dialog" aria-modal="true" aria-labelledby="trash-prompt-title">
             <div id="trash-prompt-title" className="tdocs-files-prompt-title">
               Move &quot;{trashTarget.item.name}&quot; to trash
             </div>
             {trashCans.length > 0 ? (
               <label className="tdocs-files-prompt-label">
                 <span>Trash can</span>
-                <select
-                  value={selectedTrashCanId}
-                  onChange={(event) =>
-                    setSelectedTrashCanId(event.target.value)
-                  }
-                >
+                <select value={selectedTrashCanId} onChange={(event) => setSelectedTrashCanId(event.target.value)}>
                   {trashCans.map((trashCan) => (
                     <option key={trashCan.id} value={trashCan.id}>
                       {trashCan.name}
@@ -612,22 +494,15 @@ function FilesPage({
                 </select>
               </label>
             ) : (
-              <div className="tdocs-files-prompt-error">
-                There are no trash cans. You must create one before you can move
-                items to it.
-              </div>
+              <div className="tdocs-files-prompt-error">There are no trash cans. You must create one before you can move items to it.</div>
             )}
             <div className="tdocs-files-prompt-actions">
               <button
                 type="button"
-                onClick={
-                  trashCans.length > 0
-                    ? handleMoveToTrash
-                    : () => {
-                        setTrashTarget(null);
-                        setSelectedTrashCanId("");
-                      }
-                }
+                onClick={trashCans.length > 0 ? handleMoveToTrash : () => {
+                  setTrashTarget(null);
+                  setSelectedTrashCanId('');
+                }}
                 disabled={trashCans.length > 0 && !selectedTrashCanId}
               >
                 OK
@@ -637,7 +512,7 @@ function FilesPage({
                   type="button"
                   onClick={() => {
                     setTrashTarget(null);
-                    setSelectedTrashCanId("");
+                    setSelectedTrashCanId('');
                   }}
                 >
                   Cancel
