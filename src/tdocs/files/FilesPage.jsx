@@ -1,8 +1,10 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import FileNameWindow from './FileNameWindow';
 import MoveToWindow from './MoveToWindow';
+import WebLinkWindow from './WebLinkWindow';
 import {
   addItem,
+  addWebLink,
   deleteItem,
   explodeFolder,
   findDirectoryByPath,
@@ -13,6 +15,7 @@ import {
   moveItem,
   renameItem,
   saveTreeToStorage,
+  updateWebLink,
 } from './fileSystemService';
 
 function FilesPage({ tree, onTreeChange, onOpenFile, trashCans = [], onTrashCansChange = () => {} }) {
@@ -29,6 +32,7 @@ function FilesPage({ tree, onTreeChange, onOpenFile, trashCans = [], onTrashCans
   const [promptKind, setPromptKind] = useState(null);
   const [promptTarget, setPromptTarget] = useState(null);
   const [newName, setNewName] = useState('');
+  const [webLinkTarget, setWebLinkTarget] = useState(null);
   const [statusMessage, setStatusMessage] = useState('');
   const nameInputRef = useRef(null);
 
@@ -86,6 +90,41 @@ function FilesPage({ tree, onTreeChange, onOpenFile, trashCans = [], onTrashCans
     setDeleteMenuItemKey(null);
   }
 
+  function handleAddWebLink() {
+    setWebLinkTarget({ mode: 'create', item: null });
+    setMenuOpen(false);
+  }
+
+  function handleEditWebLink(index, item) {
+    setWebLinkTarget({ mode: 'edit', index, item });
+    setActiveMenuItemKey(null);
+  }
+
+  function handleConfirmWebLink({ url, title, automaticName, titleRequest }) {
+    const targetItem = webLinkTarget?.item;
+    const itemId = targetItem?.id ?? `web-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    const nextTree = webLinkTarget?.mode === 'edit'
+      ? updateWebLink(directoryTree, currentPath, itemId, url, title)
+      : addWebLink(directoryTree, currentPath, url, title, itemId);
+
+    if (nextTree === directoryTree) {
+      return;
+    }
+
+    setDirectoryTree(nextTree);
+    setWebLinkTarget(null);
+
+    if (automaticName && titleRequest) {
+      titleRequest.then((pageTitle) => {
+        if (pageTitle) {
+          setDirectoryTree((currentTree) =>
+            updateWebLink(currentTree, currentPath, itemId, url, pageTitle),
+          );
+        }
+      });
+    }
+  }
+
   function toggleItemMenu(itemKey) {
     setActiveMenuItemKey((currentKey) => (currentKey === itemKey ? null : itemKey));
     setDeleteMenuItemKey(null);
@@ -110,7 +149,7 @@ function FilesPage({ tree, onTreeChange, onOpenFile, trashCans = [], onTrashCans
       return;
     }
 
-    handleDeleteItem(deleteTarget.index);
+    handleDeleteItem(deleteTarget.index, deleteTarget.item);
     setDeleteTarget(null);
     setDeleteMenuItemKey(null);
   }
@@ -164,9 +203,11 @@ function FilesPage({ tree, onTreeChange, onOpenFile, trashCans = [], onTrashCans
     setStatusMessage(`${trashTarget.item.name} moved to trash.`);
   }
 
-  function handleDeleteItem(index) {
-    const targetItem = getDirectoryItems(directoryTree, currentPath)[index];
-    const nextTree = deleteItem(directoryTree, currentPath, index);
+  function handleDeleteItem(index, item = null) {
+    const currentItems = getDirectoryItems(directoryTree, currentPath);
+    const itemIndex = item ? currentItems.findIndex((child) => child === item) : index;
+    const targetItem = currentItems[itemIndex];
+    const nextTree = deleteItem(directoryTree, currentPath, itemIndex);
 
     if (nextTree === directoryTree) {
       return;
@@ -309,7 +350,7 @@ function FilesPage({ tree, onTreeChange, onOpenFile, trashCans = [], onTrashCans
             <div className="tdocs-files-item" key={itemKey}>
               <div className="tdocs-files-item-left">
                 <span className="tdocs-files-item-icon" aria-hidden="true">
-                  {item.type === 'dir' ? '📁' : '📄'}
+                  {item.type === 'dir' ? '📁' : item.type === 'web' ? '🌐' : '📄'}
                 </span>
                 {item.type === 'dir' ? (
                   <button
@@ -323,13 +364,13 @@ function FilesPage({ tree, onTreeChange, onOpenFile, trashCans = [], onTrashCans
                   <button
                     type="button"
                     className="tdocs-files-item-name tdocs-files-link"
-                    onClick={() =>
-                      onOpenFile?.({
+                    onClick={() => item.type === 'web'
+                      ? window.open(item.url, '_blank', 'noopener,noreferrer')
+                      : onOpenFile?.({
                         name: item.name,
                         content: item.content ?? '',
                         path: [...currentPath, item.name],
-                      })
-                    }
+                      })}
                   >
                     {item.name}
                   </button>
@@ -348,9 +389,23 @@ function FilesPage({ tree, onTreeChange, onOpenFile, trashCans = [], onTrashCans
 
                 {isMenuOpen ? (
                   <div className="tdocs-files-menu">
-                    <button type="button" onClick={() => handleRenameItem(index, item)}>
-                      Rename
-                    </button>
+                    {item.type === 'web' ? (
+                      <button type="button" onClick={() => handleEditWebLink(index, item)}>
+                        Edit
+                      </button>
+                    ) : (
+                      <button type="button" onClick={() => handleRenameItem(index, item)}>
+                        Rename
+                      </button>
+                    )}
+                    {item.type === 'web' ? (
+                      <button type="button" onClick={() => {
+                        setDeleteTarget({ index, item });
+                        setActiveMenuItemKey(null);
+                      }}>
+                        Delete Forevermore
+                      </button>
+                    ) : null}
                     {item.type === 'file' ? (
                       <div className="tdocs-files-submenu-container">
                         <button
@@ -429,6 +484,12 @@ function FilesPage({ tree, onTreeChange, onOpenFile, trashCans = [], onTrashCans
               <button type="button" onClick={() => handleAddItem('folder')}>
                 Folder
               </button>
+              <button type="button" onClick={handleAddWebLink}>
+                Web
+              </button>
+              <button type="button" disabled>
+                Macro
+              </button>
             </div>
           ) : null}
         </div>
@@ -446,6 +507,22 @@ function FilesPage({ tree, onTreeChange, onOpenFile, trashCans = [], onTrashCans
           onCancel={handleCancelNewItem}
           validateName={validateNewName}
           inputRef={nameInputRef}
+        />
+      ) : null}
+
+      {webLinkTarget ? (
+        <WebLinkWindow
+          key={webLinkTarget.item?.id ?? 'new-web-link'}
+          initialLink={webLinkTarget.item}
+          onConfirm={handleConfirmWebLink}
+          onCancel={() => setWebLinkTarget(null)}
+          validateName={(name) => {
+            const nameExists = currentDirectory?.children?.some(
+              (child) => child.name.toLowerCase() === name.toLowerCase()
+                && child.id !== webLinkTarget.item?.id,
+            );
+            return nameExists ? 'That name already exists in this directory.' : '';
+          }}
         />
       ) : null}
 

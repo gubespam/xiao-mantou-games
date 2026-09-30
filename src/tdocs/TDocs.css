@@ -390,6 +390,18 @@
   gap: 0.4rem;
 }
 
+.tdocs-web-link-title-field {
+  margin-top: 0.8rem;
+}
+
+.tdocs-web-link-auto-name {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin-top: 0.8rem;
+  color: #dce9dc;
+}
+
 .tdocs-files-prompt-label span {
   color: #dce9dc;
 }

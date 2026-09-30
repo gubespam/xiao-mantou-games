@@ -1,8 +1,8 @@
 # TDocs Overview
 
 TDocs is the file and folder workspace in Xiao Mantou Games. Its tabs provide
-file browsing and editing, trash-can recovery, saved Smart Folder searches,
-alerts, and this navigable documentation. Start at the
+file browsing and editing, trash-can recovery, saved Smart Folder searches, and
+this navigable documentation. Start at the
 [documentation contents](../Main.md).
 
 ## Tabs
@@ -15,8 +15,6 @@ alerts, and this navigable documentation. Start at the
 	restore, permanent deletion, and per-can settings.
 - [Smart Folders](../Smart-Folders/Smart-Folders.md) saves criteria-based views
 	of the current file tree.
-- [Uh-Oh Alerts](../Uh-Oh-Alerts/Uh-Oh-Alerts.md) currently shows
-	“Nothing to report yet. Alerts will appear here.”
 - **Documentation** renders the published Markdown guides. Use Contents to
 	return to the index; selecting a guide updates the `doc` URL parameter, so
 	browser Back and Forward move between documentation pages.

@@ -16,6 +16,16 @@ export function createFileNode(name, content = '') {
   };
 }
 
+export function createWebLinkNode(url, title, id) {
+  return {
+    type: 'web',
+    id,
+    name: title,
+    url,
+    title,
+  };
+}
+
 export function buildInitialTree() {
   return createDirectoryNode('root', []);
 }
@@ -114,6 +124,36 @@ export function addItem(tree, pathSegments, kind, name) {
     kind === 'folder' ? createDirectoryNode(name) : createFileNode(name, ''),
   );
 
+  return nextTree;
+}
+
+export function addWebLink(tree, pathSegments, url, title, id) {
+  const nextTree = cloneTree(tree);
+  const currentDirectory = findDirectoryByPath(nextTree, pathSegments);
+
+  if (!currentDirectory) {
+    return tree;
+  }
+
+  currentDirectory.children = currentDirectory.children ?? [];
+  currentDirectory.children.push(createWebLinkNode(url, title, id));
+  return nextTree;
+}
+
+export function updateWebLink(tree, pathSegments, id, url, title) {
+  const nextTree = cloneTree(tree);
+  const currentDirectory = findDirectoryByPath(nextTree, pathSegments);
+  const webLink = currentDirectory?.children?.find(
+    (child) => child.type === 'web' && child.id === id,
+  );
+
+  if (!webLink) {
+    return tree;
+  }
+
+  webLink.url = url;
+  webLink.title = title;
+  webLink.name = title;
   return nextTree;
 }
 
