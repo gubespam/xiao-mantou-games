@@ -1,0 +1,675 @@
+{
+  "categories": {
+    "files": {
+      "open-directory": {
+        "name": "Open directory",
+        "parameters": {
+          "path": {
+            "type": "text",
+            "name": "Directory path",
+            "required": false,
+            "defaultValue": "/"
+          }
+        }
+      },
+      "open-directory-parent": {
+        "name": "Go to parent directory",
+        "parameters": {
+          "path": {
+            "type": "text",
+            "name": "Current directory path",
+            "required": false,
+            "defaultValue": "/"
+          }
+        }
+      },
+      "open-file": {
+        "name": "Open file",
+        "parameters": {
+          "path": {
+            "type": "text",
+            "name": "Directory path",
+            "required": true,
+            "defaultValue": "/"
+          },
+          "file-name": {
+            "type": "text",
+            "name": "File name",
+            "required": true,
+            "defaultValue": ""
+          }
+        }
+      },
+      "open-create-item-window": {
+        "name": "Open create item window",
+        "parameters": {
+          "path": {
+            "type": "text",
+            "name": "Directory path",
+            "required": false,
+            "defaultValue": "/"
+          },
+          "kind": {
+            "type": "text",
+            "name": "Item kind",
+            "required": false,
+            "defaultValue": "file"
+          },
+          "default-name": {
+            "type": "text",
+            "name": "Default item name",
+            "required": false,
+            "defaultValue": ""
+          }
+        }
+      },
+      "create-file": {
+        "name": "Create file",
+        "parameters": {
+          "path": {
+            "type": "text",
+            "name": "Directory path",
+            "required": true,
+            "defaultValue": "/"
+          },
+          "file-name": {
+            "type": "text",
+            "name": "File name",
+            "required": true,
+            "defaultValue": ""
+          }
+        }
+      },
+      "create-folder": {
+        "name": "Create folder",
+        "parameters": {
+          "path": {
+            "type": "text",
+            "name": "Directory path",
+            "required": true,
+            "defaultValue": "/"
+          },
+          "folder-name": {
+            "type": "text",
+            "name": "Folder name",
+            "required": true,
+            "defaultValue": ""
+          }
+        }
+      },
+      "create-web-link": {
+        "name": "Create web link",
+        "parameters": {
+          "path": {
+            "type": "text",
+            "name": "Directory path",
+            "required": true,
+            "defaultValue": "/"
+          },
+          "url": {
+            "type": "text",
+            "name": "URL",
+            "required": true,
+            "defaultValue": ""
+          },
+          "title": {
+            "type": "text",
+            "name": "Link title",
+            "required": true,
+            "defaultValue": ""
+          }
+        }
+      },
+      "edit-web-link": {
+        "name": "Edit web link",
+        "parameters": {
+          "path": {
+            "type": "text",
+            "name": "Directory path",
+            "required": true,
+            "defaultValue": "/"
+          },
+          "link-id": {
+            "type": "text",
+            "name": "Link identifier",
+            "required": true,
+            "defaultValue": ""
+          },
+          "url": {
+            "type": "text",
+            "name": "URL",
+            "required": true,
+            "defaultValue": ""
+          },
+          "title": {
+            "type": "text",
+            "name": "Link title",
+            "required": true,
+            "defaultValue": ""
+          }
+        }
+      },
+      "rename-item": {
+        "name": "Rename item",
+        "parameters": {
+          "path": {
+            "type": "text",
+            "name": "Directory path",
+            "required": true,
+            "defaultValue": "/"
+          },
+          "current-name": {
+            "type": "text",
+            "name": "Current item name",
+            "required": true,
+            "defaultValue": ""
+          },
+          "new-name": {
+            "type": "text",
+            "name": "New item name",
+            "required": true,
+            "defaultValue": ""
+          }
+        }
+      },
+      "move-item": {
+        "name": "Move item",
+        "parameters": {
+          "source-path": {
+            "type": "text",
+            "name": "Source directory path",
+            "required": true,
+            "defaultValue": "/"
+          },
+          "target-path": {
+            "type": "text",
+            "name": "Destination directory path",
+            "required": true,
+            "defaultValue": "/"
+          },
+          "item-name": {
+            "type": "text",
+            "name": "Item name",
+            "required": true,
+            "defaultValue": ""
+          }
+        }
+      },
+      "delete-item-forever": {
+        "name": "Delete item forever",
+        "parameters": {
+          "path": {
+            "type": "text",
+            "name": "Directory path",
+            "required": true,
+            "defaultValue": "/"
+          },
+          "item-name": {
+            "type": "text",
+            "name": "Item name",
+            "required": true,
+            "defaultValue": ""
+          }
+        }
+      },
+      "move-item-to-trash": {
+        "name": "Move item to trash",
+        "parameters": {
+          "path": {
+            "type": "text",
+            "name": "Directory path",
+            "required": true,
+            "defaultValue": "/"
+          },
+          "item-name": {
+            "type": "text",
+            "name": "Item name",
+            "required": true,
+            "defaultValue": ""
+          },
+          "trash-can-id": {
+            "type": "text",
+            "name": "Trash can id",
+            "required": true,
+            "defaultValue": ""
+          }
+        }
+      },
+      "explode-folder": {
+        "name": "Explode folder",
+        "parameters": {
+          "path": {
+            "type": "text",
+            "name": "Directory path",
+            "required": true,
+            "defaultValue": "/"
+          },
+          "folder-name": {
+            "type": "text",
+            "name": "Folder name",
+            "required": true,
+            "defaultValue": ""
+          }
+        }
+      },
+      "download-item": {
+        "name": "Download file",
+        "parameters": {
+          "path": {
+            "type": "text",
+            "name": "Directory path",
+            "required": true,
+            "defaultValue": "/"
+          },
+          "file-name": {
+            "type": "text",
+            "name": "File name",
+            "required": true,
+            "defaultValue": ""
+          }
+        }
+      }
+    },
+    "edit-file": {
+      "open-file-editor": {
+        "name": "Open file editor",
+        "parameters": {
+          "path": {
+            "type": "text",
+            "name": "Directory path",
+            "required": true,
+            "defaultValue": "/"
+          },
+          "file-name": {
+            "type": "text",
+            "name": "File name",
+            "required": true,
+            "defaultValue": ""
+          }
+        }
+      },
+      "update-file-content": {
+        "name": "Update file content",
+        "parameters": {
+          "path": {
+            "type": "text",
+            "name": "Directory path",
+            "required": true,
+            "defaultValue": "/"
+          },
+          "file-name": {
+            "type": "text",
+            "name": "File name",
+            "required": true,
+            "defaultValue": ""
+          },
+          "content": {
+            "type": "text",
+            "name": "File content",
+            "required": true,
+            "defaultValue": ""
+          }
+        }
+      },
+      "split-line": {
+        "name": "Split line",
+        "parameters": {
+          "path": {
+            "type": "text",
+            "name": "Directory path",
+            "required": true,
+            "defaultValue": "/"
+          },
+          "file-name": {
+            "type": "text",
+            "name": "File name",
+            "required": true,
+            "defaultValue": ""
+          },
+          "line-index": {
+            "type": "number",
+            "name": "Line index",
+            "required": true,
+            "defaultValue": 0
+          },
+          "cursor-position": {
+            "type": "number",
+            "name": "Cursor position",
+            "required": true,
+            "defaultValue": 0
+          }
+        }
+      },
+      "indent-line": {
+        "name": "Indent line",
+        "parameters": {
+          "path": {
+            "type": "text",
+            "name": "Directory path",
+            "required": true,
+            "defaultValue": "/"
+          },
+          "file-name": {
+            "type": "text",
+            "name": "File name",
+            "required": true,
+            "defaultValue": ""
+          },
+          "line-index": {
+            "type": "number",
+            "name": "Line index",
+            "required": true,
+            "defaultValue": 0
+          },
+          "indent-direction": {
+            "type": "text",
+            "name": "Indent direction",
+            "required": true,
+            "defaultValue": "in"
+          }
+        }
+      },
+      "outdent-line": {
+        "name": "Outdent line",
+        "parameters": {
+          "path": {
+            "type": "text",
+            "name": "Directory path",
+            "required": true,
+            "defaultValue": "/"
+          },
+          "file-name": {
+            "type": "text",
+            "name": "File name",
+            "required": true,
+            "defaultValue": ""
+          },
+          "line-index": {
+            "type": "number",
+            "name": "Line index",
+            "required": true,
+            "defaultValue": 0
+          }
+        }
+      }
+    },
+    "smart-folders": {
+      "open-create-smart-folder-window": {
+        "name": "Open create smart folder window",
+        "parameters": {
+          "location": {
+            "type": "text",
+            "name": "Smart folder location",
+            "required": false,
+            "defaultValue": "/"
+          },
+          "type": {
+            "type": "text",
+            "name": "Item type filter",
+            "required": false,
+            "defaultValue": "any"
+          }
+        }
+      },
+      "create-smart-folder": {
+        "name": "Create smart folder",
+        "parameters": {
+          "name": {
+            "type": "text",
+            "name": "Smart folder name",
+            "required": true,
+            "defaultValue": ""
+          },
+          "type": {
+            "type": "text",
+            "name": "Item type filter",
+            "required": true,
+            "defaultValue": "any"
+          },
+          "location": {
+            "type": "text",
+            "name": "Location scope",
+            "required": true,
+            "defaultValue": "/"
+          },
+          "name-query": {
+            "type": "text",
+            "name": "Name contains",
+            "required": false,
+            "defaultValue": ""
+          }
+        }
+      },
+      "open-smart-folder": {
+        "name": "Open smart folder",
+        "parameters": {
+          "smart-folder-id": {
+            "type": "text",
+            "name": "Smart folder id",
+            "required": true,
+            "defaultValue": ""
+          }
+        }
+      },
+      "edit-smart-folder": {
+        "name": "Edit smart folder",
+        "parameters": {
+          "smart-folder-id": {
+            "type": "text",
+            "name": "Smart folder id",
+            "required": true,
+            "defaultValue": ""
+          },
+          "name": {
+            "type": "text",
+            "name": "Smart folder name",
+            "required": true,
+            "defaultValue": ""
+          },
+          "type": {
+            "type": "text",
+            "name": "Item type filter",
+            "required": true,
+            "defaultValue": "any"
+          },
+          "location": {
+            "type": "text",
+            "name": "Location scope",
+            "required": true,
+            "defaultValue": "/"
+          },
+          "name-query": {
+            "type": "text",
+            "name": "Name contains",
+            "required": false,
+            "defaultValue": ""
+          }
+        }
+      },
+      "delete-smart-folder": {
+        "name": "Delete smart folder",
+        "parameters": {
+          "smart-folder-id": {
+            "type": "text",
+            "name": "Smart folder id",
+            "required": true,
+            "defaultValue": ""
+          }
+        }
+      }
+    },
+    "trashes": {
+      "create-trash-can": {
+        "name": "Create trash can",
+        "parameters": {
+          "name": {
+            "type": "text",
+            "name": "Trash can name",
+            "required": true,
+            "defaultValue": ""
+          }
+        }
+      },
+      "rename-trash-can": {
+        "name": "Rename trash can",
+        "parameters": {
+          "trash-can-id": {
+            "type": "text",
+            "name": "Trash can id",
+            "required": true,
+            "defaultValue": ""
+          },
+          "new-name": {
+            "type": "text",
+            "name": "New trash can name",
+            "required": true,
+            "defaultValue": ""
+          }
+        }
+      },
+      "delete-empty-trash-can": {
+        "name": "Delete empty trash can",
+        "parameters": {
+          "trash-can-id": {
+            "type": "text",
+            "name": "Trash can id",
+            "required": true,
+            "defaultValue": ""
+          }
+        }
+      },
+      "empty-trash-can": {
+        "name": "Empty trash can",
+        "parameters": {
+          "trash-can-id": {
+            "type": "text",
+            "name": "Trash can id",
+            "required": true,
+            "defaultValue": ""
+          }
+        }
+      },
+      "set-trash-can-settings": {
+        "name": "Set trash can settings",
+        "parameters": {
+          "trash-can-id": {
+            "type": "text",
+            "name": "Trash can id",
+            "required": true,
+            "defaultValue": ""
+          },
+          "action": {
+            "type": "text",
+            "name": "Automation action",
+            "required": true,
+            "defaultValue": "nothing"
+          },
+          "delete-after-days": {
+            "type": "number",
+            "name": "Delete after days",
+            "required": false,
+            "defaultValue": 30
+          }
+        }
+      },
+      "open-trash-can": {
+        "name": "Open trash can",
+        "parameters": {
+          "trash-can-id": {
+            "type": "text",
+            "name": "Trash can id",
+            "required": true,
+            "defaultValue": ""
+          }
+        }
+      },
+      "restore-trash-item": {
+        "name": "Restore trash item",
+        "parameters": {
+          "trash-can-id": {
+            "type": "text",
+            "name": "Trash can id",
+            "required": true,
+            "defaultValue": ""
+          },
+          "item-id": {
+            "type": "text",
+            "name": "Trash item id",
+            "required": true,
+            "defaultValue": ""
+          }
+        }
+      },
+      "delete-trash-item-forever": {
+        "name": "Delete trash item forever",
+        "parameters": {
+          "trash-can-id": {
+            "type": "text",
+            "name": "Trash can id",
+            "required": true,
+            "defaultValue": ""
+          },
+          "item-id": {
+            "type": "text",
+            "name": "Trash item id",
+            "required": true,
+            "defaultValue": ""
+          }
+        }
+      },
+      "reset-trash-item-clock": {
+        "name": "Reset trash item clock",
+        "parameters": {
+          "trash-can-id": {
+            "type": "text",
+            "name": "Trash can id",
+            "required": true,
+            "defaultValue": ""
+          },
+          "item-id": {
+            "type": "text",
+            "name": "Trash item id",
+            "required": true,
+            "defaultValue": ""
+          }
+        }
+      }
+    },
+    "documentation": {
+      "open-documentation-page": {
+        "name": "Open documentation page",
+        "parameters": {
+          "document-id": {
+            "type": "text",
+            "name": "Document id",
+            "required": false,
+            "defaultValue": "Main"
+          },
+          "fragment": {
+            "type": "text",
+            "name": "Section fragment",
+            "required": false,
+            "defaultValue": ""
+          }
+        }
+      },
+      "navigate-to-documentation-section": {
+        "name": "Navigate to documentation section",
+        "parameters": {
+          "document-id": {
+            "type": "text",
+            "name": "Document id",
+            "required": true,
+            "defaultValue": "Main"
+          },
+          "fragment": {
+            "type": "text",
+            "name": "Section fragment",
+            "required": false,
+            "defaultValue": ""
+          }
+        }
+      }
+    }
+  }
+}
