@@ -2,671 +2,917 @@
   "categories": {
     "files": {
       "open-directory": {
-        "name": "Open directory",
+        "label": "Open directory",
         "parameters": {
           "path": {
             "type": "text",
-            "name": "Directory path",
+            "label": "Directory path",
             "required": false,
             "defaultValue": "/"
+          }
+        },
+        "outputs": {
+          "opened-path": {
+            "type": "text",
+            "label": "Opened directory path"
           }
         }
       },
       "open-directory-parent": {
-        "name": "Go to parent directory",
+        "label": "Go to parent directory",
         "parameters": {
           "path": {
             "type": "text",
-            "name": "Current directory path",
+            "label": "Current directory path",
             "required": false,
             "defaultValue": "/"
+          }
+        },
+        "outputs": {
+          "parent-path": {
+            "type": "text",
+            "label": "Parent directory path"
           }
         }
       },
       "open-file": {
-        "name": "Open file",
+        "label": "Open file",
         "parameters": {
           "path": {
             "type": "text",
-            "name": "Directory path",
+            "label": "Directory path",
             "required": true,
             "defaultValue": "/"
           },
           "file-name": {
             "type": "text",
-            "name": "File name",
+            "label": "File name",
             "required": true,
             "defaultValue": ""
+          }
+        },
+        "outputs": {
+          "file-path": {
+            "type": "text",
+            "label": "Opened file path"
+          },
+          "content": {
+            "type": "text",
+            "label": "File content"
           }
         }
       },
       "open-create-item-window": {
-        "name": "Open create item window",
+        "label": "Open create item window",
         "parameters": {
           "path": {
             "type": "text",
-            "name": "Directory path",
+            "label": "Directory path",
             "required": false,
             "defaultValue": "/"
           },
           "kind": {
             "type": "text",
-            "name": "Item kind",
+            "label": "Item kind",
             "required": false,
             "defaultValue": "file"
           },
           "default-name": {
             "type": "text",
-            "name": "Default item name",
+            "label": "Default item name",
             "required": false,
             "defaultValue": ""
+          }
+        },
+        "outputs": {
+          "opened": {
+            "type": "boolean",
+            "label": "Whether the create item window opened"
           }
         }
       },
       "create-file": {
-        "name": "Create file",
+        "label": "Create file",
         "parameters": {
           "path": {
             "type": "text",
-            "name": "Directory path",
+            "label": "Directory path",
             "required": true,
             "defaultValue": "/"
           },
           "file-name": {
             "type": "text",
-            "name": "File name",
+            "label": "File name",
             "required": true,
             "defaultValue": ""
+          }
+        },
+        "outputs": {
+          "file-path": {
+            "type": "text",
+            "label": "Created file path"
           }
         }
       },
       "create-folder": {
-        "name": "Create folder",
+        "label": "Create folder",
         "parameters": {
           "path": {
             "type": "text",
-            "name": "Directory path",
+            "label": "Directory path",
             "required": true,
             "defaultValue": "/"
           },
           "folder-name": {
             "type": "text",
-            "name": "Folder name",
+            "label": "Folder name",
             "required": true,
             "defaultValue": ""
+          }
+        },
+        "outputs": {
+          "folder-path": {
+            "type": "text",
+            "label": "Created folder path"
           }
         }
       },
       "create-web-link": {
-        "name": "Create web link",
+        "label": "Create web link",
         "parameters": {
           "path": {
             "type": "text",
-            "name": "Directory path",
+            "label": "Directory path",
             "required": true,
             "defaultValue": "/"
           },
           "url": {
             "type": "text",
-            "name": "URL",
+            "label": "URL",
             "required": true,
             "defaultValue": ""
           },
           "title": {
             "type": "text",
-            "name": "Link title",
+            "label": "Link title",
             "required": true,
             "defaultValue": ""
+          }
+        },
+        "outputs": {
+          "link-id": {
+            "type": "text",
+            "label": "Created web link identifier"
+          },
+          "url": {
+            "type": "text",
+            "label": "Web link URL"
           }
         }
       },
       "edit-web-link": {
-        "name": "Edit web link",
+        "label": "Edit web link",
         "parameters": {
           "path": {
             "type": "text",
-            "name": "Directory path",
+            "label": "Directory path",
             "required": true,
             "defaultValue": "/"
           },
           "link-id": {
             "type": "text",
-            "name": "Link identifier",
+            "label": "Link identifier",
             "required": true,
             "defaultValue": ""
           },
           "url": {
             "type": "text",
-            "name": "URL",
+            "label": "URL",
             "required": true,
             "defaultValue": ""
           },
           "title": {
             "type": "text",
-            "name": "Link title",
+            "label": "Link title",
             "required": true,
             "defaultValue": ""
+          }
+        },
+        "outputs": {
+          "link-id": {
+            "type": "text",
+            "label": "Updated web link identifier"
+          },
+          "url": {
+            "type": "text",
+            "label": "Updated web link URL"
           }
         }
       },
       "rename-item": {
-        "name": "Rename item",
+        "label": "Rename item",
         "parameters": {
           "path": {
             "type": "text",
-            "name": "Directory path",
+            "label": "Directory path",
             "required": true,
             "defaultValue": "/"
           },
           "current-name": {
             "type": "text",
-            "name": "Current item name",
+            "label": "Current item name",
             "required": true,
             "defaultValue": ""
           },
           "new-name": {
             "type": "text",
-            "name": "New item name",
+            "label": "New item name",
             "required": true,
             "defaultValue": ""
+          }
+        },
+        "outputs": {
+          "item-path": {
+            "type": "text",
+            "label": "Renamed item path"
           }
         }
       },
       "move-item": {
-        "name": "Move item",
+        "label": "Move item",
         "parameters": {
           "source-path": {
             "type": "text",
-            "name": "Source directory path",
+            "label": "Source directory path",
             "required": true,
             "defaultValue": "/"
           },
           "target-path": {
             "type": "text",
-            "name": "Destination directory path",
+            "label": "Destination directory path",
             "required": true,
             "defaultValue": "/"
           },
           "item-name": {
             "type": "text",
-            "name": "Item name",
+            "label": "Item name",
             "required": true,
             "defaultValue": ""
+          }
+        },
+        "outputs": {
+          "item-path": {
+            "type": "text",
+            "label": "Moved item path"
           }
         }
       },
       "delete-item-forever": {
-        "name": "Delete item forever",
+        "label": "Delete item forever",
         "parameters": {
           "path": {
             "type": "text",
-            "name": "Directory path",
+            "label": "Directory path",
             "required": true,
             "defaultValue": "/"
           },
           "item-name": {
             "type": "text",
-            "name": "Item name",
+            "label": "Item name",
             "required": true,
             "defaultValue": ""
+          }
+        },
+        "outputs": {
+          "deleted": {
+            "type": "boolean",
+            "label": "Whether the item was deleted"
           }
         }
       },
       "move-item-to-trash": {
-        "name": "Move item to trash",
+        "label": "Move item to trash",
         "parameters": {
           "path": {
             "type": "text",
-            "name": "Directory path",
+            "label": "Directory path",
             "required": true,
             "defaultValue": "/"
           },
           "item-name": {
             "type": "text",
-            "name": "Item name",
+            "label": "Item name",
             "required": true,
             "defaultValue": ""
           },
           "trash-can-id": {
             "type": "text",
-            "name": "Trash can id",
+            "label": "Trash can id",
             "required": true,
             "defaultValue": ""
+          }
+        },
+        "outputs": {
+          "trash-item-id": {
+            "type": "text",
+            "label": "Created trash item identifier"
           }
         }
       },
       "explode-folder": {
-        "name": "Explode folder",
+        "label": "Explode folder",
         "parameters": {
           "path": {
             "type": "text",
-            "name": "Directory path",
+            "label": "Directory path",
             "required": true,
             "defaultValue": "/"
           },
           "folder-name": {
             "type": "text",
-            "name": "Folder name",
+            "label": "Folder name",
             "required": true,
             "defaultValue": ""
+          }
+        },
+        "outputs": {
+          "moved-item-count": {
+            "type": "number",
+            "label": "Number of child items moved"
           }
         }
       },
       "download-item": {
-        "name": "Download file",
+        "label": "Download file",
         "parameters": {
           "path": {
             "type": "text",
-            "name": "Directory path",
+            "label": "Directory path",
             "required": true,
             "defaultValue": "/"
           },
           "file-name": {
             "type": "text",
-            "name": "File name",
+            "label": "File name",
             "required": true,
             "defaultValue": ""
+          }
+        },
+        "outputs": {
+          "downloaded-file-name": {
+            "type": "text",
+            "label": "Downloaded file name"
           }
         }
       }
     },
     "edit-file": {
       "open-file-editor": {
-        "name": "Open file editor",
+        "label": "Open file editor",
         "parameters": {
           "path": {
             "type": "text",
-            "name": "Directory path",
+            "label": "Directory path",
             "required": true,
             "defaultValue": "/"
           },
           "file-name": {
             "type": "text",
-            "name": "File name",
+            "label": "File name",
             "required": true,
             "defaultValue": ""
+          }
+        },
+        "outputs": {
+          "file-path": {
+            "type": "text",
+            "label": "Opened file path"
           }
         }
       },
       "update-file-content": {
-        "name": "Update file content",
+        "label": "Update file content",
         "parameters": {
           "path": {
             "type": "text",
-            "name": "Directory path",
+            "label": "Directory path",
             "required": true,
             "defaultValue": "/"
           },
           "file-name": {
             "type": "text",
-            "name": "File name",
+            "label": "File name",
             "required": true,
             "defaultValue": ""
           },
           "content": {
             "type": "text",
-            "name": "File content",
+            "label": "File content",
             "required": true,
             "defaultValue": ""
+          }
+        },
+        "outputs": {
+          "content": {
+            "type": "text",
+            "label": "Updated file content"
           }
         }
       },
       "split-line": {
-        "name": "Split line",
+        "label": "Split line",
         "parameters": {
           "path": {
             "type": "text",
-            "name": "Directory path",
+            "label": "Directory path",
             "required": true,
             "defaultValue": "/"
           },
           "file-name": {
             "type": "text",
-            "name": "File name",
+            "label": "File name",
             "required": true,
             "defaultValue": ""
           },
           "line-index": {
             "type": "number",
-            "name": "Line index",
+            "label": "Line index",
             "required": true,
             "defaultValue": 0
           },
           "cursor-position": {
             "type": "number",
-            "name": "Cursor position",
+            "label": "Cursor position",
             "required": true,
             "defaultValue": 0
+          }
+        },
+        "outputs": {
+          "content": {
+            "type": "text",
+            "label": "Updated file content"
           }
         }
       },
       "indent-line": {
-        "name": "Indent line",
+        "label": "Indent line",
         "parameters": {
           "path": {
             "type": "text",
-            "name": "Directory path",
+            "label": "Directory path",
             "required": true,
             "defaultValue": "/"
           },
           "file-name": {
             "type": "text",
-            "name": "File name",
+            "label": "File name",
             "required": true,
             "defaultValue": ""
           },
           "line-index": {
             "type": "number",
-            "name": "Line index",
+            "label": "Line index",
             "required": true,
             "defaultValue": 0
           },
           "indent-direction": {
             "type": "text",
-            "name": "Indent direction",
+            "label": "Indent direction",
             "required": true,
             "defaultValue": "in"
+          }
+        },
+        "outputs": {
+          "content": {
+            "type": "text",
+            "label": "Updated file content"
           }
         }
       },
       "outdent-line": {
-        "name": "Outdent line",
+        "label": "Outdent line",
         "parameters": {
           "path": {
             "type": "text",
-            "name": "Directory path",
+            "label": "Directory path",
             "required": true,
             "defaultValue": "/"
           },
           "file-name": {
             "type": "text",
-            "name": "File name",
+            "label": "File name",
             "required": true,
             "defaultValue": ""
           },
           "line-index": {
             "type": "number",
-            "name": "Line index",
+            "label": "Line index",
             "required": true,
             "defaultValue": 0
+          }
+        },
+        "outputs": {
+          "content": {
+            "type": "text",
+            "label": "Updated file content"
           }
         }
       }
     },
     "smart-folders": {
       "open-create-smart-folder-window": {
-        "name": "Open create smart folder window",
+        "label": "Open create smart folder window",
         "parameters": {
           "location": {
             "type": "text",
-            "name": "Smart folder location",
+            "label": "Smart folder location",
             "required": false,
             "defaultValue": "/"
           },
           "type": {
             "type": "text",
-            "name": "Item type filter",
+            "label": "Item type filter",
             "required": false,
             "defaultValue": "any"
+          }
+        },
+        "outputs": {
+          "opened": {
+            "type": "boolean",
+            "label": "Whether the smart folder window opened"
           }
         }
       },
       "create-smart-folder": {
-        "name": "Create smart folder",
+        "label": "Create smart folder",
         "parameters": {
-          "name": {
+          "label": {
             "type": "text",
-            "name": "Smart folder name",
+            "label": "Smart folder name",
             "required": true,
             "defaultValue": ""
           },
           "type": {
             "type": "text",
-            "name": "Item type filter",
+            "label": "Item type filter",
             "required": true,
             "defaultValue": "any"
           },
           "location": {
             "type": "text",
-            "name": "Location scope",
+            "label": "Location scope",
             "required": true,
             "defaultValue": "/"
           },
           "name-query": {
             "type": "text",
-            "name": "Name contains",
+            "label": "Name contains",
             "required": false,
             "defaultValue": ""
+          }
+        },
+        "outputs": {
+          "smart-folder-id": {
+            "type": "text",
+            "label": "Created smart folder identifier"
+          },
+          "name": {
+            "type": "text",
+            "label": "Created smart folder name"
           }
         }
       },
       "open-smart-folder": {
-        "name": "Open smart folder",
+        "label": "Open smart folder",
         "parameters": {
           "smart-folder-id": {
             "type": "text",
-            "name": "Smart folder id",
+            "label": "Smart folder id",
             "required": true,
             "defaultValue": ""
+          }
+        },
+        "outputs": {
+          "smart-folder-id": {
+            "type": "text",
+            "label": "Opened smart folder identifier"
+          },
+          "match-count": {
+            "type": "number",
+            "label": "Number of matching items"
           }
         }
       },
       "edit-smart-folder": {
-        "name": "Edit smart folder",
+        "label": "Edit smart folder",
         "parameters": {
           "smart-folder-id": {
             "type": "text",
-            "name": "Smart folder id",
+            "label": "Smart folder id",
             "required": true,
             "defaultValue": ""
           },
-          "name": {
+          "label": {
             "type": "text",
-            "name": "Smart folder name",
+            "label": "Smart folder name",
             "required": true,
             "defaultValue": ""
           },
           "type": {
             "type": "text",
-            "name": "Item type filter",
+            "label": "Item type filter",
             "required": true,
             "defaultValue": "any"
           },
           "location": {
             "type": "text",
-            "name": "Location scope",
+            "label": "Location scope",
             "required": true,
             "defaultValue": "/"
           },
           "name-query": {
             "type": "text",
-            "name": "Name contains",
+            "label": "Name contains",
             "required": false,
             "defaultValue": ""
+          }
+        },
+        "outputs": {
+          "smart-folder-id": {
+            "type": "text",
+            "label": "Updated smart folder identifier"
           }
         }
       },
       "delete-smart-folder": {
-        "name": "Delete smart folder",
+        "label": "Delete smart folder",
         "parameters": {
           "smart-folder-id": {
             "type": "text",
-            "name": "Smart folder id",
+            "label": "Smart folder id",
             "required": true,
             "defaultValue": ""
+          }
+        },
+        "outputs": {
+          "deleted": {
+            "type": "boolean",
+            "label": "Whether the smart folder was deleted"
           }
         }
       }
     },
     "trashes": {
       "create-trash-can": {
-        "name": "Create trash can",
+        "label": "Create trash can",
         "parameters": {
-          "name": {
+          "label": {
             "type": "text",
-            "name": "Trash can name",
+            "label": "Trash can name",
             "required": true,
             "defaultValue": ""
+          }
+        },
+        "outputs": {
+          "trash-can-id": {
+            "type": "text",
+            "label": "Created trash can identifier"
+          },
+          "name": {
+            "type": "text",
+            "label": "Created trash can name"
           }
         }
       },
       "rename-trash-can": {
-        "name": "Rename trash can",
+        "label": "Rename trash can",
         "parameters": {
           "trash-can-id": {
             "type": "text",
-            "name": "Trash can id",
+            "label": "Trash can id",
             "required": true,
             "defaultValue": ""
           },
           "new-name": {
             "type": "text",
-            "name": "New trash can name",
+            "label": "New trash can name",
             "required": true,
             "defaultValue": ""
+          }
+        },
+        "outputs": {
+          "trash-can-id": {
+            "type": "text",
+            "label": "Renamed trash can identifier"
+          },
+          "name": {
+            "type": "text",
+            "label": "Updated trash can name"
           }
         }
       },
       "delete-empty-trash-can": {
-        "name": "Delete empty trash can",
+        "label": "Delete empty trash can",
         "parameters": {
           "trash-can-id": {
             "type": "text",
-            "name": "Trash can id",
+            "label": "Trash can id",
             "required": true,
             "defaultValue": ""
+          }
+        },
+        "outputs": {
+          "deleted": {
+            "type": "boolean",
+            "label": "Whether the empty trash can was deleted"
           }
         }
       },
       "empty-trash-can": {
-        "name": "Empty trash can",
+        "label": "Empty trash can",
         "parameters": {
           "trash-can-id": {
             "type": "text",
-            "name": "Trash can id",
+            "label": "Trash can id",
             "required": true,
             "defaultValue": ""
+          }
+        },
+        "outputs": {
+          "deleted-item-count": {
+            "type": "number",
+            "label": "Number of items permanently deleted"
           }
         }
       },
       "set-trash-can-settings": {
-        "name": "Set trash can settings",
+        "label": "Set trash can settings",
         "parameters": {
           "trash-can-id": {
             "type": "text",
-            "name": "Trash can id",
+            "label": "Trash can id",
             "required": true,
             "defaultValue": ""
           },
           "action": {
             "type": "text",
-            "name": "Automation action",
+            "label": "Automation action",
             "required": true,
             "defaultValue": "nothing"
           },
           "delete-after-days": {
             "type": "number",
-            "name": "Delete after days",
+            "label": "Delete after days",
             "required": false,
             "defaultValue": 30
+          }
+        },
+        "outputs": {
+          "action": {
+            "type": "text",
+            "label": "Saved automation action"
+          },
+          "delete-after-days": {
+            "type": "number",
+            "label": "Saved item age threshold in days"
           }
         }
       },
       "open-trash-can": {
-        "name": "Open trash can",
+        "label": "Open trash can",
         "parameters": {
           "trash-can-id": {
             "type": "text",
-            "name": "Trash can id",
+            "label": "Trash can id",
             "required": true,
             "defaultValue": ""
+          }
+        },
+        "outputs": {
+          "trash-can-id": {
+            "type": "text",
+            "label": "Opened trash can identifier"
           }
         }
       },
       "restore-trash-item": {
-        "name": "Restore trash item",
+        "label": "Restore trash item",
         "parameters": {
           "trash-can-id": {
             "type": "text",
-            "name": "Trash can id",
+            "label": "Trash can id",
             "required": true,
             "defaultValue": ""
           },
           "item-id": {
             "type": "text",
-            "name": "Trash item id",
+            "label": "Trash item id",
             "required": true,
             "defaultValue": ""
+          }
+        },
+        "outputs": {
+          "restored-path": {
+            "type": "text",
+            "label": "Restored item path"
           }
         }
       },
       "delete-trash-item-forever": {
-        "name": "Delete trash item forever",
+        "label": "Delete trash item forever",
         "parameters": {
           "trash-can-id": {
             "type": "text",
-            "name": "Trash can id",
+            "label": "Trash can id",
             "required": true,
             "defaultValue": ""
           },
           "item-id": {
             "type": "text",
-            "name": "Trash item id",
+            "label": "Trash item id",
             "required": true,
             "defaultValue": ""
+          }
+        },
+        "outputs": {
+          "deleted": {
+            "type": "boolean",
+            "label": "Whether the trash item was permanently deleted"
           }
         }
       },
       "reset-trash-item-clock": {
-        "name": "Reset trash item clock",
+        "label": "Reset trash item clock",
         "parameters": {
           "trash-can-id": {
             "type": "text",
-            "name": "Trash can id",
+            "label": "Trash can id",
             "required": true,
             "defaultValue": ""
           },
           "item-id": {
             "type": "text",
-            "name": "Trash item id",
+            "label": "Trash item id",
             "required": true,
             "defaultValue": ""
+          }
+        },
+        "outputs": {
+          "deleted-at": {
+            "type": "text",
+            "label": "Updated deletion timestamp"
           }
         }
       }
     },
     "documentation": {
       "open-documentation-page": {
-        "name": "Open documentation page",
+        "label": "Open documentation page",
         "parameters": {
           "document-id": {
             "type": "text",
-            "name": "Document id",
+            "label": "Document id",
             "required": false,
             "defaultValue": "Main"
           },
           "fragment": {
             "type": "text",
-            "name": "Section fragment",
+            "label": "Section fragment",
             "required": false,
             "defaultValue": ""
+          }
+        },
+        "outputs": {
+          "document-id": {
+            "type": "text",
+            "label": "Opened document identifier"
           }
         }
       },
       "navigate-to-documentation-section": {
-        "name": "Navigate to documentation section",
+        "label": "Navigate to documentation section",
         "parameters": {
           "document-id": {
             "type": "text",
-            "name": "Document id",
+            "label": "Document id",
             "required": true,
             "defaultValue": "Main"
           },
           "fragment": {
             "type": "text",
-            "name": "Section fragment",
+            "label": "Section fragment",
             "required": false,
             "defaultValue": ""
+          }
+        },
+        "outputs": {
+          "document-id": {
+            "type": "text",
+            "label": "Navigated document identifier"
+          },
+          "fragment": {
+            "type": "text",
+            "label": "Navigated section fragment"
           }
         }
       }

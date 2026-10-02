@@ -38,24 +38,34 @@ the list of tabs, such as "files", "smart-folders", etc.
 
 The command key must be lowercase with optional dashes to separate words.
 
+The parameters define the inputs to the command. For example, a file create command accepts a filename as input.
+
+The outputs define the outputs that the command returns. For example, a directory create command returns the full path of the directory created.
+
 Each category is
 ```json
 {
-  "command-key-1": {
-    "name": "User-friendly name of command",
+  "{command-key}": {
+    "label": "{User-friendly name of command}",
     "parameters": {
-      "param1": {
+      "{parameter-key}": {
         "type": "{data-type}",
-        "name": "User-friendly parameter name",
+        "label": "{User-friendly parameter name}",
         "required": "{boolean}",
         "defaultValue": "{default-value}"
+      }
+    },
+    "outputs": {
+      "{output-key}": {
+        "type": "{data-type}",
+        "label": "{User-friendly output name}",
       }
     }
   }
 }
 ```
 
-The parameter key must be lowercase with optional dashes to separate words.
+The parameter key and output key must be lowercase with optional dashes to separate words.
 
 The data types for parameters are:
 - text
@@ -113,7 +123,8 @@ When expanded, below the command name show:
 - The list of arguments for the command
 
 Each argument has
-- Name - non-editable label (from command libary metadata)
+- Label - user-visible non-editable label (from command libary metadata)
+- Name - internal stable key referring to this argument (from command libary metadata)
 - Value - type of component depends on type of argument (from command libary metadata)
   - Text - text field
   - Number - number picker
