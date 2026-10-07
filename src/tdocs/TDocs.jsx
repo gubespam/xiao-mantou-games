@@ -5,6 +5,7 @@ import TabsBar from "./TabsBar.jsx";
 import TrashesPage from "./trashes/TrashesPage.jsx";
 import FilesPage from "./files/FilesPage.jsx";
 import SmartFoldersPage from "./smartfolders/SmartFoldersPage.jsx";
+import MacroEditorTab from "./macros/MacroEditorTab.jsx";
 import DocumentationPage from "./DocumentationPage.jsx";
 import FileEditText from "./files/FileEditText.jsx";
 import {
@@ -19,6 +20,7 @@ import {
 
 const TRASH_CANS_STORAGE_KEY = "tdocs-trash-cans";
 const SMART_FOLDERS_STORAGE_KEY = "tdocs-smart-folders";
+const MACROS_STORAGE_KEY = "tdocs-macros";
 
 function getDefaultTrashCans() {
   return [];
@@ -59,6 +61,20 @@ function loadSmartFoldersFromStorage(storage) {
 
 function saveSmartFoldersToStorage(smartFolders, storage) {
   storage?.setItem?.(SMART_FOLDERS_STORAGE_KEY, JSON.stringify(smartFolders));
+}
+
+function loadMacrosFromStorage(storage) {
+  try {
+    const rawValue = storage?.getItem?.(MACROS_STORAGE_KEY);
+    const parsedValue = rawValue ? JSON.parse(rawValue) : [];
+    return Array.isArray(parsedValue) ? parsedValue : [];
+  } catch (error) {
+    return [];
+  }
+}
+
+function saveMacrosToStorage(macros, storage) {
+  storage?.setItem?.(MACROS_STORAGE_KEY, JSON.stringify(macros));
 }
 
 function getPathFromSearchParams(searchParams) {
@@ -109,6 +125,10 @@ function SmartFoldersTabScreen(props) {
   return <SmartFoldersPage {...props} />;
 }
 
+function MacroTabScreen(props) {
+  return <MacroEditorTab {...props} />;
+}
+
 function PlaceholderTabScreen({ title, message }) {
   return (
     <section className="tdocs-tab-screen">
@@ -123,6 +143,7 @@ function TDocs() {
   const activeTab = searchParams.get("tab") ?? "trashes";
   const filesPath = getPathFromSearchParams(searchParams);
   const selectedTrashCanId = searchParams.get("trash") || null;
+  const selectedMacroId = searchParams.get("macro") || null;
   const [directoryTree, setDirectoryTree] = useState(() =>
     loadTreeFromStorage(window.localStorage),
   );
@@ -132,6 +153,9 @@ function TDocs() {
   );
   const [smartFolders, setSmartFolders] = useState(() =>
     loadSmartFoldersFromStorage(window.localStorage),
+  );
+  const [macros, setMacros] = useState(() =>
+    loadMacrosFromStorage(window.localStorage),
   );
   const directoryTreeRef = useRef(directoryTree);
   const trashCansRef = useRef(trashCans);
@@ -201,6 +225,10 @@ function TDocs() {
   useEffect(() => {
     saveSmartFoldersToStorage(smartFolders, window.localStorage);
   }, [smartFolders]);
+
+  useEffect(() => {
+    saveMacrosToStorage(macros, window.localStorage);
+  }, [macros]);
 
   const runTrashCanAutomationCycle = useCallback(() => {
     // Run the scheduled trash-can cleanup pass against the latest tree and trash
@@ -299,6 +327,24 @@ function TDocs() {
         onSmartFoldersChange: setSmartFolders,
         onOpenFolder: handleOpenFolder,
         onOpenFile: handleOpenFile,
+      },
+    },
+    {
+      id: "macros",
+      label: "Macros",
+      component: MacroTabScreen,
+      props: {
+        macros,
+        onMacrosChange: setMacros,
+        selectedMacroId,
+        onSelectedMacroIdChange: (macroId) =>
+          updateLocation((params) => {
+            if (macroId) {
+              params.set("macro", macroId);
+            } else {
+              params.delete("macro");
+            }
+          }),
       },
     },
     {
