@@ -2,8 +2,8 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import "./MacroEditorTab.css";
 import commandLibrary from "./command-list.json" with { type: "json" };
 import {
+  getCommandEntries,
   getDefaultValueForType,
-  getSmartFolderCommandEntries,
   isValueMissing,
 } from "./macroEditorUtils.js";
 
@@ -21,11 +21,28 @@ function createMacro(name = "New macro") {
   };
 }
 
+function resolveCommandById(commandId) {
+  const [categoryName, commandKey] = String(commandId).split("/");
+
+  if (categoryName && commandKey && commandLibrary.categories?.[categoryName]?.[commandKey]) {
+    return commandLibrary.categories[categoryName][commandKey];
+  }
+
+  for (const [category, commands] of Object.entries(commandLibrary.categories ?? {})) {
+    const match = commands?.[commandId];
+    if (match) {
+      return match;
+    }
+  }
+
+  return null;
+}
+
 function createAction(commandId) {
-  const command = commandLibrary.categories["smart-folders"][commandId];
+  const command = resolveCommandById(commandId);
   const args = {};
 
-  Object.entries(command.parameters ?? {}).forEach(([parameterKey, parameter]) => {
+  Object.entries(command?.parameters ?? {}).forEach(([parameterKey, parameter]) => {
     const computedValue = parameter.defaultValue ?? getDefaultValueForType(parameter.type);
     args[parameterKey] = { kind: "value", value: computedValue };
   });
@@ -53,16 +70,39 @@ function getArgumentValue(action, parameterKey, parameter) {
   };
 }
 
-function MacroEditorTab({ macros = [], onMacrosChange = () => {}, selectedMacroId, onSelectedMacroIdChange = () => {} }) {
-  const commandEntries = useMemo(() => getSmartFolderCommandEntries(commandLibrary), []);
-  const commandsById = useMemo(() => {
-    const catalog = commandLibrary.categories["smart-folders"] ?? {};
-    return Object.fromEntries(
-      Object.entries(catalog).map(([commandId, command]) => [commandId, command]),
-    );
-  }, []);
+function MacroEditorTab({
+  macros = [],
+  onMacrosChange = () => {},
+  selectedMacroId,
+  onSelectedMacroIdChange = () => {},
+  onStartRecording = () => {},
+}) {
+  const commandEntries = useMemo(() => getCommandEntries(commandLibrary), []);
+  const commandsById = useMemo(
+    () =>
+      Object.fromEntries(
+        commandEntries.map(([commandId, command]) => [commandId, command]),
+      ),
+    [commandEntries],
+  );
+  const groupedCommandEntries = useMemo(() => {
+    const grouped = {};
+
+    commandEntries.forEach(([commandId, command, categoryName]) => {
+      if (!grouped[categoryName]) {
+        grouped[categoryName] = [];
+      }
+      grouped[categoryName].push([commandId, command]);
+    });
+
+    return Object.entries(grouped).sort(([left], [right]) => left.localeCompare(right));
+  }, [commandEntries]);
   const [commandPickerOpen, setCommandPickerOpen] = useState(false);
   const [expandedActionIds, setExpandedActionIds] = useState({});
+  const [createMenuOpen, setCreateMenuOpen] = useState(false);
+  const [recordingName, setRecordingName] = useState(null);
+  const [recordingNameError, setRecordingNameError] = useState("");
+  const [macroToDelete, setMacroToDelete] = useState(null);
   const commandPickerRef = useRef(null);
 
   const selectedMacro = macros.find((macro) => macro.id === selectedMacroId) ?? null;
@@ -106,6 +146,20 @@ function MacroEditorTab({ macros = [], onMacrosChange = () => {}, selectedMacroI
     const newMacro = createMacro();
     updateMacroList((currentMacros) => [...currentMacros, newMacro]);
     onSelectedMacroIdChange(newMacro.id);
+    setCreateMenuOpen(false);
+  }
+
+  function startRecording(event) {
+    event.preventDefault();
+    const name = recordingName.trim();
+    if (!name) {
+      setRecordingNameError("Please enter a macro name.");
+      return;
+    }
+
+    onStartRecording(name);
+    setRecordingName(null);
+    setRecordingNameError("");
   }
 
   function deleteMacro(macroId) {
@@ -185,6 +239,15 @@ function MacroEditorTab({ macros = [], onMacrosChange = () => {}, selectedMacroI
     const argument = getArgumentValue(action, parameterKey, parameter);
     const value = argument.value;
     const isInputRef = argument.kind === "input";
+    const isActionOutputRef = argument.kind === "action-output";
+    const outputAction = isActionOutputRef
+      ? selectedMacro?.actions.find((entry) => entry.id === argument.actionId)
+      : null;
+    const outputCommand = outputAction
+      ? commandsById[outputAction.commandId]
+      : null;
+    const outputLabel =
+      outputCommand?.outputs?.[argument.outputKey]?.label ?? argument.outputKey;
     const availableInputs = (selectedMacro?.inputs ?? []).filter(
       (input) => input.type === parameter.type,
     );
@@ -286,8 +349,33 @@ function MacroEditorTab({ macros = [], onMacrosChange = () => {}, selectedMacroI
             From input
           </label>
         </div>
-        {isInputRef ? renderInputSelection() : field}
-        {parameter.required && isValueMissing(parameter, argument.kind === "input" ? argument.inputId : argument.value) ? (
+        {isInputRef ? renderInputSelection() : null}
+        {isActionOutputRef ? (
+          <div className="tdocs-macro-action-output-ref">
+            <span>
+              From previous action: {outputCommand?.label ?? argument.actionId} → {outputLabel}
+            </span>
+            <button
+              type="button"
+              className="tdocs-macro-inline-button"
+              onClick={() =>
+                updateActionArgument(action.id, parameterKey, {
+                  kind: "value",
+                  value: parameter.defaultValue ?? getDefaultValueForType(parameter.type),
+                })
+              }
+            >
+              Use literal
+            </button>
+          </div>
+        ) : null}
+        {!isInputRef && !isActionOutputRef ? field : null}
+        {parameter.required &&
+        !isActionOutputRef &&
+        isValueMissing(
+          parameter,
+          isInputRef ? argument.inputId : argument.value,
+        ) ? (
           <div className="tdocs-macro-error">This value is required.</div>
         ) : null}
       </div>
@@ -302,15 +390,72 @@ function MacroEditorTab({ macros = [], onMacrosChange = () => {}, selectedMacroI
             <h2>Macros</h2>
             <p>Saved Smart Folders workflows.</p>
           </div>
-          <button
-            type="button"
-            className="tdocs-files-add-button"
-            onClick={addMacro}
-            aria-label="Create a macro"
-          >
-            +
-          </button>
+          <div className="tdocs-macro-create-menu-wrap">
+            <button
+              type="button"
+              className="tdocs-files-add-button"
+              onClick={() => setCreateMenuOpen((open) => !open)}
+              aria-label="Create a macro"
+              aria-expanded={createMenuOpen}
+            >
+              +
+            </button>
+            {createMenuOpen ? (
+              <div className="tdocs-macro-create-menu">
+                <button type="button" onClick={addMacro}>
+                  Create empty macro
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setRecordingName("");
+                    setRecordingNameError("");
+                    setCreateMenuOpen(false);
+                  }}
+                >
+                  Record a macro
+                </button>
+              </div>
+            ) : null}
+          </div>
         </div>
+        {recordingName !== null ? (
+          <div className="tdocs-macro-dialog-overlay">
+            <form
+              className="tdocs-macro-dialog-card"
+              onSubmit={startRecording}
+              role="dialog"
+              aria-label="Record a macro"
+            >
+              <div className="tdocs-macro-dialog-title">Record a macro</div>
+              <label className="tdocs-macro-recording-label">
+                <span>Macro name</span>
+                <input
+                  autoFocus
+                  value={recordingName}
+                  onChange={(event) => setRecordingName(event.target.value)}
+                  placeholder="New macro"
+                />
+              </label>
+              <p>Begin by clicking the red record button.</p>
+              {recordingNameError ? (
+                <div className="tdocs-macro-dialog-error">{recordingNameError}</div>
+              ) : null}
+              <div className="tdocs-macro-dialog-actions">
+                <button type="submit">Continue</button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setRecordingName(null);
+                    setRecordingNameError("");
+                  }}
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        ) : null}
         <div className="tdocs-macros-list">
           {macros.length === 0 ? (
             <div className="tdocs-smart-folders-empty">No macros yet.</div>
@@ -328,7 +473,7 @@ function MacroEditorTab({ macros = [], onMacrosChange = () => {}, selectedMacroI
                 <button
                   type="button"
                   className="tdocs-macro-delete-button"
-                  onClick={() => deleteMacro(macro.id)}
+                  onClick={() => setMacroToDelete(macro)}
                   aria-label={`Delete ${macro.name}`}
                 >
                   Delete
@@ -337,6 +482,36 @@ function MacroEditorTab({ macros = [], onMacrosChange = () => {}, selectedMacroI
             ))
           )}
         </div>
+        {macroToDelete ? (
+          <div className="tdocs-macro-dialog-overlay">
+            <div
+              className="tdocs-macro-dialog-card"
+              role="alertdialog"
+              aria-modal="true"
+              aria-labelledby="macro-delete-title"
+            >
+              <div id="macro-delete-title" className="tdocs-macro-dialog-title">
+                Delete &quot;{macroToDelete.name}&quot;?
+              </div>
+              <p>This macro will be permanently deleted.</p>
+              <div className="tdocs-macro-dialog-actions">
+                <button type="button" autoFocus onClick={() => setMacroToDelete(null)}>
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  className="tdocs-macro-confirm-delete"
+                  onClick={() => {
+                    deleteMacro(macroToDelete.id);
+                    setMacroToDelete(null);
+                  }}
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+          </div>
+        ) : null}
       </section>
     );
   }
@@ -423,16 +598,22 @@ function MacroEditorTab({ macros = [], onMacrosChange = () => {}, selectedMacroI
             </button>
             {commandPickerOpen ? (
               <div className="tdocs-macro-command-menu">
-                <div className="tdocs-macro-command-menu-title">Smart Folders commands</div>
-                {commandEntries.map(([commandId, command]) => (
-                  <button
-                    key={commandId}
-                    type="button"
-                    className="tdocs-macro-command-option"
-                    onClick={() => addAction(commandId)}
-                  >
-                    {command.label}
-                  </button>
+                {groupedCommandEntries.map(([categoryName, entries]) => (
+                  <div key={categoryName} className="tdocs-macro-command-group">
+                    <div className="tdocs-macro-command-group-title">{categoryName}</div>
+                    <div className="tdocs-macro-command-options">
+                      {entries.map(([commandId, command]) => (
+                        <button
+                          key={commandId}
+                          type="button"
+                          className="tdocs-macro-command-option"
+                          onClick={() => addAction(commandId)}
+                        >
+                          {command.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                 ))}
               </div>
             ) : null}

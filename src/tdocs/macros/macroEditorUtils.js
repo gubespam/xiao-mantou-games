@@ -1,11 +1,29 @@
-export function getSmartFolderCommandEntries(commandLibrary) {
-  const smartFolderCommands = commandLibrary?.categories?.["smart-folders"] ?? {};
+export function getCommandEntries(commandLibrary) {
+  const categories = commandLibrary?.categories ?? {};
+  const entries = [];
 
-  return Object.entries(smartFolderCommands).sort(([leftId, leftCommand], [rightId, rightCommand]) => {
+  Object.entries(categories).forEach(([categoryName, commands]) => {
+    Object.entries(commands ?? {}).forEach(([commandId, command]) => {
+      entries.push([`${categoryName}/${commandId}`, command, categoryName]);
+    });
+  });
+
+  return entries.sort(([leftId, leftCommand, leftCategory], [rightId, rightCommand, rightCategory]) => {
+    const categorySort = (leftCategory ?? "").localeCompare(rightCategory ?? "");
+    if (categorySort !== 0) {
+      return categorySort;
+    }
+
     const leftLabel = leftCommand?.label ?? leftId;
     const rightLabel = rightCommand?.label ?? rightId;
     return leftLabel.localeCompare(rightLabel) || leftId.localeCompare(rightId);
   });
+}
+
+export function getSmartFolderCommandEntries(commandLibrary) {
+  return getCommandEntries(commandLibrary).filter(([commandId]) =>
+    commandId.startsWith("smart-folders/"),
+  );
 }
 
 export function getDefaultValueForType(type) {

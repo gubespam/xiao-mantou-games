@@ -108,6 +108,79 @@
   white-space: nowrap;
 }
 
+.tdocs-macro-dialog-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.45);
+}
+
+.tdocs-macro-dialog-card {
+  width: min(25rem, calc(100vw - 2rem));
+  padding: 1rem;
+  border: 1px solid #324432;
+  border-radius: 12px;
+  background: #111811;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.45);
+}
+
+.tdocs-macro-dialog-title {
+  margin-bottom: 0.9rem;
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.tdocs-macro-recording-label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.tdocs-macro-recording-label span {
+  color: #dce9dc;
+}
+
+.tdocs-macro-recording-label input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.6rem 0.7rem;
+  border: 1px solid #3a563a;
+  border-radius: 8px;
+  background: #0d120d;
+  color: #f4f7f4;
+}
+
+.tdocs-macro-dialog-error {
+  margin-top: 0.6rem;
+  color: #ff9696;
+  font-size: 0.9rem;
+}
+
+.tdocs-macro-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.tdocs-macro-dialog-actions button {
+  padding: 0.45rem 0.85rem;
+  border: 1px solid #325632;
+  border-radius: 8px;
+  background: #1d2a1d;
+  color: #f4f7f4;
+  cursor: pointer;
+}
+
+.tdocs-macro-dialog-actions .tdocs-macro-confirm-delete {
+  border-color: #cd6c6c;
+  background: #a83232;
+  color: #ffffff;
+}
+
 .tdocs-macro-action {
   border: 1px solid #2d3d2d;
   border-radius: 8px;
@@ -199,6 +272,28 @@
   border-bottom: 1px solid #314731;
 }
 
+.tdocs-macro-command-group {
+  border-bottom: 1px solid #314731;
+}
+
+.tdocs-macro-command-group:last-child {
+  border-bottom: none;
+}
+
+.tdocs-macro-command-group-title {
+  padding: 0.55rem 0.8rem 0.35rem;
+  color: #9ad9a7;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.tdocs-macro-command-options {
+  display: flex;
+  flex-direction: column;
+}
+
 .tdocs-macro-command-option {
   border: 0;
   background: transparent;
@@ -228,3 +323,42 @@
   flex: 1;
 }
 
+.tdocs-macro-create-menu-wrap {
+  position: relative;
+}
+
+.tdocs-macro-create-menu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 0.5rem);
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  min-width: 12rem;
+  border: 1px solid #314731;
+  border-radius: 8px;
+  background: #162116;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.35);
+}
+
+.tdocs-macro-create-menu button {
+  border: 0;
+  padding: 0.7rem 0.8rem;
+  background: transparent;
+  color: #f4f7f4;
+  text-align: left;
+  cursor: pointer;
+}
+
+.tdocs-macro-create-menu button:hover {
+  background: #213521;
+}
+
+.tdocs-macro-action-output-ref {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  color: #b8d8bd;
+  flex-wrap: wrap;
+}

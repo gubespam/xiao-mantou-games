@@ -13,6 +13,7 @@ function TabsBar({ tabs, activeTab, onSelect }) {
           type="button"
           role="tab"
           aria-selected={activeTab === tab.id}
+          disabled={tab.disabled}
           className={`tdocs-tab ${activeTab === tab.id ? "is-active" : ""}`}
           onClick={() => onSelect(tab.id)}
         >

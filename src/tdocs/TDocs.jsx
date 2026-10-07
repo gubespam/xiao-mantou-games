@@ -6,6 +6,11 @@ import TrashesPage from "./trashes/TrashesPage.jsx";
 import FilesPage from "./files/FilesPage.jsx";
 import SmartFoldersPage from "./smartfolders/SmartFoldersPage.jsx";
 import MacroEditorTab from "./macros/MacroEditorTab.jsx";
+import commandLibrary from "./macros/command-list.json" with { type: "json" };
+import {
+  appendRecordedMacroEvent,
+  createMacroDraft,
+} from "./macros/macroRecording.js";
 import DocumentationPage from "./DocumentationPage.jsx";
 import FileEditText from "./files/FileEditText.jsx";
 import {
@@ -157,6 +162,8 @@ function TDocs() {
   const [macros, setMacros] = useState(() =>
     loadMacrosFromStorage(window.localStorage),
   );
+  const [recording, setRecording] = useState(null);
+  const recordingRef = useRef(null);
   const directoryTreeRef = useRef(directoryTree);
   const trashCansRef = useRef(trashCans);
   const automationTimerRef = useRef(null);
@@ -170,6 +177,80 @@ function TDocs() {
       },
       { replace: true },
     );
+  }
+
+  function setRecordingState(nextRecording) {
+    recordingRef.current = nextRecording;
+    setRecording(nextRecording);
+  }
+
+  function beginMacroRecording(name) {
+    setRecordingState({
+      phase: "ready",
+      macro: createMacroDraft(name),
+      bindings: new Map(),
+      error: "",
+    });
+    updateLocation((params) => {
+      params.set("tab", "smartfolders");
+      params.delete("macro");
+    });
+  }
+
+  function startMacroRecording() {
+    const current = recordingRef.current;
+    if (current?.phase === "ready") {
+      setRecordingState({ ...current, phase: "recording", error: "" });
+    }
+  }
+
+  function handleMacroEvent(event) {
+    const current = recordingRef.current;
+    if (current?.phase !== "recording") {
+      return;
+    }
+
+    const result = appendRecordedMacroEvent(
+      current.macro,
+      event,
+      current.bindings,
+      commandLibrary,
+    );
+    if (!result.accepted) {
+      if (result.error) {
+        setRecordingState({ ...current, error: result.error });
+      }
+      return;
+    }
+
+    setRecordingState({
+      ...current,
+      macro: result.macro,
+      bindings: result.bindings,
+      error: "",
+    });
+  }
+
+  function discardMacroRecording() {
+    setRecordingState(null);
+    updateLocation((params) => {
+      params.set("tab", "macros");
+      params.delete("macro");
+    });
+  }
+
+  function saveMacroRecording() {
+    const current = recordingRef.current;
+    if (current?.phase !== "recording") {
+      return;
+    }
+
+    setMacros((currentMacros) => [...currentMacros, current.macro]);
+    setRecordingState(null);
+    updateLocation((params) => {
+      params.set("tab", "macros");
+      params.set("macro", current.macro.id);
+    });
   }
 
   useEffect(() => {
@@ -325,6 +406,7 @@ function TDocs() {
         tree: directoryTree,
         smartFolders,
         onSmartFoldersChange: setSmartFolders,
+        onMacroEvent: handleMacroEvent,
         onOpenFolder: handleOpenFolder,
         onOpenFile: handleOpenFile,
       },
@@ -332,11 +414,13 @@ function TDocs() {
     {
       id: "macros",
       label: "Macros",
+      disabled: Boolean(recording),
       component: MacroTabScreen,
       props: {
         macros,
         onMacrosChange: setMacros,
         selectedMacroId,
+        onStartRecording: beginMacroRecording,
         onSelectedMacroIdChange: (macroId) =>
           updateLocation((params) => {
             if (macroId) {
@@ -363,7 +447,12 @@ function TDocs() {
       <TabsBar
         tabs={tabs}
         activeTab={activeTab}
-        onSelect={(tabId) => updateLocation((params) => params.set("tab", tabId))}
+        onSelect={(tabId) => {
+          if (recording && tabId === "macros") {
+            return;
+          }
+          updateLocation((params) => params.set("tab", tabId));
+        }}
       />
       <main className="tdocs-main-content">
         {
@@ -375,6 +464,48 @@ function TDocs() {
           />
         }
       </main>
+      {recording ? (
+        <div className="tdocs-macro-recorder" role="region" aria-label="Macro recorder">
+          {recording.phase === "ready" ? (
+            <button
+              type="button"
+              className="tdocs-macro-record-button"
+              onClick={startMacroRecording}
+              aria-label="Begin recording"
+            >
+              <span aria-hidden="true">●</span> Record
+            </button>
+          ) : (
+            <>
+              <span className="tdocs-macro-recorder-status">
+                Recording “{recording.macro.name}” · {recording.macro.actions.length} action
+                {recording.macro.actions.length === 1 ? "" : "s"}
+              </span>
+              <button
+                type="button"
+                className="tdocs-macro-stop-button"
+                onClick={saveMacroRecording}
+                aria-label="Stop and save recording"
+              >
+                ■ Stop and save
+              </button>
+            </>
+          )}
+          <button
+            type="button"
+            className="tdocs-macro-discard-button"
+            onClick={discardMacroRecording}
+            aria-label="Cancel and discard recording"
+          >
+            ×
+          </button>
+          {recording.error ? (
+            <div className="tdocs-macro-recorder-error" role="alert">
+              {recording.error}
+            </div>
+          ) : null}
+        </div>
+      ) : null}
     </div>
   );
 }

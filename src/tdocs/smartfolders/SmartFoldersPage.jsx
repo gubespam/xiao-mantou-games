@@ -100,6 +100,7 @@ function SmartFoldersPage({
   tree,
   smartFolders = [],
   onSmartFoldersChange = () => {},
+  onMacroEvent = () => {},
   onOpenFolder = () => {},
   onOpenFile = () => {},
 }) {
@@ -144,14 +145,76 @@ function SmartFoldersPage({
   }, [allItems, selectedFolder]);
 
   function saveFolder(folder) {
+    const isEdit = Boolean(folder.id);
+    const existingFolder = isEdit
+      ? smartFolders.find((entry) => entry.id === folder.id)
+      : null;
+    if (isEdit && !existingFolder) {
+      setFormValue(null);
+      return;
+    }
+
     const nextFolder = { ...folder, id: folder.id || `smart-${Date.now()}` };
-    onSmartFoldersChange((current) =>
-      folder.id
-        ? current.map((entry) => (entry.id === folder.id ? nextFolder : entry))
-        : [...current, nextFolder],
-    );
+    const changed = isEdit
+      ? ["name", "type", "location", "nameQuery"].some(
+          (key) => existingFolder[key] !== nextFolder[key],
+        )
+      : true;
+
+    if (changed) {
+      const nextSmartFolders = isEdit
+        ? smartFolders.map((entry) =>
+            entry.id === folder.id ? nextFolder : entry,
+          )
+        : [...smartFolders, nextFolder];
+      onSmartFoldersChange(nextSmartFolders);
+      onMacroEvent({
+        commandId: isEdit
+          ? "smart-folders/edit-smart-folder"
+          : "smart-folders/create-smart-folder",
+        params: {
+          ...(isEdit ? { "smart-folder-id": nextFolder.id } : {}),
+          label: nextFolder.name,
+          type: nextFolder.type,
+          location: nextFolder.location,
+          "name-query": nextFolder.nameQuery,
+        },
+        outputs: isEdit
+          ? { "smart-folder-id": nextFolder.id }
+          : {
+              "smart-folder-id": nextFolder.id,
+              name: nextFolder.name,
+            },
+        source: "user",
+        changed: true,
+      });
+    }
+
     setSelectedId(nextFolder.id);
     setFormValue(null);
+  }
+
+  function openCreateForm() {
+    const folder = defaultFolder();
+    setFormValue(folder);
+    onMacroEvent({
+      commandId: "smart-folders/open-create-smart-folder-window",
+      params: { location: folder.location, type: folder.type },
+      outputs: { opened: true },
+      source: "user",
+      changed: true,
+    });
+  }
+
+  function openFolder(folder) {
+    setSelectedId(folder.id);
+    onMacroEvent({
+      commandId: "smart-folders/open-smart-folder",
+      params: { "smart-folder-id": folder.id },
+      outputs: { "smart-folder-id": folder.id },
+      source: "user",
+      changed: true,
+    });
   }
 
   if (!selectedFolder) {
@@ -165,7 +228,7 @@ function SmartFoldersPage({
           <button
             type="button"
             className="tdocs-files-add-button"
-            onClick={() => setFormValue(defaultFolder())}
+            onClick={openCreateForm}
             aria-label="Create a smart folder"
           >
             +
@@ -177,7 +240,7 @@ function SmartFoldersPage({
               <button
                 type="button"
                 className="tdocs-smart-folder-open"
-                onClick={() => setSelectedId(folder.id)}
+                onClick={() => openFolder(folder)}
               >
                 <span aria-hidden="true">⚙</span>
                 <span>
@@ -235,9 +298,23 @@ function SmartFoldersPage({
                   type="button"
                   className="tdocs-files-danger-button"
                   onClick={() => {
-                    onSmartFoldersChange((current) =>
-                      current.filter((folder) => folder.id !== deleteTarget.id),
+                    const exists = smartFolders.some(
+                      (folder) => folder.id === deleteTarget.id,
                     );
+                    if (exists) {
+                      onSmartFoldersChange(
+                        smartFolders.filter(
+                          (folder) => folder.id !== deleteTarget.id,
+                        ),
+                      );
+                      onMacroEvent({
+                        commandId: "smart-folders/delete-smart-folder",
+                        params: { "smart-folder-id": deleteTarget.id },
+                        outputs: { deleted: true },
+                        source: "user",
+                        changed: true,
+                      });
+                    }
                     setDeleteTarget(null);
                   }}
                 >
