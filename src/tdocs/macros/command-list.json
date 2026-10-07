@@ -533,7 +533,8 @@
             "type": "text",
             "label": "Item type filter",
             "required": false,
-            "defaultValue": "any"
+            "defaultValue": "any",
+            "allowedValues": ["any", "file", "dir"]
           }
         },
         "outputs": {
@@ -556,7 +557,8 @@
             "type": "text",
             "label": "Item type filter",
             "required": true,
-            "defaultValue": "any"
+            "defaultValue": "any",
+            "allowedValues": ["any", "file", "dir"]
           },
           "location": {
             "type": "text",
@@ -622,7 +624,8 @@
             "type": "text",
             "label": "Item type filter",
             "required": true,
-            "defaultValue": "any"
+            "defaultValue": "any",
+            "allowedValues": ["any", "file", "dir"]
           },
           "location": {
             "type": "text",

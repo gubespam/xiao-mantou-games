@@ -76,6 +76,8 @@ function MacroEditorTab({
   selectedMacroId,
   onSelectedMacroIdChange = () => {},
   onStartRecording = () => {},
+  onPlayMacro = () => {},
+  playbackActive = false,
 }) {
   const commandEntries = useMemo(() => getCommandEntries(commandLibrary), []);
   const commandsById = useMemo(
@@ -103,6 +105,8 @@ function MacroEditorTab({
   const [recordingName, setRecordingName] = useState(null);
   const [recordingNameError, setRecordingNameError] = useState("");
   const [macroToDelete, setMacroToDelete] = useState(null);
+  const [macroToPlay, setMacroToPlay] = useState(null);
+  const [macroInputValues, setMacroInputValues] = useState({});
   const commandPickerRef = useRef(null);
 
   const selectedMacro = macros.find((macro) => macro.id === selectedMacroId) ?? null;
@@ -147,6 +151,30 @@ function MacroEditorTab({
     updateMacroList((currentMacros) => [...currentMacros, newMacro]);
     onSelectedMacroIdChange(newMacro.id);
     setCreateMenuOpen(false);
+  }
+
+  function requestPlay(macro) {
+    if (playbackActive) return;
+    if (!macro.inputs?.length) {
+      onPlayMacro(macro, {});
+      return;
+    }
+    setMacroInputValues(
+      Object.fromEntries(
+        macro.inputs.map((input) => [
+          input.id,
+          input.defaultValue ?? getDefaultValueForType(input.type),
+        ]),
+      ),
+    );
+    setMacroToPlay(macro);
+  }
+
+  function startPlayback(event) {
+    event.preventDefault();
+    onPlayMacro(macroToPlay, macroInputValues);
+    setMacroToPlay(null);
+    setMacroInputValues({});
   }
 
   function startRecording(event) {
@@ -472,6 +500,14 @@ function MacroEditorTab({
                 </button>
                 <button
                   type="button"
+                  className="tdocs-macro-inline-button"
+                  disabled={playbackActive}
+                  onClick={() => requestPlay(macro)}
+                >
+                  Play
+                </button>
+                <button
+                  type="button"
                   className="tdocs-macro-delete-button"
                   onClick={() => setMacroToDelete(macro)}
                   aria-label={`Delete ${macro.name}`}
@@ -482,6 +518,60 @@ function MacroEditorTab({
             ))
           )}
         </div>
+        {macroToPlay ? (
+          <div className="tdocs-macro-dialog-overlay">
+            <form
+              className="tdocs-macro-dialog-card"
+              onSubmit={startPlayback}
+              role="dialog"
+              aria-modal="true"
+              aria-label={`Play ${macroToPlay.name}`}
+            >
+              <div className="tdocs-macro-dialog-title">
+                Run “{macroToPlay.name}”
+              </div>
+              {macroToPlay.inputs.map((input) => (
+                <label className="tdocs-macro-recording-label" key={input.id}>
+                  <span>{input.name}</span>
+                  {input.type === "boolean" ? (
+                    <input
+                      type="checkbox"
+                      checked={Boolean(macroInputValues[input.id])}
+                      onChange={(event) =>
+                        setMacroInputValues((current) => ({
+                          ...current,
+                          [input.id]: event.target.checked,
+                        }))
+                      }
+                    />
+                  ) : (
+                    <input
+                      type={input.type === "number" ? "number" : "text"}
+                      value={macroInputValues[input.id] ?? ""}
+                      onChange={(event) =>
+                        setMacroInputValues((current) => ({
+                          ...current,
+                          [input.id]:
+                            input.type === "number"
+                              ? event.target.value === ""
+                                ? ""
+                                : Number(event.target.value)
+                              : event.target.value,
+                        }))
+                      }
+                    />
+                  )}
+                </label>
+              ))}
+              <div className="tdocs-macro-dialog-actions">
+                <button type="submit">Play macro</button>
+                <button type="button" onClick={() => setMacroToPlay(null)}>
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        ) : null}
         {macroToDelete ? (
           <div className="tdocs-macro-dialog-overlay">
             <div

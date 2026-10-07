@@ -11,6 +11,8 @@ import {
   appendRecordedMacroEvent,
   createMacroDraft,
 } from "./macros/macroRecording.js";
+import { playMacro } from "./macros/macroPlayback.js";
+import { smartFolderMacroAdapters } from "./macros/smartFolderMacroAdapters.js";
 import DocumentationPage from "./DocumentationPage.jsx";
 import FileEditText from "./files/FileEditText.jsx";
 import {
@@ -149,6 +151,7 @@ function TDocs() {
   const filesPath = getPathFromSearchParams(searchParams);
   const selectedTrashCanId = searchParams.get("trash") || null;
   const selectedMacroId = searchParams.get("macro") || null;
+  const selectedSmartFolderId = searchParams.get("smartFolder") || null;
   const [directoryTree, setDirectoryTree] = useState(() =>
     loadTreeFromStorage(window.localStorage),
   );
@@ -163,9 +166,13 @@ function TDocs() {
     loadMacrosFromStorage(window.localStorage),
   );
   const [recording, setRecording] = useState(null);
+  const [macroDialogIntent, setMacroDialogIntent] = useState(null);
+  const [playback, setPlayback] = useState(null);
   const recordingRef = useRef(null);
   const directoryTreeRef = useRef(directoryTree);
   const trashCansRef = useRef(trashCans);
+  const smartFoldersRef = useRef(smartFolders);
+  const playbackControllerRef = useRef(null);
   const automationTimerRef = useRef(null);
 
   function updateLocation(updates) {
@@ -253,6 +260,94 @@ function TDocs() {
     });
   }
 
+  async function handlePlayMacro(macro, inputs) {
+    if (playbackControllerRef.current) return;
+
+    const controller = new AbortController();
+    playbackControllerRef.current = controller;
+    setPlayback({
+      status: "playing",
+      macroName: macro.name,
+      completed: 0,
+      total: macro.actions.length,
+    });
+
+    const context = {
+      getSmartFolders: () => smartFoldersRef.current,
+      setSmartFolders: (nextFolders) => {
+        smartFoldersRef.current = nextFolders;
+        setSmartFolders(nextFolders);
+      },
+      createSmartFolderId: () =>
+        `smart-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
+      openSmartFolder: (folderId) => {
+        setMacroDialogIntent(null);
+        updateLocation((params) => {
+          params.set("tab", "smartfolders");
+          params.set("smartFolder", folderId);
+        });
+      },
+      clearSelectedSmartFolder: (folderId) =>
+        updateLocation((params) => {
+          if (params.get("smartFolder") === folderId) {
+            params.delete("smartFolder");
+          }
+        }),
+      openCreateSmartFolder: (intent) => {
+        setMacroDialogIntent(intent);
+        updateLocation((params) => {
+          params.set("tab", "smartfolders");
+          params.delete("smartFolder");
+        });
+      },
+      closeSmartFolderDialog: () => setMacroDialogIntent(null),
+    };
+
+    try {
+      const result = await playMacro({
+        macro,
+        inputs,
+        commandLibrary,
+        adapters: smartFolderMacroAdapters,
+        context,
+        signal: controller.signal,
+        onProgress: (completedActionIds) => {
+          if (playbackControllerRef.current !== controller) return;
+          setPlayback((current) =>
+            current?.status === "playing"
+              ? { ...current, completed: completedActionIds.length }
+              : current,
+          );
+        },
+      });
+      if (playbackControllerRef.current !== controller) return;
+      setPlayback({
+        ...result,
+        status: result.status,
+        macroName: macro.name,
+        completed: result.completedActionIds.length,
+        total: macro.actions.length,
+      });
+    } catch (error) {
+      if (playbackControllerRef.current !== controller) return;
+      setPlayback({
+        status: "failed",
+        macroName: macro.name,
+        completed: 0,
+        total: macro.actions.length,
+        error: error instanceof Error ? error.message : String(error),
+      });
+    } finally {
+      if (playbackControllerRef.current === controller) {
+        playbackControllerRef.current = null;
+      }
+    }
+  }
+
+  function stopMacroPlayback() {
+    playbackControllerRef.current?.abort();
+  }
+
   useEffect(() => {
     directoryTreeRef.current = directoryTree;
   }, [directoryTree]);
@@ -260,6 +355,10 @@ function TDocs() {
   useEffect(() => {
     trashCansRef.current = trashCans;
   }, [trashCans]);
+
+  useEffect(() => {
+    smartFoldersRef.current = smartFolders;
+  }, [smartFolders]);
 
   useEffect(() => {
     saveTreeToStorage(directoryTree, window.localStorage);
@@ -407,6 +506,17 @@ function TDocs() {
         smartFolders,
         onSmartFoldersChange: setSmartFolders,
         onMacroEvent: handleMacroEvent,
+        selectedSmartFolderId,
+        onSelectedSmartFolderIdChange: (folderId) =>
+          updateLocation((params) => {
+            if (folderId) {
+              params.set("smartFolder", folderId);
+            } else {
+              params.delete("smartFolder");
+            }
+          }),
+        macroDialogIntent,
+        onMacroDialogIntentChange: setMacroDialogIntent,
         onOpenFolder: handleOpenFolder,
         onOpenFile: handleOpenFile,
       },
@@ -421,6 +531,8 @@ function TDocs() {
         onMacrosChange: setMacros,
         selectedMacroId,
         onStartRecording: beginMacroRecording,
+        onPlayMacro: handlePlayMacro,
+        playbackActive: playback?.status === "playing",
         onSelectedMacroIdChange: (macroId) =>
           updateLocation((params) => {
             if (macroId) {
@@ -447,14 +559,21 @@ function TDocs() {
       <TabsBar
         tabs={tabs}
         activeTab={activeTab}
+        inert={playback?.status === "playing" ? "" : undefined}
         onSelect={(tabId) => {
+          if (playback?.status === "playing") {
+            return;
+          }
           if (recording && tabId === "macros") {
             return;
           }
           updateLocation((params) => params.set("tab", tabId));
         }}
       />
-      <main className="tdocs-main-content">
+      <main
+        className="tdocs-main-content"
+        inert={playback?.status === "playing" ? "" : undefined}
+      >
         {
           <ActiveScreen
             {...(activeTabEntry?.props ?? {})}
@@ -464,6 +583,34 @@ function TDocs() {
           />
         }
       </main>
+      {playback ? (
+        <div
+          className={`tdocs-macro-playback-controls ${
+            playback.status === "failed" ? "is-failed" : ""
+          }`}
+          role="status"
+          aria-live="polite"
+        >
+          <span>
+            {playback.status === "playing"
+              ? `Playing “${playback.macroName}” · ${playback.completed}/${playback.total}`
+              : playback.status === "completed"
+                ? `Finished “${playback.macroName}” · ${playback.completed} action${playback.completed === 1 ? "" : "s"}`
+                : playback.status === "stopped"
+                  ? `Stopped “${playback.macroName}” · ${playback.completed} action${playback.completed === 1 ? "" : "s"} completed`
+                  : `Could not finish “${playback.macroName}”: ${playback.error}`}
+          </span>
+          {playback.status === "playing" ? (
+            <button type="button" onClick={stopMacroPlayback}>
+              Stop
+            </button>
+          ) : (
+            <button type="button" onClick={() => setPlayback(null)}>
+              Dismiss
+            </button>
+          )}
+        </div>
+      ) : null}
       {recording ? (
         <div className="tdocs-macro-recorder" role="region" aria-label="Macro recorder">
           {recording.phase === "ready" ? (

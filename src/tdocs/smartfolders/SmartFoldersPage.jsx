@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { getDisplayPath } from "../files/fileSystemService";
 
 function collectItems(node, path = []) {
@@ -101,10 +101,14 @@ function SmartFoldersPage({
   smartFolders = [],
   onSmartFoldersChange = () => {},
   onMacroEvent = () => {},
+  selectedSmartFolderId = null,
+  onSelectedSmartFolderIdChange = () => {},
+  macroDialogIntent = null,
+  onMacroDialogIntentChange = () => {},
   onOpenFolder = () => {},
   onOpenFile = () => {},
 }) {
-  const [selectedId, setSelectedId] = useState(null);
+  const [selectedId, setSelectedId] = useState(selectedSmartFolderId);
   const [formValue, setFormValue] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const allItems = useMemo(() => collectItems(tree), [tree]);
@@ -120,6 +124,22 @@ function SmartFoldersPage({
   const selectedFolder = smartFolders.find(
     (folder) => folder.id === selectedId,
   );
+
+  useEffect(() => {
+    setSelectedId(selectedSmartFolderId);
+  }, [selectedSmartFolderId]);
+
+  useEffect(() => {
+    if (macroDialogIntent) {
+      setFormValue({
+        ...defaultFolder(),
+        location: macroDialogIntent.location ?? "/",
+        type: macroDialogIntent.type ?? "any",
+      });
+    } else {
+      setFormValue(null);
+    }
+  }, [macroDialogIntent]);
   const matches = useMemo(() => {
     if (!selectedFolder) return [];
     return allItems
@@ -191,7 +211,9 @@ function SmartFoldersPage({
     }
 
     setSelectedId(nextFolder.id);
+    onSelectedSmartFolderIdChange(nextFolder.id);
     setFormValue(null);
+    onMacroDialogIntentChange(null);
   }
 
   function openCreateForm() {
@@ -208,6 +230,7 @@ function SmartFoldersPage({
 
   function openFolder(folder) {
     setSelectedId(folder.id);
+    onSelectedSmartFolderIdChange(folder.id);
     onMacroEvent({
       commandId: "smart-folders/open-smart-folder",
       params: { "smart-folder-id": folder.id },
@@ -282,7 +305,10 @@ function SmartFoldersPage({
             value={formValue}
             onChange={setFormValue}
             onSubmit={saveFolder}
-            onCancel={() => setFormValue(null)}
+            onCancel={() => {
+              setFormValue(null);
+              onMacroDialogIntentChange(null);
+            }}
             locations={locations}
           />
         ) : null}
@@ -337,7 +363,10 @@ function SmartFoldersPage({
         <button
           type="button"
           className="tdocs-files-back-button"
-          onClick={() => setSelectedId(null)}
+          onClick={() => {
+            setSelectedId(null);
+            onSelectedSmartFolderIdChange(null);
+          }}
           aria-label="Back to smart folders"
         >
           ←

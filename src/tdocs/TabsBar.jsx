@@ -1,11 +1,12 @@
 import React from "react";
 
-function TabsBar({ tabs, activeTab, onSelect }) {
+function TabsBar({ tabs, activeTab, onSelect, inert }) {
   return (
     <div
       className="tdocs-tabs-bar"
       role="tablist"
       aria-label="TDocs navigation tabs"
+      inert={inert}
     >
       {tabs.map((tab) => (
         <button

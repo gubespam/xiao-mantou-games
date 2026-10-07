@@ -1,5 +1,18 @@
 # Recording Design And Implementation Plan
 
+## Implemented Scope
+
+The current recorder supports Smart Folders only. From the Macros list, choose
+Record a macro, name it, and press the floating Record button to begin. Successful
+Smart Folder creation, editing, opening, and deletion are captured as metadata-
+validated actions. IDs created earlier in the recording are stored as action
+output references rather than literal runtime IDs. Recording can be saved or
+discarded from the floating control. Other TDocs categories are not instrumented.
+Playback currently executes the Smart Folders command category only; commands in
+other categories are rejected during preflight before any action runs. The
+remaining design notes describe the intended generalized architecture rather
+than additional supported recording surfaces.
+
 ## Goal And Scope
 
 Define how a recording captures successful user behavior as editable macro actions without recording DOM events or replaying clicks. Recording includes:
