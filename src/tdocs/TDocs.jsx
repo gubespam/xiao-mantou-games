@@ -12,7 +12,7 @@ import {
   createMacroDraft,
 } from "./macros/macroRecording.js";
 import { playMacro } from "./macros/macroPlayback.js";
-import { smartFolderMacroAdapters } from "./macros/smartFolderMacroAdapters.js";
+import { allCommandAdapters } from "./macros/allCommandAdapters.js";
 import DocumentationPage from "./DocumentationPage.jsx";
 import FileEditText from "./files/FileEditText.jsx";
 import {
@@ -273,6 +273,16 @@ function TDocs() {
     });
 
     const context = {
+      getDirectoryTree: () => directoryTreeRef.current,
+      setDirectoryTree: (nextTree) => {
+        directoryTreeRef.current = nextTree;
+        setDirectoryTree(nextTree);
+      },
+      getTrashCans: () => trashCansRef.current,
+      setTrashCans: (nextTrashCans) => {
+        trashCansRef.current = nextTrashCans;
+        setTrashCans(nextTrashCans);
+      },
       getSmartFolders: () => smartFoldersRef.current,
       setSmartFolders: (nextFolders) => {
         smartFoldersRef.current = nextFolders;
@@ -301,6 +311,80 @@ function TDocs() {
         });
       },
       closeSmartFolderDialog: () => setMacroDialogIntent(null),
+      openFolder: (pathSegments) => {
+        updateLocation((params) => {
+          params.set("tab", "files");
+          if (pathSegments.length > 0) {
+            params.set("path", pathSegments.join("/"));
+          } else {
+            params.delete("path");
+          }
+        });
+      },
+      openFile: (file) => {
+        setSelectedFile(file);
+        updateLocation((params) => {
+          params.set("tab", "edit");
+        });
+      },
+      setSelectedFile,
+      openFileEditor: (file) => {
+        setSelectedFile(file);
+        updateLocation((params) => {
+          params.set("tab", "edit");
+        });
+      },
+      openDocumentationPage: (documentId, fragment) => {
+        updateLocation((params) => {
+          params.set("tab", "documentation");
+          params.set("doc", documentId);
+          if (fragment) {
+            params.set("fragment", fragment);
+          } else {
+            params.delete("fragment");
+          }
+        });
+      },
+      openTrashCan: (trashCanId) => {
+        updateLocation((params) => {
+          params.set("tab", "trashes");
+          params.set("trash", trashCanId);
+        });
+      },
+      openCreateItemWindow: ({ path, kind, defaultName }) => {
+        if (kind === "file") {
+          updateLocation((params) => {
+            params.set("tab", "files");
+            if (path.length > 0) {
+              params.set("path", path.join("/"));
+            } else {
+              params.delete("path");
+            }
+          });
+          return;
+        }
+
+        updateLocation((params) => {
+          params.set("tab", "files");
+          if (path.length > 0) {
+            params.set("path", path.join("/"));
+          } else {
+            params.delete("path");
+          }
+        });
+      },
+      downloadFile: (file) => {
+        if (file.type !== "file") {
+          return;
+        }
+        const blob = new Blob([file.content ?? ""], { type: "text/plain;charset=utf-8" });
+        const objectUrl = window.URL.createObjectURL(blob);
+        const anchor = document.createElement("a");
+        anchor.href = objectUrl;
+        anchor.download = file.name;
+        anchor.click();
+        window.URL.revokeObjectURL(objectUrl);
+      },
     };
 
     try {
@@ -308,7 +392,7 @@ function TDocs() {
         macro,
         inputs,
         commandLibrary,
-        adapters: smartFolderMacroAdapters,
+        adapters: allCommandAdapters,
         context,
         signal: controller.signal,
         onProgress: (completedActionIds) => {

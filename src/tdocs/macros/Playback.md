@@ -1,5 +1,21 @@
 # Playback Design And Implementation Plan
 
+## Implemented Scope
+
+Playback currently supports the five `smart-folders/*` commands in the command
+library: opening the create dialog, creating, opening, editing, and deleting a
+Smart Folder. The engine is command-library-driven and uses an explicit adapter
+registry so more categories can be added without changing the runner. It
+preflights the complete macro, resolves typed inputs and earlier action outputs,
+executes actions in order, supports Stop between actions, and reports completion
+or the first runtime failure. Unsupported commands fail before any action runs.
+
+The macro list prompts for macro inputs before playback. While a run is active,
+the tab bar and current screen are inert; the floating Stop control remains
+available. Smart Folder changes use shell-owned state and are persisted through
+the existing storage effect. A final create-dialog action leaves that dialog
+open after playback.
+
 ## Goal And Scope
 
 Execute a saved macro's semantic commands in order against current TDocs state. Playback must not synthesize clicks or depend on a user's current tab. It resolves macro inputs, validates the whole sequence before starting, routes commands to their owners, blocks user interaction except Stop, and reports the first runtime failure without rolling back earlier successful actions.

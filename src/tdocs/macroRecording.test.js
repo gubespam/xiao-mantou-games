@@ -44,6 +44,73 @@ test("recorder accepts only changed user events and validates command arguments"
   assert.match(invalid.error, /Missing required value "label"/);
 });
 
+test("recorded documentation actions accept macro input parameters", async () => {
+  let macro = createMacroDraft("Documentation workflow");
+  let bindings = new Map();
+
+  const events = [
+    {
+      commandId: "documentation/open-documentation-page",
+      params: {
+        "document-id": "Overview",
+        fragment: "getting-started",
+      },
+      outputs: { "document-id": "Overview" },
+      source: "user",
+      changed: true,
+    },
+    {
+      commandId: "documentation/navigate-to-documentation-section",
+      params: {
+        "document-id": "Guide",
+        fragment: "advanced",
+      },
+      outputs: { "document-id": "Guide", fragment: "advanced" },
+      source: "user",
+      changed: true,
+    },
+  ];
+
+  for (const event of events) {
+    const result = recordEvent(macro, bindings, event);
+    assert.equal(result.accepted, true, result.error);
+    macro = result.macro;
+    bindings = result.bindings;
+  }
+
+  assert.deepEqual(
+    macro.actions.map((action) => action.commandId),
+    [
+      "documentation/open-documentation-page",
+      "documentation/navigate-to-documentation-section",
+    ],
+  );
+  assert.equal(macro.actions[0].args["document-id"].kind, "value");
+  assert.equal(macro.actions[1].args.fragment.kind, "value");
+
+  const vite = await createServer({
+    configFile: new URL("../../vite.config.js", import.meta.url).pathname,
+    server: { middlewareMode: true },
+    appType: "custom",
+  });
+  try {
+    const { default: MacroEditorTab } = await vite.ssrLoadModule(
+      "/src/tdocs/macros/MacroEditorTab.jsx",
+    );
+    const editorMarkup = renderToStaticMarkup(
+      React.createElement(MacroEditorTab, {
+        macros: [macro],
+        selectedMacroId: macro.id,
+      }),
+    );
+
+    assert.match(editorMarkup, /Open documentation page/);
+    assert.match(editorMarkup, /Navigate to documentation section/);
+  } finally {
+    await vite.close();
+  }
+});
+
 test("recorded Smart Folder create, edit, and delete actions appear in the editor", async () => {
   let macro = createMacroDraft("Smart folder workflow");
   let bindings = new Map();

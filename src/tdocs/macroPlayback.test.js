@@ -5,7 +5,9 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { createServer } from "vite";
 import commandLibrary from "./macros/command-list.json" with { type: "json" };
 import { playMacro } from "./macros/macroPlayback.js";
+import { allCommandAdapters } from "./macros/allCommandAdapters.js";
 import { smartFolderMacroAdapters } from "./macros/smartFolderMacroAdapters.js";
+import { buildInitialTree, findDirectoryByPath } from "./files/fileSystemService.js";
 
 function createMacro(actions, inputs = []) {
   return {
@@ -31,6 +33,78 @@ function createContext() {
     createSmartFolderId: () => "smart-created-by-playback",
   };
 }
+
+test("playing a documentation macro opens the requested page and section", async () => {
+  let opened = null;
+  const macro = createMacro(
+    [
+      createAction("open-doc", "documentation/open-documentation-page", {
+        "document-id": { kind: "input", inputId: "document-name" },
+        fragment: { kind: "input", inputId: "section-name" },
+      }),
+    ],
+    [
+      {
+        id: "document-name",
+        name: "Documentation page",
+        type: "text",
+        defaultValue: "Overview",
+      },
+      {
+        id: "section-name",
+        name: "Section name",
+        type: "text",
+        defaultValue: "overview",
+      },
+    ],
+  );
+
+  const result = await playMacro({
+    macro,
+    inputs: { "document-name": "Guides", "section-name": "install" },
+    commandLibrary,
+    adapters: allCommandAdapters,
+    context: {
+      openDocumentationPage: (documentId, fragment) => {
+        opened = { documentId, fragment };
+      },
+    },
+  });
+
+  assert.equal(result.status, "completed");
+  assert.deepEqual(opened, { documentId: "Guides", fragment: "install" });
+});
+
+test("playing a file-edit macro updates file contents after creation", async () => {
+  let tree = buildInitialTree();
+  const macro = createMacro([
+    createAction("create-file", "files/create-file", {
+      path: { kind: "value", value: "/" },
+      "file-name": { kind: "value", value: "notes.txt" },
+    }),
+    createAction("update-file", "edit-file/update-file-content", {
+      path: { kind: "value", value: "/" },
+      "file-name": { kind: "value", value: "notes.txt" },
+      content: { kind: "value", value: "alpha\n\tbeta" },
+    }),
+  ]);
+
+  const result = await playMacro({
+    macro,
+    commandLibrary,
+    adapters: allCommandAdapters,
+    context: {
+      getDirectoryTree: () => tree,
+      setDirectoryTree: (nextTree) => {
+        tree = nextTree;
+      },
+    },
+  });
+
+  assert.equal(result.status, "completed");
+  const file = findDirectoryByPath(tree, []).children.find((child) => child.name === "notes.txt");
+  assert.equal(file?.content, "alpha\n\tbeta");
+});
 
 test("playing a macro creates a Smart Folder named from its input", async () => {
   const macro = createMacro(
