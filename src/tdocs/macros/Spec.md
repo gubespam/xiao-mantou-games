@@ -104,7 +104,7 @@ Users can add a new action to the list by clicking the plus icon and then choosi
 - The list has sections (command categories) and command types listed within each section (as bullet points)
 - Both the sections and commands within each section are sorted alphabetically.
 
-Users may reorder actions by dragging a draggable area to the left of the expansion toggle.
+Users may reorder actions by dragging the grip area to the left of the expansion toggle. Dropping above or below an action inserts the dragged action at that position.
 
 Users may delete an action by clicking the trash can icon to the right of the action/command name.
 

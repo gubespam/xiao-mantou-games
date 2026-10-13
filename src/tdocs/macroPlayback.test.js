@@ -38,7 +38,7 @@ test("playing a documentation macro opens the requested page and section", async
   let opened = null;
   const macro = createMacro(
     [
-      createAction("open-doc", "documentation/open-documentation-page", {
+      createAction("open-doc", "documentation/navigate-to-documentation-section", {
         "document-id": { kind: "input", inputId: "document-name" },
         fragment: { kind: "input", inputId: "section-name" },
       }),

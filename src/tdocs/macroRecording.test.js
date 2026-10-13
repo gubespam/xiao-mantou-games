@@ -50,16 +50,6 @@ test("recorded documentation actions accept macro input parameters", async () =>
 
   const events = [
     {
-      commandId: "documentation/open-documentation-page",
-      params: {
-        "document-id": "Overview",
-        fragment: "getting-started",
-      },
-      outputs: { "document-id": "Overview" },
-      source: "user",
-      changed: true,
-    },
-    {
       commandId: "documentation/navigate-to-documentation-section",
       params: {
         "document-id": "Guide",
@@ -81,7 +71,6 @@ test("recorded documentation actions accept macro input parameters", async () =>
   assert.deepEqual(
     macro.actions.map((action) => action.commandId),
     [
-      "documentation/open-documentation-page",
       "documentation/navigate-to-documentation-section",
     ],
   );

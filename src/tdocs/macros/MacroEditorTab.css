@@ -182,9 +182,35 @@
 }
 
 .tdocs-macro-action {
+  position: relative;
   border: 1px solid #2d3d2d;
   border-radius: 8px;
   background: #101710;
+}
+
+.tdocs-macro-action.is-dragging {
+  opacity: 0.45;
+}
+
+.tdocs-macro-action.drop-before::before,
+.tdocs-macro-action.drop-after::after {
+  position: absolute;
+  z-index: 1;
+  right: 0.5rem;
+  left: 0.5rem;
+  height: 2px;
+  border-radius: 2px;
+  background: #9ad9a7;
+  content: "";
+  pointer-events: none;
+}
+
+.tdocs-macro-action.drop-before::before {
+  top: -2px;
+}
+
+.tdocs-macro-action.drop-after::after {
+  bottom: -2px;
 }
 
 .tdocs-macro-action-row {
@@ -192,6 +218,38 @@
   align-items: center;
   gap: 0.7rem;
   padding: 0.7rem 0.9rem;
+}
+
+.tdocs-macro-action-drag-handle {
+  display: inline-flex;
+  flex: 0 0 0.9rem;
+  align-items: center;
+  justify-content: center;
+  width: 0.9rem;
+  height: 2rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: grab;
+  touch-action: none;
+}
+
+.tdocs-macro-action-drag-handle::before {
+  width: 0.55rem;
+  height: 0.9rem;
+  background-image: radial-gradient(circle, #91a391 1.25px, transparent 1.4px);
+  background-position: 0 1px;
+  background-size: 0.3rem 0.3rem;
+  content: "";
+}
+
+.tdocs-macro-action-drag-handle:hover::before,
+.tdocs-macro-action-drag-handle:focus-visible::before {
+  background-image: radial-gradient(circle, #dce9dc 1.25px, transparent 1.4px);
+}
+
+.tdocs-macro-action-drag-handle:active {
+  cursor: grabbing;
 }
 
 .tdocs-macro-action-toggle {

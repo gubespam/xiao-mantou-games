@@ -588,17 +588,6 @@ const fileCommandAdapters = {
     return updateFileState(context, pathSegments, fileName, lines.join("\n"));
   },
 
-  "documentation/open-documentation-page": async ({ params, context }) => {
-    const documentId = String(params["document-id"] ?? "Main");
-    const fragment = String(params.fragment ?? "");
-    context.openDocumentationPage?.(documentId, fragment);
-    return {
-      ok: true,
-      changed: true,
-      outputs: { "document-id": documentId },
-    };
-  },
-
   "documentation/navigate-to-documentation-section": async ({ params, context }) => {
     const documentId = String(params["document-id"] ?? "Main");
     const fragment = String(params.fragment ?? "");

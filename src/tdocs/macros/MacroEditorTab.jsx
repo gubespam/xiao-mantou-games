@@ -5,6 +5,7 @@ import {
   getCommandEntries,
   getDefaultValueForType,
   isValueMissing,
+  reorderActions,
 } from "./macroEditorUtils.js";
 
 function createId(prefix) {
@@ -107,6 +108,8 @@ function MacroEditorTab({
   const [macroToDelete, setMacroToDelete] = useState(null);
   const [macroToPlay, setMacroToPlay] = useState(null);
   const [macroInputValues, setMacroInputValues] = useState({});
+  const [draggedActionId, setDraggedActionId] = useState(null);
+  const [dropTarget, setDropTarget] = useState(null);
   const commandPickerRef = useRef(null);
 
   const selectedMacro = macros.find((macro) => macro.id === selectedMacroId) ?? null;
@@ -214,6 +217,23 @@ function MacroEditorTab({
       ...macro,
       actions: macro.actions.filter((action) => action.id !== actionId),
     }));
+  }
+
+  function moveAction(sourceActionId, targetActionId, position) {
+    updateSelectedMacro((macro) => ({
+      ...macro,
+      actions: reorderActions(
+        macro.actions,
+        sourceActionId,
+        targetActionId,
+        position,
+      ),
+    }));
+  }
+
+  function finishActionDrag() {
+    setDraggedActionId(null);
+    setDropTarget(null);
   }
 
   function updateMacroName(nextName) {
@@ -714,13 +734,84 @@ function MacroEditorTab({
           <div className="tdocs-smart-folders-empty">No actions yet.</div>
         ) : (
           <div className="tdocs-macro-action-list">
-            {selectedMacro.actions.map((action) => {
+            {selectedMacro.actions.map((action, actionIndex) => {
               const command = getActionCommand(action, commandsById);
               const isExpanded = Boolean(expandedActionIds[action.id]);
+              const dropPosition = dropTarget?.actionId === action.id
+                ? dropTarget.position
+                : null;
 
               return (
-                <div className="tdocs-macro-action" key={action.id}>
+                <div
+                  className={[
+                    "tdocs-macro-action",
+                    draggedActionId === action.id ? "is-dragging" : "",
+                    dropPosition ? `drop-${dropPosition}` : "",
+                  ].filter(Boolean).join(" ")}
+                  key={action.id}
+                  onDragOver={(event) => {
+                    if (!draggedActionId || draggedActionId === action.id) {
+                      return;
+                    }
+
+                    event.preventDefault();
+                    event.dataTransfer.dropEffect = "move";
+                    const bounds = event.currentTarget.getBoundingClientRect();
+                    setDropTarget({
+                      actionId: action.id,
+                      position:
+                        event.clientY < bounds.top + bounds.height / 2
+                          ? "before"
+                          : "after",
+                    });
+                  }}
+                  onDrop={(event) => {
+                    event.preventDefault();
+                    const sourceActionId =
+                      event.dataTransfer.getData("text/plain") || draggedActionId;
+                    const bounds = event.currentTarget.getBoundingClientRect();
+                    const position =
+                      event.clientY < bounds.top + bounds.height / 2
+                        ? "before"
+                        : "after";
+                    if (sourceActionId && sourceActionId !== action.id) {
+                      moveAction(sourceActionId, action.id, position);
+                    }
+                    finishActionDrag();
+                  }}
+                >
                   <div className="tdocs-macro-action-row">
+                    <button
+                      type="button"
+                      className="tdocs-macro-action-drag-handle"
+                      draggable
+                      aria-label={`Drag to reorder ${command?.label ?? action.commandId}`}
+                      title="Drag to reorder"
+                      onDragStart={(event) => {
+                        event.dataTransfer.effectAllowed = "move";
+                        event.dataTransfer.setData("text/plain", action.id);
+                        setDraggedActionId(action.id);
+                      }}
+                      onDragEnd={finishActionDrag}
+                      onKeyDown={(event) => {
+                        const direction =
+                          event.key === "ArrowUp"
+                            ? -1
+                            : event.key === "ArrowDown"
+                              ? 1
+                              : 0;
+                        const targetAction = selectedMacro.actions[actionIndex + direction];
+                        if (!direction || !targetAction) {
+                          return;
+                        }
+                        event.preventDefault();
+                        moveAction(
+                          action.id,
+                          targetAction.id,
+                          direction < 0 ? "before" : "after",
+                        );
+                      }}
+                    />
                     <button
                       type="button"
                       className="tdocs-macro-action-toggle"

@@ -37,6 +37,27 @@ export function getDefaultValueForType(type) {
   }
 }
 
+export function reorderActions(actions, sourceActionId, targetActionId, position) {
+  const sourceIndex = actions.findIndex((action) => action.id === sourceActionId);
+  const targetIndex = actions.findIndex((action) => action.id === targetActionId);
+
+  if (
+    sourceIndex === -1 ||
+    targetIndex === -1 ||
+    !["before", "after"].includes(position)
+  ) {
+    return actions;
+  }
+
+  const nextActions = [...actions];
+  const [action] = nextActions.splice(sourceIndex, 1);
+  const targetPosition = targetIndex + (position === "after" ? 1 : 0);
+  const insertionIndex =
+    sourceIndex < targetPosition ? targetPosition - 1 : targetPosition;
+  nextActions.splice(insertionIndex, 0, action);
+  return nextActions;
+}
+
 export function isValueMissing(parameter, value) {
   if (!parameter || !parameter.required) {
     return false;

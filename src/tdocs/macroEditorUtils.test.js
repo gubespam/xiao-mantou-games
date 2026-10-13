@@ -5,6 +5,7 @@ import {
   getCommandEntries,
   getSmartFolderCommandEntries,
   isValueMissing,
+  reorderActions,
 } from "./macros/macroEditorUtils.js";
 
 test("smart-folder command categories and actions sort deterministically", () => {
@@ -27,7 +28,7 @@ test("full command library exposes commands across all categories", () => {
   const entries = getCommandEntries(commandLibrary);
   assert.ok(entries.some(([commandId]) => commandId === "files/open-directory"));
   assert.ok(entries.some(([commandId]) => commandId === "trashes/create-trash-can"));
-  assert.ok(entries.some(([commandId]) => commandId === "documentation/open-documentation-page"));
+  assert.ok(entries.some(([commandId]) => commandId === "documentation/navigate-to-documentation-section"));
 });
 
 test("required values treat false and 0 as present, but empty text stays missing", () => {
@@ -43,4 +44,19 @@ test("required values treat false and 0 as present, but empty text stays missing
     isValueMissing({ type: "text", required: true, defaultValue: "" }, ""),
     true,
   );
+});
+
+test("reordering actions inserts before or after the target without changing action objects", () => {
+  const actions = [{ id: "a" }, { id: "b" }, { id: "c" }];
+
+  assert.deepEqual(
+    reorderActions(actions, "c", "a", "before").map(({ id }) => id),
+    ["c", "a", "b"],
+  );
+  assert.deepEqual(
+    reorderActions(actions, "a", "c", "after").map(({ id }) => id),
+    ["b", "c", "a"],
+  );
+  assert.equal(reorderActions(actions, "b", "b", "after")[1], actions[1]);
+  assert.deepEqual(reorderActions(actions, "missing", "a", "before"), actions);
 });

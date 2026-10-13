@@ -869,29 +869,6 @@
       }
     },
     "documentation": {
-      "open-documentation-page": {
-        "label": "Open documentation page",
-        "parameters": {
-          "document-id": {
-            "type": "text",
-            "label": "Document id",
-            "required": false,
-            "defaultValue": "Main"
-          },
-          "fragment": {
-            "type": "text",
-            "label": "Section fragment",
-            "required": false,
-            "defaultValue": ""
-          }
-        },
-        "outputs": {
-          "document-id": {
-            "type": "text",
-            "label": "Opened document identifier"
-          }
-        }
-      },
       "navigate-to-documentation-section": {
         "label": "Navigate to documentation section",
         "parameters": {
