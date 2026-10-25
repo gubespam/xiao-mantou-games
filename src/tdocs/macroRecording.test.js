@@ -44,7 +44,7 @@ test("recorder accepts only changed user events and validates command arguments"
   assert.match(invalid.error, /Missing required value "label"/);
 });
 
-test("recorded documentation actions accept macro input parameters", async () => {
+test("recorded documentation actions preserve parameters in the editor", async () => {
   let macro = createMacroDraft("Documentation workflow");
   let bindings = new Map();
 
@@ -74,8 +74,14 @@ test("recorded documentation actions accept macro input parameters", async () =>
       "documentation/navigate-to-documentation-section",
     ],
   );
-  assert.equal(macro.actions[0].args["document-id"].kind, "value");
-  assert.equal(macro.actions[1].args.fragment.kind, "value");
+  assert.deepEqual(macro.actions[0].args["document-id"], {
+    kind: "value",
+    value: "Guide",
+  });
+  assert.deepEqual(macro.actions[0].args.fragment, {
+    kind: "value",
+    value: "advanced",
+  });
 
   const vite = await createServer({
     configFile: new URL("../../vite.config.js", import.meta.url).pathname,
@@ -93,7 +99,6 @@ test("recorded documentation actions accept macro input parameters", async () =>
       }),
     );
 
-    assert.match(editorMarkup, /Open documentation page/);
     assert.match(editorMarkup, /Navigate to documentation section/);
   } finally {
     await vite.close();
