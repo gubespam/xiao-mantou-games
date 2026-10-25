@@ -1,6 +1,8 @@
+import './Wordle.css';
 import React, { useState, useCallback, useRef } from "react";
 import WordleBoard from "./WordleBoard";
 import Keyboard from "./Keyboard";
+
 
 function Wordle({ rules, storageKey }) {
   const [keyboardStates, setKeyboardStates] = useState([{}, {}]); // Keyboard state for each board

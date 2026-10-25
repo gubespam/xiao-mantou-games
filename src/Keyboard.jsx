@@ -1,9 +1,10 @@
 import React, { useEffect } from "react";
 
+
 const QWERTY = [
   ["Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P"],
-  ["A", "S", "D", "F", "G", "H", "J", "K", "L"],
-  ["Enter", "Z", "X", "C", "V", "B", "N", "M", "Backspace"]
+  ["A", "S", "D", "F", "G", "H", "J", "K", "L", ],
+  ["-", "-", "Z", "X", "C", "V", "B", "N", "M", "-", "Backspace", "-", "Enter","-"]
 ];
 
 function Keyboard({ onKeyPress, keyboardLeft, keyboardRight, gameState }) {
@@ -49,6 +50,14 @@ function Keyboard({ onKeyPress, keyboardLeft, keyboardRight, gameState }) {
       {QWERTY.map((row, i) => (
         <div className="wordle-keyboard-row" key={i}>
           {row.map((key) => (
+            key === '-' ?
+            <button
+              key={key}
+              className="wordle-key spacer"
+            >
+              
+            </button>
+            :
             <button
               key={key}
               className="wordle-key"
@@ -56,7 +65,7 @@ function Keyboard({ onKeyPress, keyboardLeft, keyboardRight, gameState }) {
               onClick={() => onKeyPress(key)}
               aria-label={key}
             >
-              {key === "Backspace" ? "⌫" : key === "Enter" ? "⤶" : key}
+              {key === "Backspace" ? "⌫" : key === "Enter" ? "⤊" : key}
             </button>
           ))}
         </div>
