@@ -1,0 +1,28 @@
+.candy-run {
+  width: 100%;
+  height: 100%;
+
+  .option img {
+    width: 200px;
+  }
+}
+
+.option.waggle img {
+  animation: option-waggle 1s linear;
+  transform-origin: center;
+}
+
+@keyframes option-waggle {
+  0%,
+  100% {
+    transform: scale(1) rotate(0deg);
+  }
+
+  25% {
+    transform: scale(1.1) rotate(-15deg);
+  }
+
+  75% {
+    transform: scale(1.1) rotate(15deg);
+  }
+}

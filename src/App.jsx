@@ -10,6 +10,7 @@ import TrashCans from './TrashCans.jsx';
 import SpaceshipGame from './SpaceshipGame/SpaceshipGame.jsx';
 import TDocs from './tdocs/TDocs.jsx';
 import NotFound from './NotFound.jsx';
+import CandyRun from './candyrun/CandyRun.jsx';
 
 
 import mantouLogo from './images/mantou.png';
@@ -35,6 +36,7 @@ function App() {
                 <Link className="menu-item" to="/xiao-mantou-games/trash-cans">Trash Cans</Link>
                 {/* <Link className="menu-item" to="/xiao-mantou-games/spaceship-game">Spaceship</Link> */}
                 <Link className="menu-item" to="/xiao-mantou-games/TDocs">TDocs</Link>
+                <Link className="menu-item" to="/xiao-mantou-games/CandyRun">Candy Run</Link>
               </nav>
             </div>
           }
@@ -46,6 +48,7 @@ function App() {
         <Route path="/xiao-mantou-games/checkers-chess" element={<CheckersChess />} />
         <Route path="/xiao-mantou-games/trash-cans" element={<TrashCans />} />
         <Route path="/xiao-mantou-games/TDocs" element={<TDocs />} />
+        <Route path="/xiao-mantou-games/CandyRun" element={<CandyRun />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </div>
