@@ -53,7 +53,7 @@ function chooseOption(asset, optionElement){
 }
 
 function CandyRun({}){
-  return <div className='candy-run'>Hi
+  return <div className='candy-run'>
     <div className='options'>
       {assets.map(asset => (
         <div
@@ -62,7 +62,7 @@ function CandyRun({}){
           onClick={event => chooseOption(asset, event.currentTarget)}
           onAnimationEnd={event => event.currentTarget.classList.remove('waggle')}
         >
-          <div className='title'>{asset.title}</div>
+          {/* <div className='title'>{asset.title}</div> */}
           <img src={asset.image} alt={asset.title} />
         </div>
       ))}
