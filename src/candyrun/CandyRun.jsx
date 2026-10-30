@@ -2,12 +2,43 @@ import './CandyRun.css';
 import React from "react";
 import snickersImage from "./assets/Snickers.avif";
 import snickersAudio from "./assets/Snickers.m4a";
+import skittlesImage from "./assets/Skittles.webp";
+import skittlesAudio from "./assets/Skittles.m4a";
+import milkyWayImage from "./assets/MilkyWay.jpeg";
+import milkyWayAudio from "./assets/MilkyWay.m4a";
+import kitKatImage from "./assets/KitKat.webp";
+import kitKatAudio from "./assets/KitKat.m4a";
+import sourPatchImage from "./assets/SourPatch.webp";
+import sourPatchAudio from "./assets/SourPatch.m4a";
 
-const assets = [{
-  title: 'Snickers',
-  sound: snickersAudio,
-  image: 'Snickers.avif'
-}]
+const assets = [
+  {
+    title: 'Snickers',
+    sound: snickersAudio,
+    image: snickersImage
+  },
+  {
+    title: 'Skittles',
+    sound: skittlesAudio,
+    image: skittlesImage
+  },
+  {
+    title: 'Milky Way',
+    sound: milkyWayAudio,
+    image: milkyWayImage
+  },
+  {
+    title: 'KitKat',
+    sound: kitKatAudio,
+    image: kitKatImage
+  },
+  {
+    title: 'Sour Patch',
+    sound: sourPatchAudio,
+    image: sourPatchImage
+  }
+  // 
+]
 
 function chooseOption(asset, optionElement){
   const audio = new Audio(asset.sound);
@@ -32,7 +63,7 @@ function CandyRun({}){
           onAnimationEnd={event => event.currentTarget.classList.remove('waggle')}
         >
           <div className='title'>{asset.title}</div>
-          <img src={snickersImage} alt={asset.title} />
+          <img src={asset.image} alt={asset.title} />
         </div>
       ))}
     </div>
